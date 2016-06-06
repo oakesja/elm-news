@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <script src="https://storage.googleapis.com/feednami-static/js/feednami-client-v1.0.1.js"></script>
+    <script src="main.js"></script>
+</head>
+
+<body>
+</body>
+<script type="text/javascript">
+    var app = Elm.Main.fullscreen();
+    app.ports.fetchGoogleGroupMsgs.subscribe(function(group) {
+        var url = "https://groups.google.com/forum/feed/" + group + "/msgs/rss_v2_0.xml?num=50";
+        feednami.load(url, function(result) {
+            if (result.error) {
+                var error = {
+                  group: group,
+                  message: result.error
+                }
+                app.ports.errorGoogleGroupMsgs.send(error);
+            } else {
+                var entries = result.feed.entries
+                var msgs = []
+                for (var i = 0; i < entries.length; i++) {
+                    var entry = entries[i]
+                    var msg = {
+                        author: entry.author,
+                        title: entry.title,
+                        date: entry.date_ms,
+                        description: entry.description,
+                        link: entry.link
+                    };
+                    msgs.push(msg);
+                }
+                var resp = {
+                  messages: msgs,
+                  group: group
+                }
+                app.ports.fetchedGoogleGroupMsgs.send(resp);
+            }
+        })
+    });
+</script>
+
+</html>
