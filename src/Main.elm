@@ -1,30 +1,23 @@
 port module Main exposing (..)
 
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (style)
+import Html exposing (Html, a, text, div)
+import Html.Attributes exposing (style, href)
 import Html.App
-import Http
-import Task exposing (Task, andThen, mapError, succeed, fail)
-
-
-type WithFetchState a
-    = Success a
-    | Error String
-    | Loading
 
 
 type alias Model =
-    { elmDev : WithFetchState (List GoogleGroupMsg)
-    , elmDiscuss : WithFetchState (List GoogleGroupMsg)
+    { messages : List GoogleGroupMsg
+    , errors : List ( String, String )
     }
 
 
 type alias GoogleGroupMsg =
     { author : String
     , title : String
-    , date : Int
+    , date : Float
     , description : String
     , link : String
+    , group : String
     }
 
 
@@ -32,8 +25,8 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { elmDev = Loading
-            , elmDiscuss = Loading
+            { messages = []
+            , errors = []
             }
 
         fx =
@@ -58,15 +51,7 @@ update msg model =
         FetchGoogleGroupSuccess resp ->
             let
                 updatedModel =
-                    case resp.group of
-                        "elm-dev" ->
-                            { model | elmDev = Success resp.messages }
-
-                        "elm-discuss" ->
-                            { model | elmDiscuss = Success resp.messages }
-
-                        _ ->
-                            model
+                    { model | messages = model.messages ++ resp.messages }
             in
                 ( updatedModel
                 , Cmd.none
@@ -75,15 +60,7 @@ update msg model =
         FetchGoogleGroupError error ->
             let
                 updatedModel =
-                    case error.group of
-                        "elm-dev" ->
-                            { model | elmDev = Error error.message }
-
-                        "elm-discuss" ->
-                            { model | elmDiscuss = Error error.message }
-
-                        _ ->
-                            model
+                    { model | errors = ( error.group, error.message ) :: model.errors }
             in
                 ( updatedModel
                 , Cmd.none
@@ -92,15 +69,96 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    div []
+        <| List.map newsView
+        <| List.reverse
+        <| List.sortBy .date model.messages
+
+
+newsView : GoogleGroupMsg -> Html Msg
+newsView msg =
     div
         [ style
             [ ( "display", "flex" )
-            , ( "flex-direction", "column" )
+            , ( "flex-direction", "row" )
+            , ( "border-top", "1px solid lightgrey" )
             ]
         ]
-        [ div [] [ text ("elm-dev: " ++ toString model.elmDev) ]
-        , div [] [ text ("elm-discuss: " ++ toString model.elmDiscuss) ]
+        [ tag msg.group
+        , div
+            [ style
+                [ ( "display", "flex" )
+                , ( "flex-direction", "column" )
+                , ( "justify-content", "space-around" )
+                ]
+            ]
+            [ div
+                [ style
+                    [ ( "font-weight", "bold" )
+                    ]
+                ]
+                [ a [ href msg.link ]
+                    [ text msg.title ]
+                ]
+            , div []
+                [ text msg.author ]
+            ]
+        , div
+            [ style
+                [ ( "align-self", "center" )
+                , ( "flex-grow", "1" )
+                , ( "text-align", "right" )
+                ]
+            ]
+            [ text <| toString msg.date ]
         ]
+
+
+tag : String -> Html Msg
+tag name =
+    let
+        color =
+            case name of
+                "elm-dev" ->
+                    elmDarkBlue
+
+                "elm-discuss" ->
+                    elmLightBlue
+
+                _ ->
+                    "#d9d9d9"
+    in
+        div
+            [ style
+                [ ( "background-color", color )
+                , ( "padding", "5px" )
+                , ( "display", "inline-block" )
+                , ( "width", "80px" )
+                , ( "text-align", "center" )
+                , ( "margin", "10px" )
+                ]
+            ]
+            [ text name ]
+
+
+elmDarkBlue : String
+elmDarkBlue =
+    "#5A6378"
+
+
+elmLightBlue : String
+elmLightBlue =
+    "#60B5CC"
+
+
+elmYellow : String
+elmYellow =
+    "#F0AD00"
+
+
+elmGreen : String
+elmGreen =
+    "#7FD13B"
 
 
 type alias GoogleGroupResp =
