@@ -3,11 +3,16 @@ port module Main exposing (..)
 import Html exposing (Html, a, text, div)
 import Html.Attributes exposing (style, href)
 import Html.App
+import Date exposing (Date)
+import Task
+import Date.Format
+import Basics.Extra exposing (never)
 
 
 type alias Model =
     { messages : List GoogleGroupMsg
     , errors : List ( String, String )
+    , now : Maybe Date
     }
 
 
@@ -27,12 +32,14 @@ init =
         model =
             { messages = []
             , errors = []
+            , now = Nothing
             }
 
         fx =
             Cmd.batch
                 [ fetchGoogleGroupMsgs "elm-dev"
                 , fetchGoogleGroupMsgs "elm-discuss"
+                , Task.perform never CurrentDate Date.now
                 ]
     in
         ( model
@@ -43,6 +50,7 @@ init =
 type Msg
     = FetchGoogleGroupSuccess GoogleGroupResp
     | FetchGoogleGroupError GoogleGroupError
+    | CurrentDate Date
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,17 +74,22 @@ update msg model =
                 , Cmd.none
                 )
 
+        CurrentDate date ->
+            ( { model | now = Just date }
+            , Cmd.none
+            )
+
 
 view : Model -> Html Msg
 view model =
     div []
-        <| List.map newsView
+        <| List.map (newsView model.now)
         <| List.reverse
         <| List.sortBy .date model.messages
 
 
-newsView : GoogleGroupMsg -> Html Msg
-newsView msg =
+newsView : Maybe Date -> GoogleGroupMsg -> Html Msg
+newsView now msg =
     div
         [ style
             [ ( "display", "flex" )
@@ -101,7 +114,7 @@ newsView msg =
                     [ text msg.title ]
                 ]
             , div []
-                [ text msg.author ]
+                [ text <| "By " ++ msg.author ]
             ]
         , div
             [ style
@@ -110,8 +123,21 @@ newsView msg =
                 , ( "text-align", "right" )
                 ]
             ]
-            [ text <| toString msg.date ]
+            [ text <| formatDate now <| Date.fromTime msg.date ]
         ]
+
+
+formatDate : Maybe Date -> Date -> String
+formatDate maybeNow date =
+    case maybeNow of
+        Just now ->
+            if Date.day now == Date.day date && Date.month now == Date.month date && Date.year now == Date.year date then
+                Date.Format.format "%l:%M %p" date
+            else
+                Date.Format.format "%b %d" date
+
+        Nothing ->
+            Date.Format.format "%b %d" date
 
 
 tag : String -> Html Msg
