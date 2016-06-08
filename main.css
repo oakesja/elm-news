@@ -20,8 +20,8 @@
 
 .card__tag {
   padding: 5px;
-  min-width: 80px;
-  width: 80px;
+  min-width: 100px;
+  width: 100px;
   height: 20px;
   text-align: center;
   margin: 10px;
@@ -44,7 +44,7 @@
 
 .card__date {
   align-self: center;
-  min-width: 60px;
+  min-width: 70px;
 }
 
 .dark_blue {
