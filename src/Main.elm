@@ -7,6 +7,7 @@ import Date exposing (Date)
 import Task
 import Date.Format
 import Basics.Extra exposing (never)
+import Header
 
 
 type alias Model =
@@ -97,30 +98,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ headerView model.showHeader
+        [ Header.view model.showHeader
         , body model
         , footer [] []
-        ]
-
-
-headerView : Bool -> Html Msg
-headerView showHeader =
-    let
-        visibleClass =
-            if showHeader then
-                "header--visible"
-            else
-                "header--hidden"
-    in
-        header [ class <| "header dark_blue " ++ visibleClass ]
-            [ logo ]
-
-
-logo : Html Msg
-logo =
-    div [ class "logo" ]
-        [ div [ class "logo_everything" ] [ text "everything" ]
-        , div [ class "logo_elm" ] [ text "elm" ]
         ]
 
 
@@ -219,6 +199,7 @@ subscriptions model =
         ]
 
 
+main : Program Never
 main =
     Html.App.program
         { init = init
