@@ -1,30 +1,28 @@
 port module Main exposing (..)
 
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (style)
+import Html exposing (Html, a, text, div, header, footer, h1)
+import Html.Attributes exposing (href, class)
 import Html.App
-import Http
-import Task exposing (Task, andThen, mapError, succeed, fail)
-
-
-type WithFetchState a
-    = Success a
-    | Error String
-    | Loading
+import Date exposing (Date)
+import Task
+import Date.Format
+import Basics.Extra exposing (never)
 
 
 type alias Model =
-    { elmDev : WithFetchState (List GoogleGroupMsg)
-    , elmDiscuss : WithFetchState (List GoogleGroupMsg)
+    { messages : List GoogleGroupMsg
+    , errors : List ( String, String )
+    , now : Maybe Date
     }
 
 
 type alias GoogleGroupMsg =
     { author : String
     , title : String
-    , date : Int
+    , date : Float
     , description : String
     , link : String
+    , group : String
     }
 
 
@@ -32,14 +30,16 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { elmDev = Loading
-            , elmDiscuss = Loading
+            { messages = []
+            , errors = []
+            , now = Nothing
             }
 
         fx =
             Cmd.batch
                 [ fetchGoogleGroupMsgs "elm-dev"
                 , fetchGoogleGroupMsgs "elm-discuss"
+                , Task.perform never CurrentDate Date.now
                 ]
     in
         ( model
@@ -50,6 +50,7 @@ init =
 type Msg
     = FetchGoogleGroupSuccess GoogleGroupResp
     | FetchGoogleGroupError GoogleGroupError
+    | CurrentDate Date
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,15 +59,7 @@ update msg model =
         FetchGoogleGroupSuccess resp ->
             let
                 updatedModel =
-                    case resp.group of
-                        "elm-dev" ->
-                            { model | elmDev = Success resp.messages }
-
-                        "elm-discuss" ->
-                            { model | elmDiscuss = Success resp.messages }
-
-                        _ ->
-                            model
+                    { model | messages = model.messages ++ resp.messages }
             in
                 ( updatedModel
                 , Cmd.none
@@ -75,32 +68,84 @@ update msg model =
         FetchGoogleGroupError error ->
             let
                 updatedModel =
-                    case error.group of
-                        "elm-dev" ->
-                            { model | elmDev = Error error.message }
-
-                        "elm-discuss" ->
-                            { model | elmDiscuss = Error error.message }
-
-                        _ ->
-                            model
+                    { model | errors = ( error.group, error.message ) :: model.errors }
             in
                 ( updatedModel
                 , Cmd.none
                 )
 
+        CurrentDate date ->
+            ( { model | now = Just date }
+            , Cmd.none
+            )
+
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
-            [ ( "display", "flex" )
-            , ( "flex-direction", "column" )
+    div []
+        [ header []
+            [ h1 [] [ text "Everything Elm" ] ]
+        , body model
+        , footer [] []
+        ]
+
+
+body : Model -> Html Msg
+body model =
+    div [ class "body" ]
+        [ div []
+            <| List.map (cardView model.now)
+            <| List.reverse
+            <| List.sortBy .date model.messages
+        ]
+
+
+cardView : Maybe Date -> GoogleGroupMsg -> Html Msg
+cardView now msg =
+    div [ class "card" ]
+        [ tag msg.group
+        , div [ class "card__description" ]
+            [ div [ class "card__description__title" ]
+                [ a [ href msg.link ]
+                    [ text msg.title ]
+                ]
+            , div []
+                [ text <| "By " ++ msg.author ]
             ]
+        , div [ class "card__date" ]
+            [ text <| formatDate now <| Date.fromTime msg.date ]
         ]
-        [ div [] [ text ("elm-dev: " ++ toString model.elmDev) ]
-        , div [] [ text ("elm-discuss: " ++ toString model.elmDiscuss) ]
-        ]
+
+
+formatDate : Maybe Date -> Date -> String
+formatDate maybeNow date =
+    case maybeNow of
+        Just now ->
+            if Date.day now == Date.day date && Date.month now == Date.month date && Date.year now == Date.year date then
+                Date.Format.format "%l:%M %p" date
+            else
+                Date.Format.format "%b %d" date
+
+        Nothing ->
+            Date.Format.format "%b %d" date
+
+
+tag : String -> Html Msg
+tag name =
+    let
+        colorClass =
+            case name of
+                "elm-dev" ->
+                    "dark_blue"
+
+                "elm-discuss" ->
+                    "light_blue"
+
+                _ ->
+                    ""
+    in
+        div [ class <| "card__tag " ++ colorClass ]
+            [ text name ]
 
 
 type alias GoogleGroupResp =
