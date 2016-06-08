@@ -1,0 +1,60 @@
+.main {
+  margin: 0px;
+  background-color: #EEEEEE;
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  background-color: #FFFFFF;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
+}
+
+.card__tag {
+  background-color: color;
+  padding: 5px;
+  width: 80px;
+  text-align: center;
+  margin: 10px;
+}
+
+.card__description {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.card__description__title {
+  font-weight: bold;
+}
+
+.card__date {
+  align-self: center;
+  flex-grow: 1;
+  text-align: right;
+  padding-left: 40px;
+}
+
+.dark_blue {
+  background-color: #5A6378;
+}
+
+.light_blue {
+  background-color: #60B5CC
+}
+
+.yellow {
+  background-color: #F0AD00
+}
+
+.green {
+  background-color: #7FD13B
+}

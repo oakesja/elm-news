@@ -1,7 +1,7 @@
 port module Main exposing (..)
 
-import Html exposing (Html, a, text, div)
-import Html.Attributes exposing (style, href)
+import Html exposing (Html, a, text, div, header, footer, h1)
+import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
 import Task
@@ -83,46 +83,36 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        <| List.map (newsView model.now)
-        <| List.reverse
-        <| List.sortBy .date model.messages
-
-
-newsView : Maybe Date -> GoogleGroupMsg -> Html Msg
-newsView now msg =
-    div
-        [ style
-            [ ( "display", "flex" )
-            , ( "flex-direction", "row" )
-            , ( "border-top", "1px solid lightgrey" )
-            ]
+        [ header []
+            [ h1 [] [ text "Everything Elm" ] ]
+        , body model
+        , footer [] []
         ]
+
+
+body : Model -> Html Msg
+body model =
+    div [ class "body" ]
+        [ div []
+            <| List.map (cardView model.now)
+            <| List.reverse
+            <| List.sortBy .date model.messages
+        ]
+
+
+cardView : Maybe Date -> GoogleGroupMsg -> Html Msg
+cardView now msg =
+    div [ class "card" ]
         [ tag msg.group
-        , div
-            [ style
-                [ ( "display", "flex" )
-                , ( "flex-direction", "column" )
-                , ( "justify-content", "space-around" )
-                ]
-            ]
-            [ div
-                [ style
-                    [ ( "font-weight", "bold" )
-                    ]
-                ]
+        , div [ class "card__description" ]
+            [ div [ class "card__description__title" ]
                 [ a [ href msg.link ]
                     [ text msg.title ]
                 ]
             , div []
                 [ text <| "By " ++ msg.author ]
             ]
-        , div
-            [ style
-                [ ( "align-self", "center" )
-                , ( "flex-grow", "1" )
-                , ( "text-align", "right" )
-                ]
-            ]
+        , div [ class "card__date" ]
             [ text <| formatDate now <| Date.fromTime msg.date ]
         ]
 
@@ -143,48 +133,19 @@ formatDate maybeNow date =
 tag : String -> Html Msg
 tag name =
     let
-        color =
+        colorClass =
             case name of
                 "elm-dev" ->
-                    elmDarkBlue
+                    "dark_blue"
 
                 "elm-discuss" ->
-                    elmLightBlue
+                    "light_blue"
 
                 _ ->
-                    "#d9d9d9"
+                    ""
     in
-        div
-            [ style
-                [ ( "background-color", color )
-                , ( "padding", "5px" )
-                , ( "display", "inline-block" )
-                , ( "width", "80px" )
-                , ( "text-align", "center" )
-                , ( "margin", "10px" )
-                ]
-            ]
+        div [ class <| "card__tag " ++ colorClass ]
             [ text name ]
-
-
-elmDarkBlue : String
-elmDarkBlue =
-    "#5A6378"
-
-
-elmLightBlue : String
-elmLightBlue =
-    "#60B5CC"
-
-
-elmYellow : String
-elmYellow =
-    "#F0AD00"
-
-
-elmGreen : String
-elmGreen =
-    "#7FD13B"
 
 
 type alias GoogleGroupResp =
