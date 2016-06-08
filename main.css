@@ -41,7 +41,6 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  background-color: #DDDDDD;
 }
 
 .card {
@@ -53,7 +52,7 @@
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
 }
 
-.card__tag {
+.tag {
   padding: 5px;
   min-width: 100px;
   width: 100px;
@@ -61,8 +60,12 @@
   text-align: center;
   margin: 10px;
   align-self: center;
-  color: white;
   box-shadow: 0 3px 4px 0 rgba(0,0,0,0.14);
+}
+
+.tag__link {
+  color: #FFFFFF;
+  text-decoration: none;
 }
 
 .card__description {
@@ -97,4 +100,8 @@
 
 .green {
   background-color: #7FD13B
+}
+
+.grey {
+  background-color: #DDDDDD
 }

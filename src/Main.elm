@@ -8,6 +8,7 @@ import Task
 import Date.Format
 import Basics.Extra exposing (never)
 import Header
+import Tag
 
 
 type alias Model =
@@ -106,7 +107,7 @@ view model =
 
 body : Model -> Html Msg
 body model =
-    div [ class "body" ]
+    div [ class "body grey" ]
         [ div []
             <| List.map (cardView model.now)
             <| List.reverse
@@ -117,7 +118,7 @@ body model =
 cardView : Maybe Date -> GoogleGroupMsg -> Html Msg
 cardView now msg =
     div [ class "card" ]
-        [ tag msg.group
+        [ Tag.view msg.group
         , div [ class "card__description" ]
             [ div [ class "card__description__title" ]
                 [ a [ href msg.link ]
@@ -144,22 +145,23 @@ formatDate maybeNow date =
             Date.Format.format "%b %d" date
 
 
-tag : String -> Html Msg
-tag name =
-    let
-        colorClass =
-            case name of
-                "elm-dev" ->
-                    "dark_blue"
 
-                "elm-discuss" ->
-                    "light_blue"
-
-                _ ->
-                    ""
-    in
-        div [ class <| "card__tag " ++ colorClass ]
-            [ text name ]
+-- tag : String -> Html Msg
+-- tag name =
+--     let
+--         colorClass =
+--             case name of
+--                 "elm-dev" ->
+--                     "dark_blue"
+--
+--                 "elm-discuss" ->
+--                     "light_blue"
+--
+--                 _ ->
+--                     ""
+--     in
+--         div [ class <| "card__tag " ++ colorClass ]
+--             [ text name ]
 
 
 type alias GoogleGroupResp =
