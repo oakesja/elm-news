@@ -13,6 +13,7 @@ type alias Model =
     { messages : List GoogleGroupMsg
     , errors : List ( String, String )
     , now : Maybe Date
+    , showHeader : Bool
     }
 
 
@@ -33,6 +34,7 @@ init =
             { messages = []
             , errors = []
             , now = Nothing
+            , showHeader = True
             }
 
         fx =
@@ -51,6 +53,8 @@ type Msg
     = FetchGoogleGroupSuccess GoogleGroupResp
     | FetchGoogleGroupError GoogleGroupError
     | CurrentDate Date
+    | ScrollUp
+    | ScrollDown
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,14 +83,44 @@ update msg model =
             , Cmd.none
             )
 
+        ScrollUp ->
+            ( { model | showHeader = True }
+            , Cmd.none
+            )
+
+        ScrollDown ->
+            ( { model | showHeader = False }
+            , Cmd.none
+            )
+
 
 view : Model -> Html Msg
 view model =
     div []
-        [ header []
-            [ h1 [] [ text "Everything Elm" ] ]
+        [ headerView model.showHeader
         , body model
         , footer [] []
+        ]
+
+
+headerView : Bool -> Html Msg
+headerView showHeader =
+    let
+        visibleClass =
+            if showHeader then
+                "header--visible"
+            else
+                "header--hidden"
+    in
+        header [ class <| "header dark_blue " ++ visibleClass ]
+            [ logo ]
+
+
+logo : Html Msg
+logo =
+    div [ class "logo" ]
+        [ div [ class "logo_everything" ] [ text "everything" ]
+        , div [ class "logo_elm" ] [ text "elm" ]
         ]
 
 
@@ -169,11 +203,19 @@ port fetchedGoogleGroupMsgs : (GoogleGroupResp -> msg) -> Sub msg
 port errorGoogleGroupMsgs : (GoogleGroupError -> msg) -> Sub msg
 
 
+port scrollUp : (Float -> msg) -> Sub msg
+
+
+port scrollDown : (Float -> msg) -> Sub msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchGoogleGroupSuccess
         , errorGoogleGroupMsgs FetchGoogleGroupError
+        , scrollUp (\_ -> ScrollUp)
+        , scrollDown (\_ -> ScrollDown)
         ]
 
 

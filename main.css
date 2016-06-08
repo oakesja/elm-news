@@ -1,12 +1,47 @@
 .main {
   margin: 0px;
-  background-color: #EEEEEE;
+}
+
+.header {
+  color: #FFFFFF;
+  padding: 10px 60px;
+  height: 40px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-shadow: 0 4px 4px 0 rgba(0,0,0,0.14);
+}
+
+.header--open {
+  transition: top 1.0s ease-in-out;
+}
+
+.header--hidden {
+  top: -70px;
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+}
+
+.logo_everything {
+  font-size: 0.9em;
+  margin-bottom: -3px;
+  margin-left: -8px;
+}
+
+.logo_elm {
+  font-size: 1.6em;
 }
 
 .body {
+  padding-top: 70px;
   display: flex;
   flex-direction: row;
   justify-content: center;
+  background-color: #EEEEEE;
 }
 
 .card {
