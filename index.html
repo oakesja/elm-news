@@ -10,13 +10,13 @@
 </body>
 <script type="text/javascript">
     var app = Elm.Main.fullscreen();
-    app.ports.fetchGoogleGroupMsgs.subscribe(function(group) {
-        var url = "https://groups.google.com/forum/feed/" + group + "/msgs/rss_v2_0.xml?num=50";
+    app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
+        var url = "https://groups.google.com/forum/feed/" + tag + "/msgs/rss_v2_0.xml?num=50";
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {
-                  group: group,
-                  message: result.error
+                  tag: tag,
+                  error: result.error
                 }
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
@@ -28,15 +28,14 @@
                         author: entry.author,
                         title: entry.title,
                         date: entry.date_ms,
-                        description: entry.description,
                         link: entry.link,
-                        group: group
+                        tag: tag
                     };
                     msgs.push(msg);
                 }
                 var resp = {
                   messages: msgs,
-                  group: group
+                  tag: tag
                 }
                 app.ports.fetchedGoogleGroupMsgs.send(resp);
             }
