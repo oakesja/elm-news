@@ -4,7 +4,7 @@
 
 .header {
   color: #FFFFFF;
-  padding: 10px 60px;
+  padding: 10px 25px 15px 25px;
   height: 40px;
   position: fixed;
   top: 0;
@@ -26,14 +26,14 @@
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
 
-.logo_everything {
-  font-size: 0.9em;
-  margin-bottom: -3px;
-  margin-left: -8px;
-}
-
 .logo_elm {
   font-size: 1.6em;
+}
+
+.logo_news {
+  font-size: 1.1em;
+  line-height: 9px;
+  padding-left: 1px;
 }
 
 .body {

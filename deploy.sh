@@ -4,7 +4,7 @@ rm -rf dist
 git checkout master
 git pull origin master
 git log -1 --format="%H" > hash
-git clone git@github.com:oakesja/everything-elm.git dist
+git clone git@github.com:oakesja/elm-news.git dist
 cd dist
 git checkout gh-pages
 rm -rf *

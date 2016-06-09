@@ -20,6 +20,6 @@ view showHeader =
 logo : Html msg
 logo =
     div [ class "logo" ]
-        [ div [ class "logo_everything" ] [ text "everything" ]
-        , div [ class "logo_elm" ] [ text "elm" ]
+        [ div [ class "logo_elm" ] [ text "elm" ]
+        , div [ class "logo_news" ] [ text "news" ]
         ]
