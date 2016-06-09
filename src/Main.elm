@@ -15,6 +15,10 @@ import DateFormatter
 
 -- TODO handle errors
 -- TODO move google group stuff to seperate module
+-- TODO add twitter
+-- TODO add github
+-- TODO google analytics
+-- TODO filtering
 
 
 type alias Model =
