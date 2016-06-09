@@ -4,28 +4,24 @@ import Html exposing (Html, a, text, div, header, footer, h1)
 import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
-import Task
-import Date.Format
+import Task exposing (Task)
 import Basics.Extra exposing (never)
 import Header
 import Tag
+import Message exposing (..)
+import Reddit
+import DateFormatter
+
+
+-- TODO handle errors
+-- TODO move google group stuff to seperate module
 
 
 type alias Model =
-    { messages : List GoogleGroupMsg
+    { messages : List Message
     , errors : List ( String, String )
     , now : Maybe Date
     , showHeader : Bool
-    }
-
-
-type alias GoogleGroupMsg =
-    { author : String
-    , title : String
-    , date : Float
-    , description : String
-    , link : String
-    , group : String
     }
 
 
@@ -43,6 +39,7 @@ init =
             Cmd.batch
                 [ fetchGoogleGroupMsgs "elm-dev"
                 , fetchGoogleGroupMsgs "elm-discuss"
+                , Reddit.fetchCmd FetchMessageSuccess FetchMessageError
                 , Task.perform never CurrentDate Date.now
                 ]
     in
@@ -52,8 +49,8 @@ init =
 
 
 type Msg
-    = FetchGoogleGroupSuccess GoogleGroupResp
-    | FetchGoogleGroupError GoogleGroupError
+    = FetchMessageSuccess MessageResp
+    | FetchMessageError MessageError
     | CurrentDate Date
     | ScrollUp
     | ScrollDown
@@ -62,7 +59,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchGoogleGroupSuccess resp ->
+        FetchMessageSuccess resp ->
             let
                 updatedModel =
                     { model | messages = model.messages ++ resp.messages }
@@ -71,10 +68,10 @@ update msg model =
                 , Cmd.none
                 )
 
-        FetchGoogleGroupError error ->
+        FetchMessageError error ->
             let
                 updatedModel =
-                    { model | errors = ( error.group, error.message ) :: model.errors }
+                    { model | errors = ( error.tag, Debug.log "" error.error ) :: model.errors }
             in
                 ( updatedModel
                 , Cmd.none
@@ -115,10 +112,10 @@ body model =
         ]
 
 
-cardView : Maybe Date -> GoogleGroupMsg -> Html Msg
+cardView : Maybe Date -> Message -> Html Msg
 cardView now msg =
     div [ class "card" ]
-        [ Tag.view msg.group
+        [ Tag.view msg.tag
         , div [ class "card__description" ]
             [ div [ class "card__description__title" ]
                 [ a [ href msg.link ]
@@ -128,61 +125,17 @@ cardView now msg =
                 [ text <| "By " ++ msg.author ]
             ]
         , div [ class "card__date" ]
-            [ text <| formatDate now <| Date.fromTime msg.date ]
+            [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
         ]
-
-
-formatDate : Maybe Date -> Date -> String
-formatDate maybeNow date =
-    case maybeNow of
-        Just now ->
-            if Date.day now == Date.day date && Date.month now == Date.month date && Date.year now == Date.year date then
-                Date.Format.format "%l:%M %p" date
-            else
-                Date.Format.format "%b %d" date
-
-        Nothing ->
-            Date.Format.format "%b %d" date
-
-
-
--- tag : String -> Html Msg
--- tag name =
---     let
---         colorClass =
---             case name of
---                 "elm-dev" ->
---                     "dark_blue"
---
---                 "elm-discuss" ->
---                     "light_blue"
---
---                 _ ->
---                     ""
---     in
---         div [ class <| "card__tag " ++ colorClass ]
---             [ text name ]
-
-
-type alias GoogleGroupResp =
-    { group : String
-    , messages : List GoogleGroupMsg
-    }
-
-
-type alias GoogleGroupError =
-    { group : String
-    , message : String
-    }
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg
 
 
-port fetchedGoogleGroupMsgs : (GoogleGroupResp -> msg) -> Sub msg
+port fetchedGoogleGroupMsgs : (MessageResp -> msg) -> Sub msg
 
 
-port errorGoogleGroupMsgs : (GoogleGroupError -> msg) -> Sub msg
+port errorGoogleGroupMsgs : (MessageError -> msg) -> Sub msg
 
 
 port scrollUp : (Float -> msg) -> Sub msg
@@ -194,8 +147,8 @@ port scrollDown : (Float -> msg) -> Sub msg
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ fetchedGoogleGroupMsgs FetchGoogleGroupSuccess
-        , errorGoogleGroupMsgs FetchGoogleGroupError
+        [ fetchedGoogleGroupMsgs FetchMessageSuccess
+        , errorGoogleGroupMsgs FetchMessageError
         , scrollUp (\_ -> ScrollUp)
         , scrollDown (\_ -> ScrollDown)
         ]

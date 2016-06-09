@@ -7777,6 +7777,364 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
 
+//import Dict, List, Maybe, Native.Scheduler //
+
+var _evancz$elm_http$Native_Http = function() {
+
+function send(settings, request)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+		var req = new XMLHttpRequest();
+
+		// start
+		if (settings.onStart.ctor === 'Just')
+		{
+			req.addEventListener('loadStart', function() {
+				var task = settings.onStart._0;
+				_elm_lang$core$Native_Scheduler.rawSpawn(task);
+			});
+		}
+
+		// progress
+		if (settings.onProgress.ctor === 'Just')
+		{
+			req.addEventListener('progress', function(event) {
+				var progress = !event.lengthComputable
+					? _elm_lang$core$Maybe$Nothing
+					: _elm_lang$core$Maybe$Just({
+						loaded: event.loaded,
+						total: event.total
+					});
+				var task = settings.onProgress._0(progress);
+				_elm_lang$core$Native_Scheduler.rawSpawn(task);
+			});
+		}
+
+		// end
+		req.addEventListener('error', function() {
+			return callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'RawNetworkError' }));
+		});
+
+		req.addEventListener('timeout', function() {
+			return callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'RawTimeout' }));
+		});
+
+		req.addEventListener('load', function() {
+			return callback(_elm_lang$core$Native_Scheduler.succeed(toResponse(req)));
+		});
+
+		req.open(request.verb, request.url, true);
+
+		// set all the headers
+		function setHeader(pair) {
+			req.setRequestHeader(pair._0, pair._1);
+		}
+		A2(_elm_lang$core$List$map, setHeader, request.headers);
+
+		// set the timeout
+		req.timeout = settings.timeout;
+
+		// enable this withCredentials thing
+		req.withCredentials = settings.withCredentials;
+
+		// ask for a specific MIME type for the response
+		if (settings.desiredResponseType.ctor === 'Just')
+		{
+			req.overrideMimeType(settings.desiredResponseType._0);
+		}
+
+		// actuall send the request
+		if(request.body.ctor === "BodyFormData")
+		{
+			req.send(request.body.formData)
+		}
+		else
+		{
+			req.send(request.body._0);
+		}
+
+		return function() {
+			req.abort();
+		};
+	});
+}
+
+
+// deal with responses
+
+function toResponse(req)
+{
+	var tag = req.responseType === 'blob' ? 'Blob' : 'Text'
+	var response = tag === 'Blob' ? req.response : req.responseText;
+	return {
+		status: req.status,
+		statusText: req.statusText,
+		headers: parseHeaders(req.getAllResponseHeaders()),
+		url: req.responseURL,
+		value: { ctor: tag, _0: response }
+	};
+}
+
+
+function parseHeaders(rawHeaders)
+{
+	var headers = _elm_lang$core$Dict$empty;
+
+	if (!rawHeaders)
+	{
+		return headers;
+	}
+
+	var headerPairs = rawHeaders.split('\u000d\u000a');
+	for (var i = headerPairs.length; i--; )
+	{
+		var headerPair = headerPairs[i];
+		var index = headerPair.indexOf('\u003a\u0020');
+		if (index > 0)
+		{
+			var key = headerPair.substring(0, index);
+			var value = headerPair.substring(index + 2);
+
+			headers = A3(_elm_lang$core$Dict$update, key, function(oldValue) {
+				if (oldValue.ctor === 'Just')
+				{
+					return _elm_lang$core$Maybe$Just(value + ', ' + oldValue._0);
+				}
+				return _elm_lang$core$Maybe$Just(value);
+			}, headers);
+		}
+	}
+
+	return headers;
+}
+
+
+function multipart(dataList)
+{
+	var formData = new FormData();
+
+	while (dataList.ctor !== '[]')
+	{
+		var data = dataList._0;
+		if (data.ctor === 'StringData')
+		{
+			formData.append(data._0, data._1);
+		}
+		else
+		{
+			var fileName = data._1.ctor === 'Nothing'
+				? undefined
+				: data._1._0;
+			formData.append(data._0, data._2, fileName);
+		}
+		dataList = dataList._1;
+	}
+
+	return { ctor: 'BodyFormData', formData: formData };
+}
+
+
+function uriEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function uriDecode(string)
+{
+	return decodeURIComponent(string);
+}
+
+return {
+	send: F2(send),
+	multipart: multipart,
+	uriEncode: uriEncode,
+	uriDecode: uriDecode
+};
+
+}();
+
+var _evancz$elm_http$Http$send = _evancz$elm_http$Native_Http.send;
+var _evancz$elm_http$Http$defaultSettings = {timeout: 0, onStart: _elm_lang$core$Maybe$Nothing, onProgress: _elm_lang$core$Maybe$Nothing, desiredResponseType: _elm_lang$core$Maybe$Nothing, withCredentials: false};
+var _evancz$elm_http$Http$multipart = _evancz$elm_http$Native_Http.multipart;
+var _evancz$elm_http$Http$uriDecode = _evancz$elm_http$Native_Http.uriDecode;
+var _evancz$elm_http$Http$uriEncode = _evancz$elm_http$Native_Http.uriEncode;
+var _evancz$elm_http$Http$queryEscape = function (string) {
+	return A2(
+		_elm_lang$core$String$join,
+		'+',
+		A2(
+			_elm_lang$core$String$split,
+			'%20',
+			_evancz$elm_http$Http$uriEncode(string)));
+};
+var _evancz$elm_http$Http$queryPair = function (_p0) {
+	var _p1 = _p0;
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_evancz$elm_http$Http$queryEscape(_p1._0),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			'=',
+			_evancz$elm_http$Http$queryEscape(_p1._1)));
+};
+var _evancz$elm_http$Http$url = F2(
+	function (baseUrl, args) {
+		var _p2 = args;
+		if (_p2.ctor === '[]') {
+			return baseUrl;
+		} else {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				baseUrl,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'?',
+					A2(
+						_elm_lang$core$String$join,
+						'&',
+						A2(_elm_lang$core$List$map, _evancz$elm_http$Http$queryPair, args))));
+		}
+	});
+var _evancz$elm_http$Http$Request = F4(
+	function (a, b, c, d) {
+		return {verb: a, headers: b, url: c, body: d};
+	});
+var _evancz$elm_http$Http$Settings = F5(
+	function (a, b, c, d, e) {
+		return {timeout: a, onStart: b, onProgress: c, desiredResponseType: d, withCredentials: e};
+	});
+var _evancz$elm_http$Http$Response = F5(
+	function (a, b, c, d, e) {
+		return {status: a, statusText: b, headers: c, url: d, value: e};
+	});
+var _evancz$elm_http$Http$TODO_implement_blob_in_another_library = {ctor: 'TODO_implement_blob_in_another_library'};
+var _evancz$elm_http$Http$TODO_implement_file_in_another_library = {ctor: 'TODO_implement_file_in_another_library'};
+var _evancz$elm_http$Http$BodyBlob = function (a) {
+	return {ctor: 'BodyBlob', _0: a};
+};
+var _evancz$elm_http$Http$BodyFormData = {ctor: 'BodyFormData'};
+var _evancz$elm_http$Http$ArrayBuffer = {ctor: 'ArrayBuffer'};
+var _evancz$elm_http$Http$BodyString = function (a) {
+	return {ctor: 'BodyString', _0: a};
+};
+var _evancz$elm_http$Http$string = _evancz$elm_http$Http$BodyString;
+var _evancz$elm_http$Http$Empty = {ctor: 'Empty'};
+var _evancz$elm_http$Http$empty = _evancz$elm_http$Http$Empty;
+var _evancz$elm_http$Http$FileData = F3(
+	function (a, b, c) {
+		return {ctor: 'FileData', _0: a, _1: b, _2: c};
+	});
+var _evancz$elm_http$Http$BlobData = F3(
+	function (a, b, c) {
+		return {ctor: 'BlobData', _0: a, _1: b, _2: c};
+	});
+var _evancz$elm_http$Http$blobData = _evancz$elm_http$Http$BlobData;
+var _evancz$elm_http$Http$StringData = F2(
+	function (a, b) {
+		return {ctor: 'StringData', _0: a, _1: b};
+	});
+var _evancz$elm_http$Http$stringData = _evancz$elm_http$Http$StringData;
+var _evancz$elm_http$Http$Blob = function (a) {
+	return {ctor: 'Blob', _0: a};
+};
+var _evancz$elm_http$Http$Text = function (a) {
+	return {ctor: 'Text', _0: a};
+};
+var _evancz$elm_http$Http$RawNetworkError = {ctor: 'RawNetworkError'};
+var _evancz$elm_http$Http$RawTimeout = {ctor: 'RawTimeout'};
+var _evancz$elm_http$Http$BadResponse = F2(
+	function (a, b) {
+		return {ctor: 'BadResponse', _0: a, _1: b};
+	});
+var _evancz$elm_http$Http$UnexpectedPayload = function (a) {
+	return {ctor: 'UnexpectedPayload', _0: a};
+};
+var _evancz$elm_http$Http$handleResponse = F2(
+	function (handle, response) {
+		if ((_elm_lang$core$Native_Utils.cmp(200, response.status) < 1) && (_elm_lang$core$Native_Utils.cmp(response.status, 300) < 0)) {
+			var _p3 = response.value;
+			if (_p3.ctor === 'Text') {
+				return handle(_p3._0);
+			} else {
+				return _elm_lang$core$Task$fail(
+					_evancz$elm_http$Http$UnexpectedPayload('Response body is a blob, expecting a string.'));
+			}
+		} else {
+			return _elm_lang$core$Task$fail(
+				A2(_evancz$elm_http$Http$BadResponse, response.status, response.statusText));
+		}
+	});
+var _evancz$elm_http$Http$NetworkError = {ctor: 'NetworkError'};
+var _evancz$elm_http$Http$Timeout = {ctor: 'Timeout'};
+var _evancz$elm_http$Http$promoteError = function (rawError) {
+	var _p4 = rawError;
+	if (_p4.ctor === 'RawTimeout') {
+		return _evancz$elm_http$Http$Timeout;
+	} else {
+		return _evancz$elm_http$Http$NetworkError;
+	}
+};
+var _evancz$elm_http$Http$getString = function (url) {
+	var request = {
+		verb: 'GET',
+		headers: _elm_lang$core$Native_List.fromArray(
+			[]),
+		url: url,
+		body: _evancz$elm_http$Http$empty
+	};
+	return A2(
+		_elm_lang$core$Task$andThen,
+		A2(
+			_elm_lang$core$Task$mapError,
+			_evancz$elm_http$Http$promoteError,
+			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request)),
+		_evancz$elm_http$Http$handleResponse(_elm_lang$core$Task$succeed));
+};
+var _evancz$elm_http$Http$fromJson = F2(
+	function (decoder, response) {
+		var decode = function (str) {
+			var _p5 = A2(_elm_lang$core$Json_Decode$decodeString, decoder, str);
+			if (_p5.ctor === 'Ok') {
+				return _elm_lang$core$Task$succeed(_p5._0);
+			} else {
+				return _elm_lang$core$Task$fail(
+					_evancz$elm_http$Http$UnexpectedPayload(_p5._0));
+			}
+		};
+		return A2(
+			_elm_lang$core$Task$andThen,
+			A2(_elm_lang$core$Task$mapError, _evancz$elm_http$Http$promoteError, response),
+			_evancz$elm_http$Http$handleResponse(decode));
+	});
+var _evancz$elm_http$Http$get = F2(
+	function (decoder, url) {
+		var request = {
+			verb: 'GET',
+			headers: _elm_lang$core$Native_List.fromArray(
+				[]),
+			url: url,
+			body: _evancz$elm_http$Http$empty
+		};
+		return A2(
+			_evancz$elm_http$Http$fromJson,
+			decoder,
+			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
+	});
+var _evancz$elm_http$Http$post = F3(
+	function (decoder, url, body) {
+		var request = {
+			verb: 'POST',
+			headers: _elm_lang$core$Native_List.fromArray(
+				[]),
+			url: url,
+			body: body
+		};
+		return A2(
+			_evancz$elm_http$Http$fromJson,
+			decoder,
+			A2(_evancz$elm_http$Http$send, _evancz$elm_http$Http$defaultSettings, request));
+	});
+
 var _mgold$elm_date_format$Date_Format$padWith = function (c) {
 	return function (_p0) {
 		return A3(
@@ -7974,6 +8332,23 @@ var _mgold$elm_date_format$Date_Format$format = F2(
 	});
 var _mgold$elm_date_format$Date_Format$formatISO8601 = _mgold$elm_date_format$Date_Format$format('%Y-%m-%dT%H:%M:%SZ');
 
+var _user$project$DateFormatter$format = F2(
+	function (maybeNow, date) {
+		var _p0 = maybeNow;
+		if (_p0.ctor === 'Just') {
+			var _p1 = _p0._0;
+			return (_elm_lang$core$Native_Utils.eq(
+				_elm_lang$core$Date$day(_p1),
+				_elm_lang$core$Date$day(date)) && (_elm_lang$core$Native_Utils.eq(
+				_elm_lang$core$Date$month(_p1),
+				_elm_lang$core$Date$month(date)) && _elm_lang$core$Native_Utils.eq(
+				_elm_lang$core$Date$year(_p1),
+				_elm_lang$core$Date$year(date)))) ? A2(_mgold$elm_date_format$Date_Format$format, '%l:%M %p', date) : A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
+		} else {
+			return A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
+		}
+	});
+
 var _user$project$Header$logo = A2(
 	_elm_lang$html$Html$div,
 	_elm_lang$core$Native_List.fromArray(
@@ -8010,25 +8385,86 @@ var _user$project$Header$view = function (showHeader) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html_Attributes$class(
-				A2(_elm_lang$core$Basics_ops['++'], 'header dark_blue ', visibleClass))
+				A2(_elm_lang$core$Basics_ops['++'], 'header elm_dark_blue ', visibleClass))
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[_user$project$Header$logo]));
 };
 
-var _user$project$Tag$elmDevTag = {name: 'elm-dev', colorClass: 'dark_blue', link: 'https://groups.google.com/forum/#!forum/elm-dev'};
-var _user$project$Tag$elmDiscussTag = {name: 'elm-discuss', colorClass: 'light_blue', link: 'https://groups.google.com/forum/#!forum/elm-discuss'};
-var _user$project$Tag$TagInfo = F3(
-	function (a, b, c) {
-		return {name: a, colorClass: b, link: c};
+var _user$project$Message$Message = F5(
+	function (a, b, c, d, e) {
+		return {author: a, title: b, date: c, link: d, tag: e};
+	});
+var _user$project$Message$MessageResp = F2(
+	function (a, b) {
+		return {tag: a, messages: b};
+	});
+var _user$project$Message$MessageError = F2(
+	function (a, b) {
+		return {tag: a, error: b};
+	});
+
+var _user$project$Reddit$timeDecoder = A2(
+	_elm_lang$core$Json_Decode$customDecoder,
+	_elm_lang$core$Json_Decode$float,
+	function (time) {
+		return _elm_lang$core$Result$Ok(time * 1000);
+	});
+var _user$project$Reddit$tag = 'reddit';
+var _user$project$Reddit$decoder = A2(
+	_elm_lang$core$Json_Decode$at,
+	_elm_lang$core$Native_List.fromArray(
+		['data', 'children']),
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$at,
+			_elm_lang$core$Native_List.fromArray(
+				['data']),
+			A6(
+				_elm_lang$core$Json_Decode$object5,
+				_user$project$Message$Message,
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'author', _elm_lang$core$Json_Decode$string),
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string),
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'created_utc', _user$project$Reddit$timeDecoder),
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'url', _elm_lang$core$Json_Decode$string),
+				_elm_lang$core$Json_Decode$succeed(_user$project$Reddit$tag)))));
+var _user$project$Reddit$fetchTask = A2(_evancz$elm_http$Http$get, _user$project$Reddit$decoder, 'https://www.reddit.com/r/elm/new/.json');
+var _user$project$Reddit$fetchCmd = F2(
+	function (successMsg, failureMsg) {
+		return A3(
+			_elm_lang$core$Task$perform,
+			function (error) {
+				return failureMsg(
+					A2(
+						_user$project$Message$MessageError,
+						_user$project$Reddit$tag,
+						_elm_lang$core$Basics$toString(error)));
+			},
+			function (msgs) {
+				return successMsg(
+					A2(_user$project$Message$MessageResp, _user$project$Reddit$tag, msgs));
+			},
+			_user$project$Reddit$fetchTask);
+	});
+
+var _user$project$Tag$redditTag = {name: _user$project$Reddit$tag, tagColor: 'reddit_blue', textColor: 'black_text', link: 'https://www.reddit.com/r/elm/new'};
+var _user$project$Tag$elmDevTag = {name: 'elm-dev', tagColor: 'elm_dark_blue', textColor: 'white_text', link: 'https://groups.google.com/forum/#!forum/elm-dev'};
+var _user$project$Tag$elmDiscussTag = {name: 'elm-discuss', tagColor: 'elm_light_blue', textColor: 'white_text', link: 'https://groups.google.com/forum/#!forum/elm-discuss'};
+var _user$project$Tag$TagInfo = F4(
+	function (a, b, c, d) {
+		return {name: a, tagColor: b, textColor: c, link: d};
 	});
 var _user$project$Tag$lookupTagInfo = function (name) {
 	var lookup = A3(
 		_elm_lang$core$Dict$insert,
-		'elm-dev',
-		_user$project$Tag$elmDevTag,
-		A3(_elm_lang$core$Dict$insert, 'elm-discuss', _user$project$Tag$elmDiscussTag, _elm_lang$core$Dict$empty));
-	var $default = A3(_user$project$Tag$TagInfo, 'unknown', 'grey', '');
+		_user$project$Reddit$tag,
+		_user$project$Tag$redditTag,
+		A3(
+			_elm_lang$core$Dict$insert,
+			'elm-dev',
+			_user$project$Tag$elmDevTag,
+			A3(_elm_lang$core$Dict$insert, 'elm-discuss', _user$project$Tag$elmDiscussTag, _elm_lang$core$Dict$empty)));
+	var $default = A4(_user$project$Tag$TagInfo, 'unknown', 'grey', 'white_text', '');
 	return A2(
 		_elm_lang$core$Maybe$withDefault,
 		$default,
@@ -8041,7 +8477,7 @@ var _user$project$Tag$view = function (name) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html_Attributes$class(
-				A2(_elm_lang$core$Basics_ops['++'], 'tag ', tag.colorClass))
+				A2(_elm_lang$core$Basics_ops['++'], 'tag ', tag.tagColor))
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -8050,7 +8486,8 @@ var _user$project$Tag$view = function (name) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$href(tag.link),
-						_elm_lang$html$Html_Attributes$class('tag__link')
+						_elm_lang$html$Html_Attributes$class(
+						A2(_elm_lang$core$Basics_ops['++'], 'tag__link ', tag.textColor))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -8059,22 +8496,6 @@ var _user$project$Tag$view = function (name) {
 			]));
 };
 
-var _user$project$Main$formatDate = F2(
-	function (maybeNow, date) {
-		var _p0 = maybeNow;
-		if (_p0.ctor === 'Just') {
-			var _p1 = _p0._0;
-			return (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$day(_p1),
-				_elm_lang$core$Date$day(date)) && (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$month(_p1),
-				_elm_lang$core$Date$month(date)) && _elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$year(_p1),
-				_elm_lang$core$Date$year(date)))) ? A2(_mgold$elm_date_format$Date_Format$format, '%l:%M %p', date) : A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
-		} else {
-			return A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
-		}
-	});
 var _user$project$Main$cardView = F2(
 	function (now, msg) {
 		return A2(
@@ -8085,7 +8506,7 @@ var _user$project$Main$cardView = F2(
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_user$project$Tag$view(msg.group),
+					_user$project$Tag$view(msg.tag),
 					A2(
 					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
@@ -8133,7 +8554,7 @@ var _user$project$Main$cardView = F2(
 						[
 							_elm_lang$html$Html$text(
 							A2(
-								_user$project$Main$formatDate,
+								_user$project$DateFormatter$format,
 								now,
 								_elm_lang$core$Date$fromTime(msg.date)))
 						]))
@@ -8183,23 +8604,27 @@ var _user$project$Main$view = function (model) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p2 = msg;
-		switch (_p2.ctor) {
-			case 'FetchGoogleGroupSuccess':
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'FetchMessageSuccess':
 				var updatedModel = _elm_lang$core$Native_Utils.update(
 					model,
 					{
-						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p2._0.messages)
+						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p0._0.messages)
 					});
 				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'FetchGoogleGroupError':
-				var _p3 = _p2._0;
+			case 'FetchMessageError':
+				var _p1 = _p0._0;
 				var updatedModel = _elm_lang$core$Native_Utils.update(
 					model,
 					{
 						errors: A2(
 							_elm_lang$core$List_ops['::'],
-							{ctor: '_Tuple2', _0: _p3.group, _1: _p3.message},
+							{
+								ctor: '_Tuple2',
+								_0: _p1.tag,
+								_1: A2(_elm_lang$core$Debug$log, '', _p1.error)
+							},
 							model.errors)
 					});
 				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
@@ -8209,7 +8634,7 @@ var _user$project$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							now: _elm_lang$core$Maybe$Just(_p2._0)
+							now: _elm_lang$core$Maybe$Just(_p0._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -8240,8 +8665,8 @@ var _user$project$Main$fetchedGoogleGroupMsgs = _elm_lang$core$Native_Platform.i
 	'fetchedGoogleGroupMsgs',
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
-		A2(_elm_lang$core$Json_Decode_ops[':='], 'group', _elm_lang$core$Json_Decode$string),
-		function (group) {
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'tag', _elm_lang$core$Json_Decode$string),
+		function (tag) {
 			return A2(
 				_elm_lang$core$Json_Decode$andThen,
 				A2(
@@ -8262,19 +8687,14 @@ var _user$project$Main$fetchedGoogleGroupMsgs = _elm_lang$core$Native_Platform.i
 											function (date) {
 												return A2(
 													_elm_lang$core$Json_Decode$andThen,
-													A2(_elm_lang$core$Json_Decode_ops[':='], 'description', _elm_lang$core$Json_Decode$string),
-													function (description) {
+													A2(_elm_lang$core$Json_Decode_ops[':='], 'link', _elm_lang$core$Json_Decode$string),
+													function (link) {
 														return A2(
 															_elm_lang$core$Json_Decode$andThen,
-															A2(_elm_lang$core$Json_Decode_ops[':='], 'link', _elm_lang$core$Json_Decode$string),
-															function (link) {
-																return A2(
-																	_elm_lang$core$Json_Decode$andThen,
-																	A2(_elm_lang$core$Json_Decode_ops[':='], 'group', _elm_lang$core$Json_Decode$string),
-																	function (group) {
-																		return _elm_lang$core$Json_Decode$succeed(
-																			{author: author, title: title, date: date, description: description, link: link, group: group});
-																	});
+															A2(_elm_lang$core$Json_Decode_ops[':='], 'tag', _elm_lang$core$Json_Decode$string),
+															function (tag) {
+																return _elm_lang$core$Json_Decode$succeed(
+																	{author: author, title: title, date: date, link: link, tag: tag});
 															});
 													});
 											});
@@ -8282,21 +8702,21 @@ var _user$project$Main$fetchedGoogleGroupMsgs = _elm_lang$core$Native_Platform.i
 							}))),
 				function (messages) {
 					return _elm_lang$core$Json_Decode$succeed(
-						{group: group, messages: messages});
+						{tag: tag, messages: messages});
 				});
 		}));
 var _user$project$Main$errorGoogleGroupMsgs = _elm_lang$core$Native_Platform.incomingPort(
 	'errorGoogleGroupMsgs',
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
-		A2(_elm_lang$core$Json_Decode_ops[':='], 'group', _elm_lang$core$Json_Decode$string),
-		function (group) {
+		A2(_elm_lang$core$Json_Decode_ops[':='], 'tag', _elm_lang$core$Json_Decode$string),
+		function (tag) {
 			return A2(
 				_elm_lang$core$Json_Decode$andThen,
-				A2(_elm_lang$core$Json_Decode_ops[':='], 'message', _elm_lang$core$Json_Decode$string),
-				function (message) {
+				A2(_elm_lang$core$Json_Decode_ops[':='], 'error', _elm_lang$core$Json_Decode$string),
+				function (error) {
 					return _elm_lang$core$Json_Decode$succeed(
-						{group: group, message: message});
+						{tag: tag, error: error});
 				});
 		}));
 var _user$project$Main$scrollUp = _elm_lang$core$Native_Platform.incomingPort('scrollUp', _elm_lang$core$Json_Decode$float);
@@ -8305,22 +8725,16 @@ var _user$project$Main$Model = F4(
 	function (a, b, c, d) {
 		return {messages: a, errors: b, now: c, showHeader: d};
 	});
-var _user$project$Main$GoogleGroupMsg = F6(
-	function (a, b, c, d, e, f) {
-		return {author: a, title: b, date: c, description: d, link: e, group: f};
-	});
-var _user$project$Main$GoogleGroupResp = F2(
-	function (a, b) {
-		return {group: a, messages: b};
-	});
-var _user$project$Main$GoogleGroupError = F2(
-	function (a, b) {
-		return {group: a, message: b};
-	});
 var _user$project$Main$ScrollDown = {ctor: 'ScrollDown'};
 var _user$project$Main$ScrollUp = {ctor: 'ScrollUp'};
 var _user$project$Main$CurrentDate = function (a) {
 	return {ctor: 'CurrentDate', _0: a};
+};
+var _user$project$Main$FetchMessageError = function (a) {
+	return {ctor: 'FetchMessageError', _0: a};
+};
+var _user$project$Main$FetchMessageSuccess = function (a) {
+	return {ctor: 'FetchMessageSuccess', _0: a};
 };
 var _user$project$Main$init = function () {
 	var fx = _elm_lang$core$Platform_Cmd$batch(
@@ -8328,6 +8742,7 @@ var _user$project$Main$init = function () {
 			[
 				_user$project$Main$fetchGoogleGroupMsgs('elm-dev'),
 				_user$project$Main$fetchGoogleGroupMsgs('elm-discuss'),
+				A2(_user$project$Reddit$fetchCmd, _user$project$Main$FetchMessageSuccess, _user$project$Main$FetchMessageError),
 				A3(_elm_lang$core$Task$perform, _elm_community$basics_extra$Basics_Extra$never, _user$project$Main$CurrentDate, _elm_lang$core$Date$now)
 			]));
 	var model = {
@@ -8340,24 +8755,18 @@ var _user$project$Main$init = function () {
 	};
 	return {ctor: '_Tuple2', _0: model, _1: fx};
 }();
-var _user$project$Main$FetchGoogleGroupError = function (a) {
-	return {ctor: 'FetchGoogleGroupError', _0: a};
-};
-var _user$project$Main$FetchGoogleGroupSuccess = function (a) {
-	return {ctor: 'FetchGoogleGroupSuccess', _0: a};
-};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$Main$fetchedGoogleGroupMsgs(_user$project$Main$FetchGoogleGroupSuccess),
-				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchGoogleGroupError),
+				_user$project$Main$fetchedGoogleGroupMsgs(_user$project$Main$FetchMessageSuccess),
+				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchMessageError),
 				_user$project$Main$scrollUp(
-				function (_p4) {
+				function (_p2) {
 					return _user$project$Main$ScrollUp;
 				}),
 				_user$project$Main$scrollDown(
-				function (_p5) {
+				function (_p3) {
 					return _user$project$Main$ScrollDown;
 				})
 			]));

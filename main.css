@@ -64,7 +64,6 @@
 }
 
 .tag__link {
-  color: #FFFFFF;
   text-decoration: none;
 }
 
@@ -86,20 +85,32 @@
   min-width: 70px;
 }
 
-.dark_blue {
+.white_text {
+  color: #FFFFFF;
+}
+
+.black_text {
+  color: #000000;
+}
+
+.elm_dark_blue {
   background-color: #5A6378;
 }
 
-.light_blue {
+.elm_light_blue {
   background-color: #60B5CC
 }
 
-.yellow {
+.elm_yellow {
   background-color: #F0AD00
 }
 
-.green {
+.elm_green {
   background-color: #7FD13B
+}
+
+.reddit_blue {
+  background-color: #CEE3F8
 }
 
 .grey {
