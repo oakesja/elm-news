@@ -7974,41 +7974,102 @@ var _mgold$elm_date_format$Date_Format$format = F2(
 	});
 var _mgold$elm_date_format$Date_Format$formatISO8601 = _mgold$elm_date_format$Date_Format$format('%Y-%m-%dT%H:%M:%SZ');
 
-var _user$project$Main$tag = function (name) {
-	var colorClass = function () {
-		var _p0 = name;
-		switch (_p0) {
-			case 'elm-dev':
-				return 'dark_blue';
-			case 'elm-discuss':
-				return 'light_blue';
-			default:
-				return '';
-		}
-	}();
+var _user$project$Header$logo = A2(
+	_elm_lang$html$Html$div,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$html$Html_Attributes$class('logo')
+		]),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('logo_elm')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('elm')
+				])),
+			A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('logo_news')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('news')
+				]))
+		]));
+var _user$project$Header$view = function (showHeader) {
+	var visibleClass = showHeader ? 'header--visible' : 'header--hidden';
+	return A2(
+		_elm_lang$html$Html$header,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$class(
+				A2(_elm_lang$core$Basics_ops['++'], 'header dark_blue ', visibleClass))
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[_user$project$Header$logo]));
+};
+
+var _user$project$Tag$elmDevTag = {name: 'elm-dev', colorClass: 'dark_blue', link: 'https://groups.google.com/forum/#!forum/elm-dev'};
+var _user$project$Tag$elmDiscussTag = {name: 'elm-discuss', colorClass: 'light_blue', link: 'https://groups.google.com/forum/#!forum/elm-discuss'};
+var _user$project$Tag$TagInfo = F3(
+	function (a, b, c) {
+		return {name: a, colorClass: b, link: c};
+	});
+var _user$project$Tag$lookupTagInfo = function (name) {
+	var lookup = A3(
+		_elm_lang$core$Dict$insert,
+		'elm-dev',
+		_user$project$Tag$elmDevTag,
+		A3(_elm_lang$core$Dict$insert, 'elm-discuss', _user$project$Tag$elmDiscussTag, _elm_lang$core$Dict$empty));
+	var $default = A3(_user$project$Tag$TagInfo, 'unknown', 'grey', '');
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		$default,
+		A2(_elm_lang$core$Dict$get, name, lookup));
+};
+var _user$project$Tag$view = function (name) {
+	var tag = _user$project$Tag$lookupTagInfo(name);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_elm_lang$html$Html_Attributes$class(
-				A2(_elm_lang$core$Basics_ops['++'], 'card__tag ', colorClass))
+				A2(_elm_lang$core$Basics_ops['++'], 'tag ', tag.colorClass))
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html$text(name)
+				A2(
+				_elm_lang$html$Html$a,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$href(tag.link),
+						_elm_lang$html$Html_Attributes$class('tag__link')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(tag.name)
+					]))
 			]));
 };
+
 var _user$project$Main$formatDate = F2(
 	function (maybeNow, date) {
-		var _p1 = maybeNow;
-		if (_p1.ctor === 'Just') {
-			var _p2 = _p1._0;
+		var _p0 = maybeNow;
+		if (_p0.ctor === 'Just') {
+			var _p1 = _p0._0;
 			return (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$day(_p2),
+				_elm_lang$core$Date$day(_p1),
 				_elm_lang$core$Date$day(date)) && (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$month(_p2),
+				_elm_lang$core$Date$month(_p1),
 				_elm_lang$core$Date$month(date)) && _elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$year(_p2),
+				_elm_lang$core$Date$year(_p1),
 				_elm_lang$core$Date$year(date)))) ? A2(_mgold$elm_date_format$Date_Format$format, '%l:%M %p', date) : A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
 		} else {
 			return A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
@@ -8024,7 +8085,7 @@ var _user$project$Main$cardView = F2(
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[
-					_user$project$Main$tag(msg.group),
+					_user$project$Tag$view(msg.group),
 					A2(
 					_elm_lang$html$Html$div,
 					_elm_lang$core$Native_List.fromArray(
@@ -8083,7 +8144,7 @@ var _user$project$Main$body = function (model) {
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Attributes$class('body')
+				_elm_lang$html$Html_Attributes$class('body grey')
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -8110,21 +8171,7 @@ var _user$project$Main$view = function (model) {
 			[]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				A2(
-				_elm_lang$html$Html$header,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$h1,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text('Everything Elm')
-							]))
-					])),
+				_user$project$Header$view(model.showHeader),
 				_user$project$Main$body(model),
 				A2(
 				_elm_lang$html$Html$footer,
@@ -8136,34 +8183,50 @@ var _user$project$Main$view = function (model) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p3 = msg;
-		switch (_p3.ctor) {
+		var _p2 = msg;
+		switch (_p2.ctor) {
 			case 'FetchGoogleGroupSuccess':
 				var updatedModel = _elm_lang$core$Native_Utils.update(
 					model,
 					{
-						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p3._0.messages)
+						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p2._0.messages)
 					});
 				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'FetchGoogleGroupError':
-				var _p4 = _p3._0;
+				var _p3 = _p2._0;
 				var updatedModel = _elm_lang$core$Native_Utils.update(
 					model,
 					{
 						errors: A2(
 							_elm_lang$core$List_ops['::'],
-							{ctor: '_Tuple2', _0: _p4.group, _1: _p4.message},
+							{ctor: '_Tuple2', _0: _p3.group, _1: _p3.message},
 							model.errors)
 					});
 				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
-			default:
+			case 'CurrentDate':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							now: _elm_lang$core$Maybe$Just(_p3._0)
+							now: _elm_lang$core$Maybe$Just(_p2._0)
 						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ScrollUp':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{showHeader: true}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{showHeader: false}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
@@ -8236,9 +8299,11 @@ var _user$project$Main$errorGoogleGroupMsgs = _elm_lang$core$Native_Platform.inc
 						{group: group, message: message});
 				});
 		}));
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {messages: a, errors: b, now: c};
+var _user$project$Main$scrollUp = _elm_lang$core$Native_Platform.incomingPort('scrollUp', _elm_lang$core$Json_Decode$float);
+var _user$project$Main$scrollDown = _elm_lang$core$Native_Platform.incomingPort('scrollDown', _elm_lang$core$Json_Decode$float);
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {messages: a, errors: b, now: c, showHeader: d};
 	});
 var _user$project$Main$GoogleGroupMsg = F6(
 	function (a, b, c, d, e, f) {
@@ -8252,6 +8317,8 @@ var _user$project$Main$GoogleGroupError = F2(
 	function (a, b) {
 		return {group: a, message: b};
 	});
+var _user$project$Main$ScrollDown = {ctor: 'ScrollDown'};
+var _user$project$Main$ScrollUp = {ctor: 'ScrollUp'};
 var _user$project$Main$CurrentDate = function (a) {
 	return {ctor: 'CurrentDate', _0: a};
 };
@@ -8268,7 +8335,8 @@ var _user$project$Main$init = function () {
 			[]),
 		errors: _elm_lang$core$Native_List.fromArray(
 			[]),
-		now: _elm_lang$core$Maybe$Nothing
+		now: _elm_lang$core$Maybe$Nothing,
+		showHeader: true
 	};
 	return {ctor: '_Tuple2', _0: model, _1: fx};
 }();
@@ -8283,7 +8351,15 @@ var _user$project$Main$subscriptions = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_user$project$Main$fetchedGoogleGroupMsgs(_user$project$Main$FetchGoogleGroupSuccess),
-				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchGoogleGroupError)
+				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchGoogleGroupError),
+				_user$project$Main$scrollUp(
+				function (_p4) {
+					return _user$project$Main$ScrollUp;
+				}),
+				_user$project$Main$scrollDown(
+				function (_p5) {
+					return _user$project$Main$ScrollDown;
+				})
 			]));
 };
 var _user$project$Main$main = {

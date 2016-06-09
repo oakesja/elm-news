@@ -7,12 +7,15 @@ import Date exposing (Date)
 import Task
 import Date.Format
 import Basics.Extra exposing (never)
+import Header
+import Tag
 
 
 type alias Model =
     { messages : List GoogleGroupMsg
     , errors : List ( String, String )
     , now : Maybe Date
+    , showHeader : Bool
     }
 
 
@@ -33,6 +36,7 @@ init =
             { messages = []
             , errors = []
             , now = Nothing
+            , showHeader = True
             }
 
         fx =
@@ -51,6 +55,8 @@ type Msg
     = FetchGoogleGroupSuccess GoogleGroupResp
     | FetchGoogleGroupError GoogleGroupError
     | CurrentDate Date
+    | ScrollUp
+    | ScrollDown
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,12 +85,21 @@ update msg model =
             , Cmd.none
             )
 
+        ScrollUp ->
+            ( { model | showHeader = True }
+            , Cmd.none
+            )
+
+        ScrollDown ->
+            ( { model | showHeader = False }
+            , Cmd.none
+            )
+
 
 view : Model -> Html Msg
 view model =
     div []
-        [ header []
-            [ h1 [] [ text "Everything Elm" ] ]
+        [ Header.view model.showHeader
         , body model
         , footer [] []
         ]
@@ -92,7 +107,7 @@ view model =
 
 body : Model -> Html Msg
 body model =
-    div [ class "body" ]
+    div [ class "body grey" ]
         [ div []
             <| List.map (cardView model.now)
             <| List.reverse
@@ -103,7 +118,7 @@ body model =
 cardView : Maybe Date -> GoogleGroupMsg -> Html Msg
 cardView now msg =
     div [ class "card" ]
-        [ tag msg.group
+        [ Tag.view msg.group
         , div [ class "card__description" ]
             [ div [ class "card__description__title" ]
                 [ a [ href msg.link ]
@@ -130,22 +145,23 @@ formatDate maybeNow date =
             Date.Format.format "%b %d" date
 
 
-tag : String -> Html Msg
-tag name =
-    let
-        colorClass =
-            case name of
-                "elm-dev" ->
-                    "dark_blue"
 
-                "elm-discuss" ->
-                    "light_blue"
-
-                _ ->
-                    ""
-    in
-        div [ class <| "card__tag " ++ colorClass ]
-            [ text name ]
+-- tag : String -> Html Msg
+-- tag name =
+--     let
+--         colorClass =
+--             case name of
+--                 "elm-dev" ->
+--                     "dark_blue"
+--
+--                 "elm-discuss" ->
+--                     "light_blue"
+--
+--                 _ ->
+--                     ""
+--     in
+--         div [ class <| "card__tag " ++ colorClass ]
+--             [ text name ]
 
 
 type alias GoogleGroupResp =
@@ -169,14 +185,23 @@ port fetchedGoogleGroupMsgs : (GoogleGroupResp -> msg) -> Sub msg
 port errorGoogleGroupMsgs : (GoogleGroupError -> msg) -> Sub msg
 
 
+port scrollUp : (Float -> msg) -> Sub msg
+
+
+port scrollDown : (Float -> msg) -> Sub msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchGoogleGroupSuccess
         , errorGoogleGroupMsgs FetchGoogleGroupError
+        , scrollUp (\_ -> ScrollUp)
+        , scrollDown (\_ -> ScrollDown)
         ]
 
 
+main : Program Never
 main =
     Html.App.program
         { init = init

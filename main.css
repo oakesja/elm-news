@@ -1,9 +1,43 @@
 .main {
   margin: 0px;
-  background-color: #EEEEEE;
+}
+
+.header {
+  color: #FFFFFF;
+  padding: 10px 25px 15px 25px;
+  height: 40px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-shadow: 0 4px 4px 0 rgba(0,0,0,0.14);
+}
+
+.header--open {
+  transition: top 1.0s ease-in-out;
+}
+
+.header--hidden {
+  top: -70px;
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+}
+
+.logo_elm {
+  font-size: 1.6em;
+}
+
+.logo_news {
+  font-size: 1.1em;
+  line-height: 9px;
+  padding-left: 1px;
 }
 
 .body {
+  padding-top: 70px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -18,7 +52,7 @@
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
 }
 
-.card__tag {
+.tag {
   padding: 5px;
   min-width: 100px;
   width: 100px;
@@ -26,7 +60,12 @@
   text-align: center;
   margin: 10px;
   align-self: center;
-  color: white;
+  box-shadow: 0 3px 4px 0 rgba(0,0,0,0.14);
+}
+
+.tag__link {
+  color: #FFFFFF;
+  text-decoration: none;
 }
 
 .card__description {
@@ -61,4 +100,8 @@
 
 .green {
   background-color: #7FD13B
+}
+
+.grey {
+  background-color: #DDDDDD
 }

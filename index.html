@@ -42,6 +42,17 @@
             }
         })
     });
+
+    var lastScroll = 0
+    window.onscroll = function() {
+        var newScroll = window.pageYOffset || document.body.scrollTop;
+        if (newScroll > lastScroll){
+            app.ports.scrollDown.send(newScroll);
+        } else {
+            app.ports.scrollUp.send(newScroll);
+        }
+        lastScroll = newScroll;
+    };
 </script>
 
 </html>
