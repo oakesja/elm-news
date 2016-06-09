@@ -13,12 +13,23 @@ import Reddit
 import DateFormatter
 
 
--- TODO handle errors
+-- TODO display host of url links
+-- TODO better looking links
+-- TODO consider no cards like hacker news or reddit
 -- TODO move google group stuff to seperate module
+-- TODO handle errors
+-- TODO spinner for loading
 -- TODO add twitter
+-- TODO footer
+-- TODO filtering
+-- TODO use local storage to save filtering selections
 -- TODO add github
 -- TODO google analytics
--- TODO filtering
+-- TODO better color scheme
+-- TODO share with others
+-- TODO create a logo
+-- TODO paging to go back further? not sure how this will work
+-- TODO create xml parser in elm using json decoders
 
 
 type alias Model =
