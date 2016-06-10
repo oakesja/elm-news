@@ -17,6 +17,7 @@ import DateFormatter
 -- TODO better looking links
 -- TODO consider no cards like hacker news or reddit
 -- TODO move google group stuff to seperate module
+-- TODO ensure calls are returning the same amount of message or are over a certain time span
 -- TODO handle errors
 -- TODO spinner for loading
 -- TODO add twitter
