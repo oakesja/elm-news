@@ -1,9 +1,10 @@
 <html>
 
 <head>
-    <script src="https://storage.googleapis.com/feednami-static/js/feednami-client-v1.0.1.js"></script>
-    <script src="main.js"></script>
-    <link rel="stylesheet" type="text/css" href="main.css"/>
+    <script type="text/javascript" src="https://storage.googleapis.com/feednami-static/js/feednami-client-v1.0.1.js"></script>
+    <script type="text/javascript" src="vendor/codebird.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css" />
 </head>
 
 <body class="main">
@@ -15,8 +16,8 @@
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {
-                  tag: tag,
-                  error: result.error
+                    tag: tag,
+                    error: result.error
                 }
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
@@ -34,8 +35,8 @@
                     msgs.push(msg);
                 }
                 var resp = {
-                  messages: msgs,
-                  tag: tag
+                    messages: msgs,
+                    tag: tag
                 }
                 app.ports.fetchedGoogleGroupMsgs.send(resp);
             }
@@ -45,13 +46,49 @@
     var lastScroll = 0
     window.onscroll = function() {
         var newScroll = window.pageYOffset || document.body.scrollTop;
-        if (newScroll > lastScroll){
+        if (newScroll > lastScroll) {
             app.ports.scrollDown.send(newScroll);
         } else {
             app.ports.scrollUp.send(newScroll);
         }
         lastScroll = newScroll;
     };
+
+    var cb = new Codebird;
+    cb.setConsumerKey("ummDnEl8HFe1wol0IO7w3XgT9", "NVvXMc0JxQoBtW4VpyCeS3eFeLv8pRxE918A74aPsroLWGzOiU");
+    cb.__call(
+        "oauth2_token", {},
+        function(reply, err) {
+            var bearer_token;
+            if (err) {
+                console.log("error response or timeout exceeded" + err.error);
+            }
+            if (reply) {
+                bearer_token = reply.access_token;
+            }
+            cb.setBearerToken(bearer_token);
+            cb.__call(
+                "search_tweets",
+                "q=%23elmlang&src=typd",
+                "count=50"
+                function(reply, rate, error) {
+                    console.log(reply);
+                    console.log(rate);
+                },
+                true
+            );
+            cb.__call(
+                "statuses_userTimeline",
+                "screen_name=elmlang",
+                "count=25"
+                function(reply, rate, err) {
+                    console.log(reply);
+                    console.log(err);
+                },
+                true
+            );
+        }
+    );
 </script>
 
 </html>
