@@ -12,6 +12,7 @@ type alias Message =
     , date : Float
     , link : String
     , tag : String
+    , domain : String
     }
 
 

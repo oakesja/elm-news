@@ -75,9 +75,19 @@
   margin: 0px 10px;
 }
 
+.card__description__header {
+  margin-bottom: 8px;
+}
+
 .card__description__title {
   font-weight: bold;
-  margin-bottom: 8px;
+  text-decoration: none;
+}
+
+.card__description__domain {
+  color: #888888;
+  padding-left: 7px;
+  font-size: 0.8em;
 }
 
 .card__date {

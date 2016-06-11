@@ -25,12 +25,13 @@ fetchTask =
 
 decoder : Decoder (List Message)
 decoder =
-    object5 Message
+    object6 Message
         ("author" := string)
         ("title" := string)
         ("created_utc" := timeDecoder)
         ("url" := string)
         (succeed tag)
+        ("domain" := string)
         |> at [ "data" ]
         |> list
         |> at [ "data", "children" ]

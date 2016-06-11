@@ -1,6 +1,6 @@
 port module Main exposing (..)
 
-import Html exposing (Html, a, text, div, header, footer, h1)
+import Html exposing (Html, a, text, div, header, footer, h1, span)
 import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
@@ -13,8 +13,7 @@ import Reddit
 import DateFormatter
 
 
--- TODO display host of url links
--- TODO better looking links
+-- TODO link component
 -- TODO consider no cards like hacker news or reddit
 -- TODO move google group stuff to seperate module
 -- TODO ensure calls are returning the same amount of message or are over a certain time span
@@ -22,13 +21,16 @@ import DateFormatter
 -- TODO spinner for loading
 -- TODO add twitter
 -- TODO footer
--- TODO filtering
+-- TODO filtering (on header or by clicking tags)
 -- TODO use local storage to save filtering selections
 -- TODO add github
 -- TODO google analytics
--- TODO better color scheme
+-- TODO better font and color scheme
+-- TODO web checklist
 -- TODO share with others
 -- TODO create a logo
+-- TODO favicon
+-- TODO sort by domain
 -- TODO paging to go back further? not sure how this will work
 -- TODO create xml parser in elm using json decoders
 
@@ -133,9 +135,14 @@ cardView now msg =
     div [ class "card" ]
         [ Tag.view msg.tag
         , div [ class "card__description" ]
-            [ div [ class "card__description__title" ]
-                [ a [ href msg.link ]
+            [ div [ class "card__description__header" ]
+                [ a
+                    [ href msg.link
+                    , class "card__description__title black_text"
+                    ]
                     [ text msg.title ]
+                , span [ class "card__description__domain" ]
+                    [ text <| "(" ++ msg.domain ++ ")" ]
                 ]
             , div []
                 [ text <| "By " ++ msg.author ]
