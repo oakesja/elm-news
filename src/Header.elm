@@ -13,7 +13,7 @@ view showHeader =
             else
                 "header--hidden"
     in
-        header [ class <| "header elm_dark_blue " ++ visibleClass ]
+        header [ class <| "header " ++ visibleClass ]
             [ logo ]
 
 
