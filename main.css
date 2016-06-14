@@ -1,5 +1,11 @@
-.main {
+.page {
   margin: 0px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .header {
@@ -10,6 +16,7 @@
   top: 0;
   width: 100%;
   box-shadow: 0 4px 4px 0 rgba(0,0,0,0.14);
+  background-color: #5A6378;
 }
 
 .header--open {
@@ -21,6 +28,16 @@
 }
 
 .logo {
+  display: flex;
+  flex-direction: row;
+}
+
+.logo__icon {
+  padding-top: 3px;
+  padding-right: 7px;
+}
+
+.logo__text {
   display: flex;
   flex-direction: column;
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
@@ -41,6 +58,8 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  flex-grow: 1;
+  background-color: #DDDDDD
 }
 
 .card {
@@ -75,15 +94,46 @@
   margin: 0px 10px;
 }
 
+.card__description__header {
+  margin-bottom: 8px;
+}
+
 .card__description__title {
   font-weight: bold;
-  margin-bottom: 8px;
+  text-decoration: none;
+}
+
+.card__description__domain {
+  color: #888888;
+  padding-left: 7px;
+  font-size: 0.8em;
 }
 
 .card__date {
   align-self: center;
   min-width: 70px;
 }
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  min-height: 50px;
+  text-align: center;
+  box-shadow: 0 -4px 4px 0 rgba(0,0,0,0.14);
+  background-color: #5A6378;
+  padding: 10px;
+}
+
+.footer__description {
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #FFFFFF;
+}
+
+/* Color */
 
 .white_text {
   color: #FFFFFF;
@@ -111,8 +161,4 @@
 
 .reddit_blue {
   background-color: #CEE3F8
-}
-
-.grey {
-  background-color: #DDDDDD
 }

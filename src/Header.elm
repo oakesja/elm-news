@@ -1,7 +1,8 @@
 module Header exposing (view)
 
-import Html exposing (Html, header, div, text)
+import Html exposing (Html, header)
 import Html.Attributes exposing (class)
+import Logo
 
 
 view : Bool -> Html msg
@@ -13,13 +14,5 @@ view showHeader =
             else
                 "header--hidden"
     in
-        header [ class <| "header elm_dark_blue " ++ visibleClass ]
-            [ logo ]
-
-
-logo : Html msg
-logo =
-    div [ class "logo" ]
-        [ div [ class "logo_elm" ] [ text "elm" ]
-        , div [ class "logo_news" ] [ text "news" ]
-        ]
+        header [ class <| "header " ++ visibleClass ]
+            [ Logo.view ]

@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="main.css"/>
 </head>
 
-<body class="main">
+<body class="page">
 </body>
 <script type="text/javascript">
     var app = Elm.Main.fullscreen();
@@ -29,7 +29,8 @@
                         title: entry.title,
                         date: entry.date_ms,
                         link: entry.link,
-                        tag: tag
+                        tag: tag,
+                        domain: "groups.google.com"
                     };
                     msgs.push(msg);
                 }

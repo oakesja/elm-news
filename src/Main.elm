@@ -1,20 +1,37 @@
 port module Main exposing (..)
 
-import Html exposing (Html, a, text, div, header, footer, h1)
+import Html exposing (Html, a, text, div, h1, span)
 import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
 import Task exposing (Task)
 import Basics.Extra exposing (never)
 import Header
+import Footer
 import Tag
 import Message exposing (..)
 import Reddit
 import DateFormatter
 
 
--- TODO handle errors
+-- TODO figure out how to get around rate limits (rss feeds instead?)
+-- TODO link component
+-- TODO consider no cards like hacker news or reddit
 -- TODO move google group stuff to seperate module
+-- TODO ensure calls are returning the same amount of message or are over a certain time span
+-- TODO handle errors
+-- TODO spinner for loading
+-- TODO mobile and header like http://square.github.io/okhttp/
+-- TODO filtering (on header or by clicking tags)
+-- TODO use local storage to save filtering selections
+-- TODO google analytics
+-- TODO better font and color scheme
+-- TODO web checklist
+-- TODO share with others
+-- TODO favicon
+-- TODO sort by domain
+-- TODO paging to go back further? not sure how this will work
+-- TODO create xml parser in elm using json decoders
 
 
 type alias Model =
@@ -95,16 +112,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ class "main" ]
         [ Header.view model.showHeader
         , body model
-        , footer [] []
+        , Footer.view <| Maybe.map Date.year model.now
         ]
 
 
 body : Model -> Html Msg
 body model =
-    div [ class "body grey" ]
+    div [ class "body" ]
         [ div []
             <| List.map (cardView model.now)
             <| List.reverse
@@ -117,9 +134,14 @@ cardView now msg =
     div [ class "card" ]
         [ Tag.view msg.tag
         , div [ class "card__description" ]
-            [ div [ class "card__description__title" ]
-                [ a [ href msg.link ]
+            [ div [ class "card__description__header" ]
+                [ a
+                    [ href msg.link
+                    , class "card__description__title black_text"
+                    ]
                     [ text msg.title ]
+                , span [ class "card__description__domain" ]
+                    [ text <| "(" ++ msg.domain ++ ")" ]
                 ]
             , div []
                 [ text <| "By " ++ msg.author ]
