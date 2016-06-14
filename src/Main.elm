@@ -14,7 +14,6 @@ import Reddit
 import DateFormatter
 
 
--- TODO add ways to share in footer
 -- TODO figure out how to get around rate limits (rss feeds instead?)
 -- TODO link component
 -- TODO consider no cards like hacker news or reddit
@@ -22,16 +21,13 @@ import DateFormatter
 -- TODO ensure calls are returning the same amount of message or are over a certain time span
 -- TODO handle errors
 -- TODO spinner for loading
--- TODO add twitter
 -- TODO mobile and header like http://square.github.io/okhttp/
 -- TODO filtering (on header or by clicking tags)
 -- TODO use local storage to save filtering selections
--- TODO add github
 -- TODO google analytics
 -- TODO better font and color scheme
 -- TODO web checklist
 -- TODO share with others
--- TODO create a logo
 -- TODO favicon
 -- TODO sort by domain
 -- TODO paging to go back further? not sure how this will work

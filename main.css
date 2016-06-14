@@ -29,6 +29,16 @@
 
 .logo {
   display: flex;
+  flex-direction: row;
+}
+
+.logo__icon {
+  padding-top: 3px;
+  padding-right: 7px;
+}
+
+.logo__text {
+  display: flex;
   flex-direction: column;
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
