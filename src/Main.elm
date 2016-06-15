@@ -11,25 +11,24 @@ import Footer
 import Tag
 import Message exposing (..)
 import Reddit
+import HackerNews
 import DateFormatter
+import Http
 
 
--- TODO figure out how to get around rate limits (rss feeds instead?)
--- TODO link component
+-- TODO rename messages model
+-- TODO update times without page reload
 -- TODO consider no cards like hacker news or reddit
--- TODO move google group stuff to seperate module
 -- TODO ensure calls are returning the same amount of message or are over a certain time span
 -- TODO handle errors
 -- TODO spinner for loading
 -- TODO mobile and header like http://square.github.io/okhttp/
 -- TODO filtering (on header or by clicking tags)
--- TODO use local storage to save filtering selections
 -- TODO google analytics
 -- TODO better font and color scheme
 -- TODO web checklist
+-- TODO purchase domain and setup with gh pages
 -- TODO share with others
--- TODO favicon
--- TODO sort by domain
 -- TODO paging to go back further? not sure how this will work
 -- TODO create xml parser in elm using json decoders
 
@@ -56,7 +55,8 @@ init =
             Cmd.batch
                 [ fetchGoogleGroupMsgs "elm-dev"
                 , fetchGoogleGroupMsgs "elm-discuss"
-                , Reddit.fetchCmd FetchMessageSuccess FetchMessageError
+                , fetch Reddit.tag Reddit.fetch
+                , fetch HackerNews.tag HackerNews.fetch
                 , Task.perform never CurrentDate Date.now
                 ]
     in
@@ -149,6 +149,13 @@ cardView now msg =
         , div [ class "card__date" ]
             [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
         ]
+
+
+fetch : String -> Task Http.Error (List Message) -> Cmd Msg
+fetch tag task =
+    Task.perform (\error -> FetchMessageError <| MessageError tag <| toString error)
+        (\msgs -> FetchMessageSuccess <| MessageResp tag msgs)
+        task
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg
