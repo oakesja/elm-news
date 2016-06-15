@@ -8,7 +8,7 @@ view : Maybe Int -> Html msg
 view currentYear =
     footer [ class "footer grey" ]
         [ a [ href "https://github.com/oakesja/elm-news" ]
-            [ img [ src "/assets/images/GitHub-Mark-Light-64px.png" ]
+            [ img [ src "assets/images/GitHub-Mark-Light-64px.png" ]
                 []
             ]
         , div [ class "footer__description" ]
