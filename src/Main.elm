@@ -4,20 +4,21 @@ import Html exposing (Html, a, text, div, h1, span)
 import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
-import Task exposing (Task)
+import Task exposing (Task, andThen)
+import Process
+import Time
 import Basics.Extra exposing (never)
+import Http
+import DateFormatter
 import Header
 import Footer
 import Tag
 import Message exposing (..)
 import Reddit
 import HackerNews
-import DateFormatter
-import Http
 
 
 -- TODO rename messages model
--- TODO update times without page reload
 -- TODO consider no cards like hacker news or reddit
 -- TODO ensure calls are returning the same amount of message or are over a certain time span
 -- TODO handle errors
@@ -96,7 +97,7 @@ update msg model =
 
         CurrentDate date ->
             ( { model | now = Just date }
-            , Cmd.none
+            , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
             )
 
         ScrollUp ->
