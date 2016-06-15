@@ -3,7 +3,30 @@
 <head>
     <script src="https://storage.googleapis.com/feednami-static/js/feednami-client-v1.0.1.js"></script>
     <script src="main.js"></script>
-    <link rel="stylesheet" type="text/css" href="main.css"/>
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/images/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/images/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/images/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/images/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/images/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/images/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/images/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="assets/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="assets/images/favicon-194x194.png" sizes="194x194">
+    <link rel="icon" type="image/png" href="assets/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="assets/images/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="assets/images/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="assets/images/manifest.json">
+    <link rel="mask-icon" href="assets/images/safari-pinned-tab.svg" color="#5a6378">
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="elm news">
+    <meta name="application-name" content="elm news">
+    <meta name="msapplication-TileColor" content="#5a6378">
+    <meta name="msapplication-TileImage" content="assets/images/mstile-144x144.png">
+    <meta name="msapplication-config" content="assets/images/browserconfig.xml">
+    <meta name="theme-color" content="#5a6378">
 </head>
 
 <body class="page">
@@ -15,8 +38,8 @@
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {
-                  tag: tag,
-                  error: result.error
+                    tag: tag,
+                    error: result.error
                 }
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
@@ -35,8 +58,8 @@
                     msgs.push(msg);
                 }
                 var resp = {
-                  messages: msgs,
-                  tag: tag
+                    messages: msgs,
+                    tag: tag
                 }
                 app.ports.fetchedGoogleGroupMsgs.send(resp);
             }
@@ -46,7 +69,7 @@
     var lastScroll = 0
     window.onscroll = function() {
         var newScroll = window.pageYOffset || document.body.scrollTop;
-        if (newScroll > lastScroll){
+        if (newScroll > lastScroll) {
             app.ports.scrollDown.send(newScroll);
         } else {
             app.ports.scrollUp.send(newScroll);

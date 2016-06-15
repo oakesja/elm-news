@@ -8734,7 +8734,7 @@ var _user$project$Footer$view = function (currentYear) {
 						_elm_lang$html$Html$img,
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html_Attributes$src('/assets/images/GitHub-Mark-Light-64px.png')
+								_elm_lang$html$Html_Attributes$src('assets/images/GitHub-Mark-Light-64px.png')
 							]),
 						_elm_lang$core$Native_List.fromArray(
 							[]))
