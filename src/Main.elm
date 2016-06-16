@@ -20,17 +20,15 @@ import HackerNews
 
 -- TODO rename messages model
 -- TODO consider no cards like hacker news or reddit
--- TODO ensure calls are returning the same amount of message or are over a certain time span
+-- TODO fetch messages over a certain time span and on scroll
 -- TODO handle errors
 -- TODO spinner for loading
 -- TODO mobile and header like http://square.github.io/okhttp/
--- TODO filtering (on header or by clicking tags)
 -- TODO google analytics
 -- TODO better font and color scheme
 -- TODO web checklist
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
--- TODO paging to go back further? not sure how this will work
 -- TODO create xml parser in elm using json decoders
 
 
