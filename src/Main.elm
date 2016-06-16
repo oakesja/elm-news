@@ -23,7 +23,7 @@ import HackerNews
 -- TODO fetch messages over a certain time span and on scroll
 -- TODO handle errors
 -- TODO spinner for loading
--- TODO mobile and header like http://square.github.io/okhttp/
+-- TODO mobile friendly
 -- TODO google analytics
 -- TODO better font and color scheme
 -- TODO web checklist
