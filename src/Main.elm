@@ -38,7 +38,6 @@ type alias Model =
     { messages : List Message
     , errors : List ( String, String )
     , now : Maybe Date
-    , showHeader : Bool
     }
 
 
@@ -49,7 +48,6 @@ init =
             { messages = []
             , errors = []
             , now = Nothing
-            , showHeader = True
             }
 
         fx =
@@ -70,8 +68,6 @@ type Msg
     = FetchMessageSuccess MessageResp
     | FetchMessageError MessageError
     | CurrentDate Date
-    | ScrollUp
-    | ScrollDown
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,21 +96,11 @@ update msg model =
             , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
             )
 
-        ScrollUp ->
-            ( { model | showHeader = True }
-            , Cmd.none
-            )
-
-        ScrollDown ->
-            ( { model | showHeader = False }
-            , Cmd.none
-            )
-
 
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ Header.view model.showHeader
+        [ Header.view
         , body model
         , Footer.view <| Maybe.map Date.year model.now
         ]
@@ -168,19 +154,11 @@ port fetchedGoogleGroupMsgs : (MessageResp -> msg) -> Sub msg
 port errorGoogleGroupMsgs : (MessageError -> msg) -> Sub msg
 
 
-port scrollUp : (Float -> msg) -> Sub msg
-
-
-port scrollDown : (Float -> msg) -> Sub msg
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchMessageSuccess
         , errorGoogleGroupMsgs FetchMessageError
-        , scrollUp (\_ -> ScrollUp)
-        , scrollDown (\_ -> ScrollDown)
         ]
 
 

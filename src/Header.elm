@@ -1,18 +1,17 @@
 module Header exposing (view)
 
-import Html exposing (Html, header)
+import Html exposing (Html, header, div, text)
 import Html.Attributes exposing (class)
 import Logo
+import GithubLink
 
 
-view : Bool -> Html msg
-view showHeader =
-    let
-        visibleClass =
-            if showHeader then
-                "header--visible"
-            else
-                "header--hidden"
-    in
-        header [ class <| "header " ++ visibleClass ]
-            [ Logo.view ]
+view : Html msg
+view =
+    header [ class "header" ]
+        [ Logo.view
+        , div [ class "header__description" ]
+            [ text "All elm news in one place" ]
+        , div [ class "header__right" ]
+            [ GithubLink.view "header__github" ]
+        ]
