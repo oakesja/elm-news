@@ -6218,6 +6218,10 @@ return {
 
 }();
 
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
 var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
 var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
 var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
@@ -8680,22 +8684,448 @@ var _mgold$elm_date_format$Date_Format$format = F2(
 	});
 var _mgold$elm_date_format$Date_Format$formatISO8601 = _mgold$elm_date_format$Date_Format$format('%Y-%m-%dT%H:%M:%SZ');
 
+var _sporto$erl$Erl$appendPathSegments = F2(
+	function (segments, url) {
+		var newPath = A2(_elm_lang$core$List$append, url.path, segments);
+		return _elm_lang$core$Native_Utils.update(
+			url,
+			{path: newPath});
+	});
+var _sporto$erl$Erl$removeQuery = F2(
+	function (key, url) {
+		var updated = A2(_elm_lang$core$Dict$remove, key, url.query);
+		return _elm_lang$core$Native_Utils.update(
+			url,
+			{query: updated});
+	});
+var _sporto$erl$Erl$setQuery = F3(
+	function (key, val, url) {
+		var updated = A2(_elm_lang$core$Dict$singleton, key, val);
+		return _elm_lang$core$Native_Utils.update(
+			url,
+			{query: updated});
+	});
+var _sporto$erl$Erl$addQuery = F3(
+	function (key, val, url) {
+		var updated = _elm_lang$core$String$isEmpty(val) ? A2(_elm_lang$core$Dict$remove, key, url.query) : A3(_elm_lang$core$Dict$insert, key, val, url.query);
+		return _elm_lang$core$Native_Utils.update(
+			url,
+			{query: updated});
+	});
+var _sporto$erl$Erl$clearQuery = function (url) {
+	return _elm_lang$core$Native_Utils.update(
+		url,
+		{query: _elm_lang$core$Dict$empty});
+};
+var _sporto$erl$Erl$new = {
+	protocol: '',
+	username: '',
+	password: '',
+	host: _elm_lang$core$Native_List.fromArray(
+		[]),
+	path: _elm_lang$core$Native_List.fromArray(
+		[]),
+	hasTrailingSlash: false,
+	port$: 0,
+	hash: '',
+	query: _elm_lang$core$Dict$empty
+};
+var _sporto$erl$Erl$hashToString = function (url) {
+	return _elm_lang$core$String$isEmpty(url.hash) ? '' : A2(_elm_lang$core$Basics_ops['++'], '#', url.hash);
+};
+var _sporto$erl$Erl$trailingSlashComponent = function (url) {
+	return _elm_lang$core$Native_Utils.eq(url.hasTrailingSlash, true) ? '/' : '';
+};
+var _sporto$erl$Erl$pathComponent = function (url) {
+	var encoded = A2(_elm_lang$core$List$map, _evancz$elm_http$Http$uriEncode, url.path);
+	return _elm_lang$core$Native_Utils.eq(
+		_elm_lang$core$List$length(url.path),
+		0) ? '' : A2(
+		_elm_lang$core$Basics_ops['++'],
+		'/',
+		A2(_elm_lang$core$String$join, '/', encoded));
+};
+var _sporto$erl$Erl$portComponent = function (url) {
+	var _p0 = url.port$;
+	switch (_p0) {
+		case 0:
+			return '';
+		case 80:
+			return '';
+		default:
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				':',
+				_elm_lang$core$Basics$toString(url.port$));
+	}
+};
+var _sporto$erl$Erl$hostComponent = function (url) {
+	return _evancz$elm_http$Http$uriEncode(
+		A2(_elm_lang$core$String$join, '.', url.host));
+};
+var _sporto$erl$Erl$protocolComponent = function (url) {
+	var _p1 = url.protocol;
+	if (_p1 === '') {
+		return '';
+	} else {
+		return A2(_elm_lang$core$Basics_ops['++'], url.protocol, '://');
+	}
+};
+var _sporto$erl$Erl$queryToString = function (url) {
+	var tuples = _elm_lang$core$Dict$toList(url.query);
+	var encodedTuples = A2(
+		_elm_lang$core$List$map,
+		function (_p2) {
+			var _p3 = _p2;
+			return {
+				ctor: '_Tuple2',
+				_0: _evancz$elm_http$Http$uriEncode(_p3._0),
+				_1: _evancz$elm_http$Http$uriEncode(_p3._1)
+			};
+		},
+		tuples);
+	var parts = A2(
+		_elm_lang$core$List$map,
+		function (_p4) {
+			var _p5 = _p4;
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				_p5._0,
+				A2(_elm_lang$core$Basics_ops['++'], '=', _p5._1));
+		},
+		encodedTuples);
+	return _elm_lang$core$Dict$isEmpty(url.query) ? '' : A2(
+		_elm_lang$core$Basics_ops['++'],
+		'?',
+		A2(_elm_lang$core$String$join, '&', parts));
+};
+var _sporto$erl$Erl$toString = function (url) {
+	var hash = _sporto$erl$Erl$hashToString(url);
+	var query$ = _sporto$erl$Erl$queryToString(url);
+	var trailingSlash$ = _sporto$erl$Erl$trailingSlashComponent(url);
+	var path$ = _sporto$erl$Erl$pathComponent(url);
+	var port$ = _sporto$erl$Erl$portComponent(url);
+	var host$ = _sporto$erl$Erl$hostComponent(url);
+	var protocol$ = _sporto$erl$Erl$protocolComponent(url);
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		protocol$,
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			host$,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				port$,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					path$,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						trailingSlash$,
+						A2(_elm_lang$core$Basics_ops['++'], query$, hash))))));
+};
+var _sporto$erl$Erl$queryStringElementToTuple = function (element) {
+	var splitted = A2(_elm_lang$core$String$split, '=', element);
+	var first = A2(
+		_elm_lang$core$Maybe$withDefault,
+		'',
+		_elm_lang$core$List$head(splitted));
+	var firstDecoded = _evancz$elm_http$Http$uriDecode(first);
+	var second = A2(
+		_elm_lang$core$Maybe$withDefault,
+		'',
+		_elm_lang$core$List$head(
+			A2(_elm_lang$core$List$drop, 1, splitted)));
+	var secondDecoded = _evancz$elm_http$Http$uriDecode(second);
+	return {ctor: '_Tuple2', _0: firstDecoded, _1: secondDecoded};
+};
+var _sporto$erl$Erl$queryTuples = function (queryString) {
+	var splitted = A2(_elm_lang$core$String$split, '&', queryString);
+	return _elm_lang$core$String$isEmpty(queryString) ? _elm_lang$core$Native_List.fromArray(
+		[]) : A2(_elm_lang$core$List$map, _sporto$erl$Erl$queryStringElementToTuple, splitted);
+};
+var _sporto$erl$Erl$parseQuery = function (str) {
+	return _elm_lang$core$Dict$fromList(
+		_sporto$erl$Erl$queryTuples(str));
+};
+var _sporto$erl$Erl$extractQuery = function (str) {
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		'',
+		_elm_lang$core$List$head(
+			A2(
+				_elm_lang$core$String$split,
+				'#',
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					'',
+					_elm_lang$core$List$head(
+						A2(
+							_elm_lang$core$List$drop,
+							1,
+							A2(_elm_lang$core$String$split, '?', str)))))));
+};
+var _sporto$erl$Erl$queryFromAll = function (all) {
+	return _sporto$erl$Erl$parseQuery(
+		_sporto$erl$Erl$extractQuery(all));
+};
+var _sporto$erl$Erl$extractHash = function (str) {
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		'',
+		_elm_lang$core$List$head(
+			A2(
+				_elm_lang$core$List$drop,
+				1,
+				A2(_elm_lang$core$String$split, '#', str))));
+};
+var _sporto$erl$Erl$hashFromAll = function (str) {
+	return _sporto$erl$Erl$extractHash(str);
+};
+var _sporto$erl$Erl$extractPort = function (str) {
+	var rx = _elm_lang$core$Regex$regex(':\\d+');
+	var res = A3(
+		_elm_lang$core$Regex$find,
+		_elm_lang$core$Regex$AtMost(1),
+		rx,
+		str);
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		80,
+		_elm_lang$core$Result$toMaybe(
+			_elm_lang$core$String$toInt(
+				A2(
+					_elm_lang$core$String$dropLeft,
+					1,
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						'',
+						_elm_lang$core$List$head(
+							A2(
+								_elm_lang$core$List$map,
+								function (_) {
+									return _.match;
+								},
+								res)))))));
+};
+var _sporto$erl$Erl$parseHost = function (str) {
+	return A2(_elm_lang$core$String$split, '.', str);
+};
+var _sporto$erl$Erl$extractProtocol = function (str) {
+	var parts = A2(_elm_lang$core$String$split, '://', str);
+	var _p6 = _elm_lang$core$List$length(parts);
+	if (_p6 === 1) {
+		return '';
+	} else {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			_elm_lang$core$List$head(parts));
+	}
+};
+var _sporto$erl$Erl$leftFrom = F2(
+	function (delimiter, str) {
+		var parts = A2(_elm_lang$core$String$split, delimiter, str);
+		var head = _elm_lang$core$List$head(parts);
+		var _p7 = _elm_lang$core$List$length(parts);
+		switch (_p7) {
+			case 0:
+				return '';
+			case 1:
+				return '';
+			default:
+				return A2(_elm_lang$core$Maybe$withDefault, '', head);
+		}
+	});
+var _sporto$erl$Erl$leftFromOrSame = F2(
+	function (delimiter, str) {
+		var parts = A2(_elm_lang$core$String$split, delimiter, str);
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			_elm_lang$core$List$head(parts));
+	});
+var _sporto$erl$Erl$rightFromOrSame = F2(
+	function (delimiter, str) {
+		var parts = A2(_elm_lang$core$String$split, delimiter, str);
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			_elm_lang$core$List$head(
+				_elm_lang$core$List$reverse(parts)));
+	});
+var _sporto$erl$Erl$extractHost = function (str) {
+	var localhostRx = 'localhost';
+	var dotsRx = '((\\w|-)+\\.)+(\\w|-)+';
+	var rx = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'(',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			dotsRx,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'|',
+				A2(_elm_lang$core$Basics_ops['++'], localhostRx, ')'))));
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		'',
+		_elm_lang$core$List$head(
+			A2(
+				_elm_lang$core$List$map,
+				function (_) {
+					return _.match;
+				},
+				A3(
+					_elm_lang$core$Regex$find,
+					_elm_lang$core$Regex$AtMost(1),
+					_elm_lang$core$Regex$regex(rx),
+					A2(
+						_sporto$erl$Erl$leftFromOrSame,
+						'/',
+						A2(_sporto$erl$Erl$rightFromOrSame, '//', str))))));
+};
+var _sporto$erl$Erl$host = function (str) {
+	return _sporto$erl$Erl$parseHost(
+		_sporto$erl$Erl$extractHost(str));
+};
+var _sporto$erl$Erl$extractPath = function (str) {
+	var host = _sporto$erl$Erl$extractHost(str);
+	return A4(
+		_elm_lang$core$Regex$replace,
+		_elm_lang$core$Regex$AtMost(1),
+		_elm_lang$core$Regex$regex(':\\d+'),
+		function (_p8) {
+			return '';
+		},
+		A4(
+			_elm_lang$core$Regex$replace,
+			_elm_lang$core$Regex$AtMost(1),
+			_elm_lang$core$Regex$regex(host),
+			function (_p9) {
+				return '';
+			},
+			A2(
+				_sporto$erl$Erl$leftFromOrSame,
+				'#',
+				A2(
+					_sporto$erl$Erl$leftFromOrSame,
+					'?',
+					A2(_sporto$erl$Erl$rightFromOrSame, '//', str)))));
+};
+var _sporto$erl$Erl$hasTrailingSlashFromAll = function (str) {
+	return A2(
+		_elm_lang$core$Regex$contains,
+		_elm_lang$core$Regex$regex('/$'),
+		_sporto$erl$Erl$extractPath(str));
+};
+var _sporto$erl$Erl$rightFrom = F2(
+	function (delimiter, str) {
+		var parts = A2(_elm_lang$core$String$split, delimiter, str);
+		var _p10 = _elm_lang$core$List$length(parts);
+		switch (_p10) {
+			case 0:
+				return '';
+			case 1:
+				return '';
+			default:
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					'',
+					_elm_lang$core$List$head(
+						_elm_lang$core$List$reverse(parts)));
+		}
+	});
+var _sporto$erl$Erl$notEmpty = function (str) {
+	return _elm_lang$core$Basics$not(
+		_elm_lang$core$String$isEmpty(str));
+};
+var _sporto$erl$Erl$parsePath = function (str) {
+	return A2(
+		_elm_lang$core$List$map,
+		_evancz$elm_http$Http$uriDecode,
+		A2(
+			_elm_lang$core$List$filter,
+			_sporto$erl$Erl$notEmpty,
+			A2(_elm_lang$core$String$split, '/', str)));
+};
+var _sporto$erl$Erl$pathFromAll = function (str) {
+	return _sporto$erl$Erl$parsePath(
+		_sporto$erl$Erl$extractPath(str));
+};
+var _sporto$erl$Erl$parse = function (str) {
+	return {
+		host: _sporto$erl$Erl$host(str),
+		hash: _sporto$erl$Erl$hashFromAll(str),
+		password: '',
+		path: _sporto$erl$Erl$pathFromAll(str),
+		hasTrailingSlash: _sporto$erl$Erl$hasTrailingSlashFromAll(str),
+		port$: _sporto$erl$Erl$extractPort(str),
+		protocol: _sporto$erl$Erl$extractProtocol(str),
+		query: _sporto$erl$Erl$queryFromAll(str),
+		username: ''
+	};
+};
+var _sporto$erl$Erl$Url = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {protocol: a, username: b, password: c, host: d, port$: e, path: f, hasTrailingSlash: g, hash: h, query: i};
+	});
+
 var _user$project$DateFormatter$format = F2(
 	function (maybeNow, date) {
 		var _p0 = maybeNow;
 		if (_p0.ctor === 'Just') {
-			var _p1 = _p0._0;
-			return (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$day(_p1),
-				_elm_lang$core$Date$day(date)) && (_elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$month(_p1),
-				_elm_lang$core$Date$month(date)) && _elm_lang$core$Native_Utils.eq(
-				_elm_lang$core$Date$year(_p1),
-				_elm_lang$core$Date$year(date)))) ? A2(_mgold$elm_date_format$Date_Format$format, '%l:%M %p', date) : A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
+			var dateTime = _elm_lang$core$Date$toTime(date);
+			var nowTime = _elm_lang$core$Date$toTime(_p0._0);
+			var diff = (nowTime - dateTime) / 1000;
+			return (_elm_lang$core$Native_Utils.cmp(diff, 0) < 1) ? A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date) : (((_elm_lang$core$Native_Utils.cmp(diff, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(diff, 1) < 1)) ? '1 second ago' : (((_elm_lang$core$Native_Utils.cmp(diff, 1) > 0) && (_elm_lang$core$Native_Utils.cmp(diff, 60) < 0)) ? A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(diff),
+				' seconds ago') : (((_elm_lang$core$Native_Utils.cmp(diff, 60) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 120) < 0)) ? '1 minute ago' : (((_elm_lang$core$Native_Utils.cmp(diff, 120) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 3600) < 0)) ? A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(
+					_elm_lang$core$Basics$round(diff / 60)),
+				' minutes ago') : (((_elm_lang$core$Native_Utils.cmp(diff, 3600) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 7200) < 0)) ? '1 hour ago' : (((_elm_lang$core$Native_Utils.cmp(diff, 7200) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 86400) < 0)) ? A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(
+					_elm_lang$core$Basics$round(diff / 3600)),
+				' hours ago') : (((_elm_lang$core$Native_Utils.cmp(diff, 86400) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 172800) < 0)) ? '1 day ago' : (((_elm_lang$core$Native_Utils.cmp(diff, 172800) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 2592000) < 0)) ? A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(
+					_elm_lang$core$Basics$round(diff / 86400)),
+				' days ago') : (((_elm_lang$core$Native_Utils.cmp(diff, 2629800) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 5259600) < 0)) ? '1 month ago' : (((_elm_lang$core$Native_Utils.cmp(diff, 5259600) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 31557600) < 0)) ? A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(
+					_elm_lang$core$Basics$round(diff / 2629800)),
+				' months ago') : (((_elm_lang$core$Native_Utils.cmp(diff, 31557600) > -1) && (_elm_lang$core$Native_Utils.cmp(diff, 63115200) < 0)) ? '1 year ago' : A2(
+				_elm_lang$core$Basics_ops['++'],
+				_elm_lang$core$Basics$toString(diff / 31557600),
+				' years ago'))))))))))));
 		} else {
 			return A2(_mgold$elm_date_format$Date_Format$format, '%b %d', date);
 		}
 	});
+
+var _user$project$GithubLink$view = function (imgClasses) {
+	return A2(
+		_elm_lang$html$Html$a,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$href('https://github.com/oakesja/elm-news')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$img,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class(imgClasses),
+						_elm_lang$html$Html_Attributes$src('assets/images/GitHub-Mark-Light-64px.png')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[]))
+			]));
+};
 
 var _user$project$Footer$starYear = 2016;
 var _user$project$Footer$copyrightYear = function (currentYear) {
@@ -8722,23 +9152,7 @@ var _user$project$Footer$view = function (currentYear) {
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				A2(
-				_elm_lang$html$Html$a,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$href('https://github.com/oakesja/elm-news')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$img,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Attributes$src('assets/images/GitHub-Mark-Light-64px.png')
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[]))
-					])),
+				_user$project$GithubLink$view('footer__github'),
 				A2(
 				_elm_lang$html$Html$div,
 				_elm_lang$core$Native_List.fromArray(
@@ -8773,6 +9187,79 @@ var _user$project$Footer$view = function (currentYear) {
 					]))
 			]));
 };
+
+var _user$project$Message$Message = F6(
+	function (a, b, c, d, e, f) {
+		return {author: a, title: b, date: c, link: d, tag: e, domain: f};
+	});
+var _user$project$Message$MessageResp = F2(
+	function (a, b) {
+		return {tag: a, messages: b};
+	});
+var _user$project$Message$MessageError = F2(
+	function (a, b) {
+		return {tag: a, error: b};
+	});
+
+var _user$project$HackerNews$parseDomain = function (link) {
+	return A2(
+		_elm_lang$core$String$join,
+		'.',
+		function (_) {
+			return _.host;
+		}(
+			_sporto$erl$Erl$parse(link)));
+};
+var _user$project$HackerNews$timeDecoder = A2(
+	_elm_lang$core$Json_Decode$customDecoder,
+	_elm_lang$core$Json_Decode$float,
+	function (time) {
+		return _elm_lang$core$Result$Ok(time * 1000);
+	});
+var _user$project$HackerNews$tag = 'Hacker News';
+var _user$project$HackerNews$storyToMessage = function (story) {
+	var link = A2(_elm_lang$core$Maybe$withDefault, '', story.link);
+	return {
+		author: story.author,
+		title: story.title,
+		date: story.date,
+		link: link,
+		tag: _user$project$HackerNews$tag,
+		domain: _user$project$HackerNews$parseDomain(link)
+	};
+};
+var _user$project$HackerNews$HackerNewsStory = F4(
+	function (a, b, c, d) {
+		return {author: a, title: b, date: c, link: d};
+	});
+var _user$project$HackerNews$hackerNewsDecoder = A2(
+	_elm_lang$core$Json_Decode$at,
+	_elm_lang$core$Native_List.fromArray(
+		['hits']),
+	_elm_lang$core$Json_Decode$list(
+		A5(
+			_elm_lang$core$Json_Decode$object4,
+			_user$project$HackerNews$HackerNewsStory,
+			A2(_elm_lang$core$Json_Decode_ops[':='], 'author', _elm_lang$core$Json_Decode$string),
+			A2(_elm_lang$core$Json_Decode_ops[':='], 'title', _elm_lang$core$Json_Decode$string),
+			A2(_elm_lang$core$Json_Decode_ops[':='], 'created_at_i', _user$project$HackerNews$timeDecoder),
+			A2(
+				_elm_lang$core$Json_Decode_ops[':='],
+				'url',
+				_elm_lang$core$Json_Decode$maybe(_elm_lang$core$Json_Decode$string)))));
+var _user$project$HackerNews$decoder = A2(
+	_elm_lang$core$Json_Decode$customDecoder,
+	_user$project$HackerNews$hackerNewsDecoder,
+	function (stories) {
+		return _elm_lang$core$Result$Ok(
+			A2(
+				_elm_lang$core$List$filter,
+				function (s) {
+					return !_elm_lang$core$Native_Utils.eq(s.link, '');
+				},
+				A2(_elm_lang$core$List$map, _user$project$HackerNews$storyToMessage, stories)));
+	});
+var _user$project$HackerNews$fetch = A2(_evancz$elm_http$Http$get, _user$project$HackerNews$decoder, 'http://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)');
 
 var _user$project$Logo$icon = A2(
 	_elm_lang$svg$Svg$svg,
@@ -8861,31 +9348,36 @@ var _user$project$Logo$view = A2(
 				]))
 		]));
 
-var _user$project$Header$view = function (showHeader) {
-	var visibleClass = showHeader ? 'header--visible' : 'header--hidden';
-	return A2(
-		_elm_lang$html$Html$header,
-		_elm_lang$core$Native_List.fromArray(
-			[
-				_elm_lang$html$Html_Attributes$class(
-				A2(_elm_lang$core$Basics_ops['++'], 'header ', visibleClass))
-			]),
-		_elm_lang$core$Native_List.fromArray(
-			[_user$project$Logo$view]));
-};
-
-var _user$project$Message$Message = F6(
-	function (a, b, c, d, e, f) {
-		return {author: a, title: b, date: c, link: d, tag: e, domain: f};
-	});
-var _user$project$Message$MessageResp = F2(
-	function (a, b) {
-		return {tag: a, messages: b};
-	});
-var _user$project$Message$MessageError = F2(
-	function (a, b) {
-		return {tag: a, error: b};
-	});
+var _user$project$Header$view = A2(
+	_elm_lang$html$Html$header,
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$html$Html_Attributes$class('header')
+		]),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_user$project$Logo$view,
+			A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('header__description')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('All elm news in one place')
+				])),
+			A2(
+			_elm_lang$html$Html$div,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$class('header__right')
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_user$project$GithubLink$view('header__github')
+				]))
+		]));
 
 var _user$project$Reddit$domainDecoder = A2(
 	_elm_lang$core$Json_Decode$customDecoder,
@@ -8918,43 +9410,31 @@ var _user$project$Reddit$decoder = A2(
 				A2(_elm_lang$core$Json_Decode_ops[':='], 'url', _elm_lang$core$Json_Decode$string),
 				_elm_lang$core$Json_Decode$succeed(_user$project$Reddit$tag),
 				A2(_elm_lang$core$Json_Decode_ops[':='], 'domain', _user$project$Reddit$domainDecoder)))));
-var _user$project$Reddit$fetchTask = A2(_evancz$elm_http$Http$get, _user$project$Reddit$decoder, 'https://www.reddit.com/r/elm/new/.json');
-var _user$project$Reddit$fetchCmd = F2(
-	function (successMsg, failureMsg) {
-		return A3(
-			_elm_lang$core$Task$perform,
-			function (error) {
-				return failureMsg(
-					A2(
-						_user$project$Message$MessageError,
-						_user$project$Reddit$tag,
-						_elm_lang$core$Basics$toString(error)));
-			},
-			function (msgs) {
-				return successMsg(
-					A2(_user$project$Message$MessageResp, _user$project$Reddit$tag, msgs));
-			},
-			_user$project$Reddit$fetchTask);
-	});
+var _user$project$Reddit$fetch = A2(_evancz$elm_http$Http$get, _user$project$Reddit$decoder, 'https://www.reddit.com/r/elm/new/.json');
 
-var _user$project$Tag$redditTag = {name: _user$project$Reddit$tag, tagColor: 'reddit_blue', textColor: 'black_text', link: 'https://www.reddit.com/r/elm/new'};
-var _user$project$Tag$elmDevTag = {name: 'elm-dev', tagColor: 'elm_dark_blue', textColor: 'white_text', link: 'https://groups.google.com/forum/#!forum/elm-dev'};
-var _user$project$Tag$elmDiscussTag = {name: 'elm-discuss', tagColor: 'elm_light_blue', textColor: 'white_text', link: 'https://groups.google.com/forum/#!forum/elm-discuss'};
-var _user$project$Tag$TagInfo = F4(
-	function (a, b, c, d) {
-		return {name: a, tagColor: b, textColor: c, link: d};
+var _user$project$Tag$hackerNewsTag = {name: _user$project$HackerNews$tag, tagColor: 'elm_green', link: 'https://news.ycombinator.com/'};
+var _user$project$Tag$redditTag = {name: _user$project$Reddit$tag, tagColor: 'elm_yellow', link: 'https://www.reddit.com/r/elm/new'};
+var _user$project$Tag$elmDevTag = {name: 'elm-dev', tagColor: 'elm_dark_blue', link: 'https://groups.google.com/forum/#!forum/elm-dev'};
+var _user$project$Tag$elmDiscussTag = {name: 'elm-discuss', tagColor: 'elm_light_blue', link: 'https://groups.google.com/forum/#!forum/elm-discuss'};
+var _user$project$Tag$TagInfo = F3(
+	function (a, b, c) {
+		return {name: a, tagColor: b, link: c};
 	});
 var _user$project$Tag$lookupTagInfo = function (name) {
 	var lookup = A3(
 		_elm_lang$core$Dict$insert,
-		_user$project$Reddit$tag,
-		_user$project$Tag$redditTag,
+		_user$project$HackerNews$tag,
+		_user$project$Tag$hackerNewsTag,
 		A3(
 			_elm_lang$core$Dict$insert,
-			'elm-dev',
-			_user$project$Tag$elmDevTag,
-			A3(_elm_lang$core$Dict$insert, 'elm-discuss', _user$project$Tag$elmDiscussTag, _elm_lang$core$Dict$empty)));
-	var $default = A4(_user$project$Tag$TagInfo, 'unknown', 'grey', 'white_text', '');
+			_user$project$Reddit$tag,
+			_user$project$Tag$redditTag,
+			A3(
+				_elm_lang$core$Dict$insert,
+				'elm-dev',
+				_user$project$Tag$elmDevTag,
+				A3(_elm_lang$core$Dict$insert, 'elm-discuss', _user$project$Tag$elmDiscussTag, _elm_lang$core$Dict$empty))));
+	var $default = A3(_user$project$Tag$TagInfo, 'unknown', 'grey', '');
 	return A2(
 		_elm_lang$core$Maybe$withDefault,
 		$default,
@@ -8976,8 +9456,7 @@ var _user$project$Tag$view = function (name) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$href(tag.link),
-						_elm_lang$html$Html_Attributes$class(
-						A2(_elm_lang$core$Basics_ops['++'], 'tag__link ', tag.textColor))
+						_elm_lang$html$Html_Attributes$class('tag__link')
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -9099,66 +9578,12 @@ var _user$project$Main$view = function (model) {
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_user$project$Header$view(model.showHeader),
+				_user$project$Header$view,
 				_user$project$Main$body(model),
 				_user$project$Footer$view(
 				A2(_elm_lang$core$Maybe$map, _elm_lang$core$Date$year, model.now))
 			]));
 };
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
-			case 'FetchMessageSuccess':
-				var updatedModel = _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p0._0.messages)
-					});
-				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'FetchMessageError':
-				var _p1 = _p0._0;
-				var updatedModel = _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						errors: A2(
-							_elm_lang$core$List_ops['::'],
-							{
-								ctor: '_Tuple2',
-								_0: _p1.tag,
-								_1: A2(_elm_lang$core$Debug$log, '', _p1.error)
-							},
-							model.errors)
-					});
-				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'CurrentDate':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							now: _elm_lang$core$Maybe$Just(_p0._0)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'ScrollUp':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{showHeader: true}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{showHeader: false}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-		}
-	});
 var _user$project$Main$fetchGoogleGroupMsgs = _elm_lang$core$Native_Platform.outgoingPort(
 	'fetchGoogleGroupMsgs',
 	function (v) {
@@ -9227,30 +9652,91 @@ var _user$project$Main$errorGoogleGroupMsgs = _elm_lang$core$Native_Platform.inc
 						{tag: tag, error: error});
 				});
 		}));
-var _user$project$Main$scrollUp = _elm_lang$core$Native_Platform.incomingPort('scrollUp', _elm_lang$core$Json_Decode$float);
-var _user$project$Main$scrollDown = _elm_lang$core$Native_Platform.incomingPort('scrollDown', _elm_lang$core$Json_Decode$float);
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {messages: a, errors: b, now: c, showHeader: d};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {messages: a, errors: b, now: c};
 	});
-var _user$project$Main$ScrollDown = {ctor: 'ScrollDown'};
-var _user$project$Main$ScrollUp = {ctor: 'ScrollUp'};
 var _user$project$Main$CurrentDate = function (a) {
 	return {ctor: 'CurrentDate', _0: a};
 };
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'FetchMessageSuccess':
+				var updatedModel = _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						messages: A2(_elm_lang$core$Basics_ops['++'], model.messages, _p0._0.messages)
+					});
+				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'FetchMessageError':
+				var _p1 = _p0._0;
+				var updatedModel = _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						errors: A2(
+							_elm_lang$core$List_ops['::'],
+							{
+								ctor: '_Tuple2',
+								_0: _p1.tag,
+								_1: A2(_elm_lang$core$Debug$log, '', _p1.error)
+							},
+							model.errors)
+					});
+				return {ctor: '_Tuple2', _0: updatedModel, _1: _elm_lang$core$Platform_Cmd$none};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							now: _elm_lang$core$Maybe$Just(_p0._0)
+						}),
+					_1: A3(
+						_elm_lang$core$Task$perform,
+						_elm_community$basics_extra$Basics_Extra$never,
+						_user$project$Main$CurrentDate,
+						A2(
+							_elm_lang$core$Task$andThen,
+							_elm_lang$core$Process$sleep(_elm_lang$core$Time$minute),
+							function (_p2) {
+								return _elm_lang$core$Date$now;
+							}))
+				};
+		}
+	});
 var _user$project$Main$FetchMessageError = function (a) {
 	return {ctor: 'FetchMessageError', _0: a};
 };
 var _user$project$Main$FetchMessageSuccess = function (a) {
 	return {ctor: 'FetchMessageSuccess', _0: a};
 };
+var _user$project$Main$fetch = F2(
+	function (tag, task) {
+		return A3(
+			_elm_lang$core$Task$perform,
+			function (error) {
+				return _user$project$Main$FetchMessageError(
+					A2(
+						_user$project$Message$MessageError,
+						tag,
+						_elm_lang$core$Basics$toString(error)));
+			},
+			function (msgs) {
+				return _user$project$Main$FetchMessageSuccess(
+					A2(_user$project$Message$MessageResp, tag, msgs));
+			},
+			task);
+	});
 var _user$project$Main$init = function () {
 	var fx = _elm_lang$core$Platform_Cmd$batch(
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_user$project$Main$fetchGoogleGroupMsgs('elm-dev'),
 				_user$project$Main$fetchGoogleGroupMsgs('elm-discuss'),
-				A2(_user$project$Reddit$fetchCmd, _user$project$Main$FetchMessageSuccess, _user$project$Main$FetchMessageError),
+				A2(_user$project$Main$fetch, _user$project$Reddit$tag, _user$project$Reddit$fetch),
+				A2(_user$project$Main$fetch, _user$project$HackerNews$tag, _user$project$HackerNews$fetch),
 				A3(_elm_lang$core$Task$perform, _elm_community$basics_extra$Basics_Extra$never, _user$project$Main$CurrentDate, _elm_lang$core$Date$now)
 			]));
 	var model = {
@@ -9258,8 +9744,7 @@ var _user$project$Main$init = function () {
 			[]),
 		errors: _elm_lang$core$Native_List.fromArray(
 			[]),
-		now: _elm_lang$core$Maybe$Nothing,
-		showHeader: true
+		now: _elm_lang$core$Maybe$Nothing
 	};
 	return {ctor: '_Tuple2', _0: model, _1: fx};
 }();
@@ -9268,15 +9753,7 @@ var _user$project$Main$subscriptions = function (model) {
 		_elm_lang$core$Native_List.fromArray(
 			[
 				_user$project$Main$fetchedGoogleGroupMsgs(_user$project$Main$FetchMessageSuccess),
-				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchMessageError),
-				_user$project$Main$scrollUp(
-				function (_p2) {
-					return _user$project$Main$ScrollUp;
-				}),
-				_user$project$Main$scrollDown(
-				function (_p3) {
-					return _user$project$Main$ScrollDown;
-				})
+				_user$project$Main$errorGoogleGroupMsgs(_user$project$Main$FetchMessageError)
 			]));
 };
 var _user$project$Main$main = {

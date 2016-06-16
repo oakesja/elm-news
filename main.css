@@ -11,20 +11,30 @@
 .header {
   color: #FFFFFF;
   padding: 10px 25px 15px 25px;
-  height: 40px;
-  position: fixed;
-  top: 0;
-  width: 100%;
   box-shadow: 0 4px 4px 0 rgba(0,0,0,0.14);
   background-color: #5A6378;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
 
-.header--open {
-  transition: top 1.0s ease-in-out;
+.header__description {
+  font-size: 2em;
+  padding-left: 25px;
+  padding-right: 25px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.header--hidden {
-  top: -70px;
+.header__github {
+  height: 45px;
+}
+
+.header__github:hover, .footer__github:hover {
+  opacity: 0.7;
 }
 
 .logo {
@@ -40,7 +50,6 @@
 .logo__text {
   display: flex;
   flex-direction: column;
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
 
 .logo_elm {
@@ -54,7 +63,7 @@
 }
 
 .body {
-  padding-top: 70px;
+  padding: 10px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -84,6 +93,7 @@
 
 .tag__link {
   text-decoration: none;
+  color: #FFFFFF;
 }
 
 .card__description {
@@ -111,7 +121,7 @@
 
 .card__date {
   align-self: center;
-  min-width: 70px;
+  min-width: 90px;
 }
 
 .footer {
@@ -135,10 +145,6 @@
 
 /* Color */
 
-.white_text {
-  color: #FFFFFF;
-}
-
 .black_text {
   color: #000000;
 }
@@ -157,8 +163,4 @@
 
 .elm_green {
   background-color: #7FD13B
-}
-
-.reddit_blue {
-  background-color: #CEE3F8
 }

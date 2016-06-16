@@ -4,33 +4,31 @@ import Html exposing (Html, a, text, div, h1, span)
 import Html.Attributes exposing (href, class)
 import Html.App
 import Date exposing (Date)
-import Task exposing (Task)
+import Task exposing (Task, andThen)
+import Process
+import Time
 import Basics.Extra exposing (never)
+import Http
+import DateFormatter
 import Header
 import Footer
 import Tag
 import Message exposing (..)
 import Reddit
-import DateFormatter
+import HackerNews
 
 
--- TODO figure out how to get around rate limits (rss feeds instead?)
--- TODO link component
+-- TODO rename messages model
 -- TODO consider no cards like hacker news or reddit
--- TODO move google group stuff to seperate module
--- TODO ensure calls are returning the same amount of message or are over a certain time span
+-- TODO fetch messages over a certain time span and on scroll
 -- TODO handle errors
 -- TODO spinner for loading
 -- TODO mobile and header like http://square.github.io/okhttp/
--- TODO filtering (on header or by clicking tags)
--- TODO use local storage to save filtering selections
 -- TODO google analytics
 -- TODO better font and color scheme
 -- TODO web checklist
+-- TODO purchase domain and setup with gh pages
 -- TODO share with others
--- TODO favicon
--- TODO sort by domain
--- TODO paging to go back further? not sure how this will work
 -- TODO create xml parser in elm using json decoders
 
 
@@ -38,7 +36,6 @@ type alias Model =
     { messages : List Message
     , errors : List ( String, String )
     , now : Maybe Date
-    , showHeader : Bool
     }
 
 
@@ -49,14 +46,14 @@ init =
             { messages = []
             , errors = []
             , now = Nothing
-            , showHeader = True
             }
 
         fx =
             Cmd.batch
                 [ fetchGoogleGroupMsgs "elm-dev"
                 , fetchGoogleGroupMsgs "elm-discuss"
-                , Reddit.fetchCmd FetchMessageSuccess FetchMessageError
+                , fetch Reddit.tag Reddit.fetch
+                , fetch HackerNews.tag HackerNews.fetch
                 , Task.perform never CurrentDate Date.now
                 ]
     in
@@ -69,8 +66,6 @@ type Msg
     = FetchMessageSuccess MessageResp
     | FetchMessageError MessageError
     | CurrentDate Date
-    | ScrollUp
-    | ScrollDown
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -96,24 +91,14 @@ update msg model =
 
         CurrentDate date ->
             ( { model | now = Just date }
-            , Cmd.none
-            )
-
-        ScrollUp ->
-            ( { model | showHeader = True }
-            , Cmd.none
-            )
-
-        ScrollDown ->
-            ( { model | showHeader = False }
-            , Cmd.none
+            , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
             )
 
 
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ Header.view model.showHeader
+        [ Header.view
         , body model
         , Footer.view <| Maybe.map Date.year model.now
         ]
@@ -151,6 +136,13 @@ cardView now msg =
         ]
 
 
+fetch : String -> Task Http.Error (List Message) -> Cmd Msg
+fetch tag task =
+    Task.perform (\error -> FetchMessageError <| MessageError tag <| toString error)
+        (\msgs -> FetchMessageSuccess <| MessageResp tag msgs)
+        task
+
+
 port fetchGoogleGroupMsgs : String -> Cmd msg
 
 
@@ -160,19 +152,11 @@ port fetchedGoogleGroupMsgs : (MessageResp -> msg) -> Sub msg
 port errorGoogleGroupMsgs : (MessageError -> msg) -> Sub msg
 
 
-port scrollUp : (Float -> msg) -> Sub msg
-
-
-port scrollDown : (Float -> msg) -> Sub msg
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchMessageSuccess
         , errorGoogleGroupMsgs FetchMessageError
-        , scrollUp (\_ -> ScrollUp)
-        , scrollDown (\_ -> ScrollDown)
         ]
 
 

@@ -1,16 +1,14 @@
 module Footer exposing (view)
 
-import Html exposing (Html, div, footer, text, img, a)
-import Html.Attributes exposing (class, src, alt, href)
+import Html exposing (Html, div, footer, text)
+import Html.Attributes exposing (class)
+import GithubLink
 
 
 view : Maybe Int -> Html msg
 view currentYear =
     footer [ class "footer grey" ]
-        [ a [ href "https://github.com/oakesja/elm-news" ]
-            [ img [ src "assets/images/GitHub-Mark-Light-64px.png" ]
-                []
-            ]
+        [ GithubLink.view "footer__github"
         , div [ class "footer__description" ]
             [ div [] [ text "Code for this site is open source and written in Elm" ]
             , div [] [ text <| "© " ++ (copyrightYear currentYear) ++ " Jacob Oakes" ]

@@ -1,4 +1,4 @@
-module Reddit exposing (fetchCmd, tag)
+module Reddit exposing (fetch, tag)
 
 import Json.Decode exposing (..)
 import Task exposing (Task)
@@ -7,20 +7,13 @@ import String
 import Message exposing (..)
 
 
-fetchCmd : (MessageResp -> msg) -> (MessageError -> msg) -> Cmd msg
-fetchCmd successMsg failureMsg =
-    Task.perform (\error -> failureMsg <| MessageError tag <| toString error)
-        (\msgs -> successMsg <| MessageResp tag msgs)
-        fetchTask
-
-
 tag : String
 tag =
     "reddit"
 
 
-fetchTask : Task Http.Error (List Message)
-fetchTask =
+fetch : Task Http.Error (List Message)
+fetch =
     Http.get decoder "https://www.reddit.com/r/elm/new/.json"
 
 
