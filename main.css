@@ -164,3 +164,16 @@
 .elm_green {
   background-color: #7FD13B
 }
+
+/* Responsive */
+@media all and (max-width: 900px) {
+  .header__description {
+    display: none;
+  }
+}
+
+@media all and (max-width: 600px) {
+  .tag {
+    display: none;
+  }
+}
