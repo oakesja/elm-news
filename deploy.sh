@@ -14,6 +14,7 @@ rm -rf dist elm-stuff
 elm-package install -y
 ./build.sh
 rm -rf elm-stuff
+uglifyjs --compress --mangle -o main.js -- main.js
 git add .
 git commit -m "Deploying version $(cat hash)"
 git push origin gh-pages
