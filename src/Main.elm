@@ -16,17 +16,15 @@ import Tag
 import Message exposing (..)
 import Reddit
 import HackerNews
+import Spinner
 
 
 -- TODO rename messages model
 -- TODO consider no cards like hacker news or reddit
 -- TODO fetch messages over a certain time span and on scroll
 -- TODO handle errors
--- TODO spinner for loading
--- TODO mobile friendly
 -- TODO google analytics
 -- TODO better font and color scheme
--- TODO web checklist
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
@@ -106,12 +104,18 @@ view model =
 
 body : Model -> Html Msg
 body model =
-    div [ class "body" ]
-        [ div []
-            <| List.map (cardView model.now)
-            <| List.reverse
-            <| List.sortBy .date model.messages
-        ]
+    let
+        content =
+            if List.isEmpty model.messages && List.isEmpty model.errors then
+                Spinner.view
+            else
+                div []
+                    <| List.map (cardView model.now)
+                    <| List.reverse
+                    <| List.sortBy .date model.messages
+    in
+        div [ class "body" ]
+            [ content ]
 
 
 cardView : Maybe Date -> Message -> Html Msg
