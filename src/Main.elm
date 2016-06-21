@@ -17,8 +17,11 @@ import Message exposing (..)
 import Reddit
 import HackerNews
 import Spinner
+import ErrorManager
 
 
+-- TODO set max widths on cards
+-- TODO better click target for mobile
 -- TODO rename messages model
 -- TODO consider no cards like hacker news or reddit
 -- TODO fetch messages over a certain time span and on scroll
@@ -32,8 +35,8 @@ import Spinner
 
 type alias Model =
     { messages : List Message
-    , errors : List ( String, String )
     , now : Maybe Date
+    , errorManager : ErrorManager.Model
     }
 
 
@@ -42,8 +45,8 @@ init =
     let
         model =
             { messages = []
-            , errors = []
             , now = Nothing
+            , errorManager = ErrorManager.init
             }
 
         fx =
@@ -64,6 +67,7 @@ type Msg
     = FetchMessageSuccess MessageResp
     | FetchMessageError MessageError
     | CurrentDate Date
+    | ErrorManagerMessage ErrorManager.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,19 +82,34 @@ update msg model =
                 , Cmd.none
                 )
 
-        FetchMessageError error ->
+        FetchMessageError rawError ->
             let
-                updatedModel =
-                    { model | errors = ( error.tag, Debug.log "" error.error ) :: model.errors }
+                _ =
+                    Debug.log "" rawError.error
+
+                error =
+                    "Failed to fetch content from " ++ rawError.tag
+
+                ( newErrorMang, fx ) =
+                    ErrorManager.update (ErrorManager.AddError error) model.errorManager
             in
-                ( updatedModel
-                , Cmd.none
+                ( { model | errorManager = newErrorMang }
+                , Cmd.map ErrorManagerMessage fx
                 )
 
         CurrentDate date ->
             ( { model | now = Just date }
             , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
             )
+
+        ErrorManagerMessage errorMsg ->
+            let
+                ( newErrorMang, fx ) =
+                    ErrorManager.update errorMsg model.errorManager
+            in
+                ( { model | errorManager = newErrorMang }
+                , Cmd.map ErrorManagerMessage fx
+                )
 
 
 view : Model -> Html Msg
@@ -99,6 +118,7 @@ view model =
         [ Header.view
         , body model
         , Footer.view <| Maybe.map Date.year model.now
+        , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
         ]
 
 
@@ -106,7 +126,7 @@ body : Model -> Html Msg
 body model =
     let
         content =
-            if List.isEmpty model.messages && List.isEmpty model.errors then
+            if List.isEmpty model.messages && ErrorManager.noErrors model.errorManager then
                 Spinner.view
             else
                 div []
