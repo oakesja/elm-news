@@ -22,11 +22,8 @@ import ErrorManager
 
 -- TODO better click target for mobile
 -- TODO rename messages model
--- TODO consider no cards like hacker news or reddit
 -- TODO fetch messages over a certain time span and on scroll
--- TODO handle errors
 -- TODO google analytics
--- TODO better font and color scheme
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
