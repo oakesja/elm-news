@@ -148,16 +148,8 @@ body model =
 cardView : Maybe Date -> Int -> Message -> Html Msg
 cardView now width msg =
     let
-        cardLinkAttrs =
-            if width < 600 then
-                [ href msg.link
-                , class "card__link"
-                ]
-            else
-                [ class "card__link" ]
-    in
-        a cardLinkAttrs
-            [ div [ class "card" ]
+        content =
+            div [ class "card" ]
                 [ Tag.view msg.tag
                 , div [ class "card__description" ]
                     [ div [ class "card__description__header" ]
@@ -175,7 +167,15 @@ cardView now width msg =
                 , div [ class "card__date" ]
                     [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
                 ]
-            ]
+    in
+        if width < 600 then
+            a
+                [ href msg.link
+                , class "card__link"
+                ]
+                [ content ]
+        else
+            content
 
 
 fetch : String -> Task Http.Error (List Message) -> Cmd Msg

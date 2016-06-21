@@ -100,8 +100,6 @@
 }
 
 .card__link {
-  pointer-events: none;
-  cursor: default;
   text-decoration: none;
   color: #000000;
 }
@@ -118,6 +116,7 @@
 }
 
 .tag__link {
+  pointer-events: auto;
   text-decoration: none;
   color: #FFFFFF;
 }
@@ -137,6 +136,7 @@
 .card__description__title {
   font-weight: bold;
   text-decoration: none;
+  pointer-events: auto;
 }
 
 .card__description__domain {
