@@ -239,8 +239,8 @@
 }
 
 @media all and (max-width: 900px) {
-  .cards {
-    max-width: 100%;
+  .header__description {
+    display: none;
   }
 }
 
