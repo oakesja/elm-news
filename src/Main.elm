@@ -24,7 +24,7 @@ import ErrorManager
 -- TODO create card component
 -- TODO show which links have been visited
 -- TODO rename messages model
--- TODO fetch messages over a certain time span and on scroll
+-- TODO fetch messages over a certain time span and on scroll or paging
 -- TODO google analytics
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
