@@ -18,7 +18,7 @@ type alias ContentLink =
 
 type alias ContentLinkResp =
     { tag : String
-    , messages : List ContentLink
+    , links : List ContentLink
     }
 
 

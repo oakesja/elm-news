@@ -10,18 +10,15 @@ import Time
 import Basics.Extra exposing (never)
 import Http
 import Window
-import DateFormatter
 import Header
 import Footer
-import Tag
 import ContentLink exposing (..)
 import Reddit
 import HackerNews
-import Spinner
 import ErrorManager
+import Body
 
 
--- TODO create card component
 -- TODO show which links have been visited
 -- TODO fetch messages over a certain time span and on scroll or paging
 -- TODO better logo
@@ -32,7 +29,7 @@ import ErrorManager
 
 
 type alias Model =
-    { messages : List ContentLink
+    { links : List ContentLink
     , now : Maybe Date
     , errorManager : ErrorManager.Model
     , width : Int
@@ -43,7 +40,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { messages = []
+            { links = []
             , now = Nothing
             , errorManager = ErrorManager.init
             , width = 0
@@ -78,7 +75,7 @@ update msg model =
         FetchSuccess resp ->
             let
                 updatedModel =
-                    { model | messages = model.messages ++ resp.messages }
+                    { model | links = model.links ++ resp.links }
             in
                 ( updatedModel
                 , Cmd.none
@@ -121,67 +118,22 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "main" ]
-        [ Header.view
-        , body model
-        , Footer.view <| Maybe.map Date.year model.now
-        , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
-        ]
-
-
-body : Model -> Html Msg
-body model =
     let
-        cards =
-            if List.isEmpty model.messages && ErrorManager.noErrors model.errorManager then
-                Spinner.view
-            else
-                div [ class "cards" ]
-                    <| List.map (cardView model.now model.width)
-                    <| List.reverse
-                    <| List.sortBy .date model.messages
+        showSpinner =
+            List.isEmpty model.links && ErrorManager.noErrors model.errorManager
     in
-        div [ class "body" ]
-            [ cards ]
-
-
-cardView : Maybe Date -> Int -> ContentLink -> Html Msg
-cardView now width msg =
-    let
-        content =
-            div [ class "card" ]
-                [ Tag.view msg.tag
-                , div [ class "card__description" ]
-                    [ div [ class "card__description__header" ]
-                        [ a
-                            [ href msg.link
-                            , class "card__description__title"
-                            ]
-                            [ text msg.title ]
-                        , span [ class "card__description__domain" ]
-                            [ text <| "(" ++ msg.domain ++ ")" ]
-                        ]
-                    , div []
-                        [ text <| "By " ++ msg.author ]
-                    ]
-                , div [ class "card__date" ]
-                    [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
-                ]
-    in
-        if width < 600 then
-            a
-                [ href msg.link
-                , class "card__link"
-                ]
-                [ content ]
-        else
-            content
+        div [ class "main" ]
+            [ Header.view
+            , Body.view model.now model.width showSpinner model.links
+            , Footer.view <| Maybe.map Date.year model.now
+            , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
+            ]
 
 
 fetch : String -> Task Http.Error (List ContentLink) -> Cmd Msg
 fetch tag task =
     Task.perform (\error -> FetchError <| ContentLinkError tag <| toString error)
-        (\msgs -> FetchSuccess <| ContentLinkResp tag msgs)
+        (\links -> FetchSuccess <| ContentLinkResp tag links)
         task
 
 
