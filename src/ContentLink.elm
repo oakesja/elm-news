@@ -1,12 +1,12 @@
-module Message
+module ContentLink
     exposing
-        ( Message
-        , MessageError
-        , MessageResp
+        ( ContentLink
+        , ContentLinkError
+        , ContentLinkResp
         )
 
 
-type alias Message =
+type alias ContentLink =
     { author : String
     , title : String
     , date : Float
@@ -16,13 +16,13 @@ type alias Message =
     }
 
 
-type alias MessageResp =
+type alias ContentLinkResp =
     { tag : String
-    , messages : List Message
+    , links : List ContentLink
     }
 
 
-type alias MessageError =
+type alias ContentLinkError =
     { tag : String
     , error : String
     }

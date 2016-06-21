@@ -5,7 +5,7 @@ module HackerNews exposing (fetch, tag)
 import Json.Decode exposing (..)
 import Task exposing (Task)
 import Http
-import Message exposing (..)
+import ContentLink exposing (ContentLink)
 import Erl
 import String
 
@@ -23,12 +23,12 @@ tag =
     "Hacker News"
 
 
-fetch : Task Http.Error (List Message)
+fetch : Task Http.Error (List ContentLink)
 fetch =
     Http.get decoder "http://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
 
 
-decoder : Decoder (List Message)
+decoder : Decoder (List ContentLink)
 decoder =
     customDecoder hackerNewsDecoder
         <| \stories ->
@@ -54,7 +54,7 @@ timeDecoder =
         (\time -> Ok <| time * 1000)
 
 
-storyToMessage : HackerNewsStory -> Message
+storyToMessage : HackerNewsStory -> ContentLink
 storyToMessage story =
     let
         link =

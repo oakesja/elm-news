@@ -100,8 +100,6 @@
 }
 
 .card__link {
-  pointer-events: none;
-  cursor: default;
   text-decoration: none;
   color: #000000;
 }
@@ -118,8 +116,10 @@
 }
 
 .tag__link {
+  pointer-events: auto;
   text-decoration: none;
   color: #FFFFFF;
+  text-shadow: 0 1px 0 #777777;
 }
 
 .card__description {
@@ -135,12 +135,14 @@
 }
 
 .card__description__title {
+  color: #000000;
   font-weight: bold;
   text-decoration: none;
+  pointer-events: auto;
 }
 
 .card__description__domain {
-  color: #888888;
+  color: #777777;
   padding-left: 7px;
   font-size: 0.8em;
 }
@@ -209,10 +211,6 @@
 }
 
 /* Color */
-
-.black_text {
-  color: #000000;
-}
 
 .elm_dark_blue {
   background-color: #5A6378;

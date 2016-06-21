@@ -10,21 +10,18 @@ import Time
 import Basics.Extra exposing (never)
 import Http
 import Window
-import DateFormatter
 import Header
 import Footer
-import Tag
-import Message exposing (..)
+import ContentLink exposing (..)
 import Reddit
 import HackerNews
-import Spinner
 import ErrorManager
+import Body
 
 
--- TODO create card component
 -- TODO show which links have been visited
--- TODO rename messages model
 -- TODO fetch messages over a certain time span and on scroll or paging
+-- TODO better logo
 -- TODO google analytics
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
@@ -32,7 +29,7 @@ import ErrorManager
 
 
 type alias Model =
-    { messages : List Message
+    { links : List ContentLink
     , now : Maybe Date
     , errorManager : ErrorManager.Model
     , width : Int
@@ -43,7 +40,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         model =
-            { messages = []
+            { links = []
             , now = Nothing
             , errorManager = ErrorManager.init
             , width = 0
@@ -65,8 +62,8 @@ init =
 
 
 type Msg
-    = FetchMessageSuccess MessageResp
-    | FetchMessageError MessageError
+    = FetchSuccess ContentLinkResp
+    | FetchError ContentLinkError
     | CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
     | WindowSize Window.Size
@@ -75,16 +72,16 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchMessageSuccess resp ->
+        FetchSuccess resp ->
             let
                 updatedModel =
-                    { model | messages = model.messages ++ resp.messages }
+                    { model | links = model.links ++ resp.links }
             in
                 ( updatedModel
                 , Cmd.none
                 )
 
-        FetchMessageError rawError ->
+        FetchError rawError ->
             let
                 _ =
                     Debug.log "" rawError.error
@@ -121,84 +118,39 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "main" ]
-        [ Header.view
-        , body model
-        , Footer.view <| Maybe.map Date.year model.now
-        , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
-        ]
-
-
-body : Model -> Html Msg
-body model =
     let
-        cards =
-            if List.isEmpty model.messages && ErrorManager.noErrors model.errorManager then
-                Spinner.view
-            else
-                div [ class "cards" ]
-                    <| List.map (cardView model.now model.width)
-                    <| List.reverse
-                    <| List.sortBy .date model.messages
+        showSpinner =
+            List.isEmpty model.links && ErrorManager.noErrors model.errorManager
     in
-        div [ class "body" ]
-            [ cards ]
-
-
-cardView : Maybe Date -> Int -> Message -> Html Msg
-cardView now width msg =
-    let
-        cardLinkAttrs =
-            if width < 600 then
-                [ href msg.link
-                , class "card__link"
-                ]
-            else
-                [ class "card__link" ]
-    in
-        a cardLinkAttrs
-            [ div [ class "card" ]
-                [ Tag.view msg.tag
-                , div [ class "card__description" ]
-                    [ div [ class "card__description__header" ]
-                        [ a
-                            [ href msg.link
-                            , class "card__description__title black_text"
-                            ]
-                            [ text msg.title ]
-                        , span [ class "card__description__domain" ]
-                            [ text <| "(" ++ msg.domain ++ ")" ]
-                        ]
-                    , div []
-                        [ text <| "By " ++ msg.author ]
-                    ]
-                , div [ class "card__date" ]
-                    [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
-                ]
+        div [ class "main" ]
+            [ Header.view
+            , Body.view model.now model.width showSpinner model.links
+            , Footer.view <| Maybe.map Date.year model.now
+            , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
             ]
 
 
-fetch : String -> Task Http.Error (List Message) -> Cmd Msg
+fetch : String -> Task Http.Error (List ContentLink) -> Cmd Msg
 fetch tag task =
-    Task.perform (\error -> FetchMessageError <| MessageError tag <| toString error)
-        (\msgs -> FetchMessageSuccess <| MessageResp tag msgs)
+    Task.perform (\error -> FetchError <| ContentLinkError tag <| toString error)
+        (\links -> FetchSuccess <| ContentLinkResp tag links)
         task
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg
 
 
-port fetchedGoogleGroupMsgs : (MessageResp -> msg) -> Sub msg
+port fetchedGoogleGroupMsgs : (ContentLinkResp -> msg) -> Sub msg
 
 
-port errorGoogleGroupMsgs : (MessageError -> msg) -> Sub msg
+port errorGoogleGroupMsgs : (ContentLinkError -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ fetchedGoogleGroupMsgs FetchMessageSuccess
-        , errorGoogleGroupMsgs FetchMessageError
+        [ fetchedGoogleGroupMsgs FetchSuccess
+        , errorGoogleGroupMsgs FetchError
         , Window.resizes WindowSize
         ]
 

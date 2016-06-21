@@ -48,10 +48,10 @@
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
                 var entries = result.feed.entries
-                var msgs = []
+                var links = []
                 for (var i = 0; i < entries.length; i++) {
                     var entry = entries[i]
-                    var msg = {
+                    var link = {
                         author: entry.author,
                         title: entry.title,
                         date: entry.date_ms,
@@ -59,10 +59,10 @@
                         tag: tag,
                         domain: "groups.google.com"
                     };
-                    msgs.push(msg);
+                    links.push(link);
                 }
                 var resp = {
-                    messages: msgs,
+                    links: links,
                     tag: tag
                 }
                 app.ports.fetchedGoogleGroupMsgs.send(resp);
