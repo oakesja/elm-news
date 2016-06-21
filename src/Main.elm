@@ -14,7 +14,7 @@ import DateFormatter
 import Header
 import Footer
 import Tag
-import Message exposing (..)
+import ContentLink exposing (..)
 import Reddit
 import HackerNews
 import Spinner
@@ -23,8 +23,8 @@ import ErrorManager
 
 -- TODO create card component
 -- TODO show which links have been visited
--- TODO rename messages model
 -- TODO fetch messages over a certain time span and on scroll or paging
+-- TODO better logo
 -- TODO google analytics
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
@@ -32,7 +32,7 @@ import ErrorManager
 
 
 type alias Model =
-    { messages : List Message
+    { messages : List ContentLink
     , now : Maybe Date
     , errorManager : ErrorManager.Model
     , width : Int
@@ -65,8 +65,8 @@ init =
 
 
 type Msg
-    = FetchMessageSuccess MessageResp
-    | FetchMessageError MessageError
+    = FetchSuccess ContentLinkResp
+    | FetchError ContentLinkError
     | CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
     | WindowSize Window.Size
@@ -75,7 +75,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchMessageSuccess resp ->
+        FetchSuccess resp ->
             let
                 updatedModel =
                     { model | messages = model.messages ++ resp.messages }
@@ -84,7 +84,7 @@ update msg model =
                 , Cmd.none
                 )
 
-        FetchMessageError rawError ->
+        FetchError rawError ->
             let
                 _ =
                     Debug.log "" rawError.error
@@ -145,7 +145,7 @@ body model =
             [ cards ]
 
 
-cardView : Maybe Date -> Int -> Message -> Html Msg
+cardView : Maybe Date -> Int -> ContentLink -> Html Msg
 cardView now width msg =
     let
         content =
@@ -155,7 +155,7 @@ cardView now width msg =
                     [ div [ class "card__description__header" ]
                         [ a
                             [ href msg.link
-                            , class "card__description__title black_text"
+                            , class "card__description__title"
                             ]
                             [ text msg.title ]
                         , span [ class "card__description__domain" ]
@@ -178,27 +178,27 @@ cardView now width msg =
             content
 
 
-fetch : String -> Task Http.Error (List Message) -> Cmd Msg
+fetch : String -> Task Http.Error (List ContentLink) -> Cmd Msg
 fetch tag task =
-    Task.perform (\error -> FetchMessageError <| MessageError tag <| toString error)
-        (\msgs -> FetchMessageSuccess <| MessageResp tag msgs)
+    Task.perform (\error -> FetchError <| ContentLinkError tag <| toString error)
+        (\msgs -> FetchSuccess <| ContentLinkResp tag msgs)
         task
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg
 
 
-port fetchedGoogleGroupMsgs : (MessageResp -> msg) -> Sub msg
+port fetchedGoogleGroupMsgs : (ContentLinkResp -> msg) -> Sub msg
 
 
-port errorGoogleGroupMsgs : (MessageError -> msg) -> Sub msg
+port errorGoogleGroupMsgs : (ContentLinkError -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ fetchedGoogleGroupMsgs FetchMessageSuccess
-        , errorGoogleGroupMsgs FetchMessageError
+        [ fetchedGoogleGroupMsgs FetchSuccess
+        , errorGoogleGroupMsgs FetchError
         , Window.resizes WindowSize
         ]
 
