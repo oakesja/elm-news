@@ -9,6 +9,7 @@ import Process
 import Time
 import Basics.Extra exposing (never)
 import Http
+import Window
 import DateFormatter
 import Header
 import Footer
@@ -16,17 +17,15 @@ import Tag
 import Message exposing (..)
 import Reddit
 import HackerNews
+import Spinner
+import ErrorManager
 
 
+-- TODO create card component
+-- TODO show which links have been visited
 -- TODO rename messages model
--- TODO consider no cards like hacker news or reddit
 -- TODO fetch messages over a certain time span and on scroll
--- TODO handle errors
--- TODO spinner for loading
--- TODO mobile friendly
 -- TODO google analytics
--- TODO better font and color scheme
--- TODO web checklist
 -- TODO purchase domain and setup with gh pages
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
@@ -34,8 +33,9 @@ import HackerNews
 
 type alias Model =
     { messages : List Message
-    , errors : List ( String, String )
     , now : Maybe Date
+    , errorManager : ErrorManager.Model
+    , width : Int
     }
 
 
@@ -44,8 +44,9 @@ init =
     let
         model =
             { messages = []
-            , errors = []
             , now = Nothing
+            , errorManager = ErrorManager.init
+            , width = 0
             }
 
         fx =
@@ -55,6 +56,7 @@ init =
                 , fetch Reddit.tag Reddit.fetch
                 , fetch HackerNews.tag HackerNews.fetch
                 , Task.perform never CurrentDate Date.now
+                , Task.perform never WindowSize Window.size
                 ]
     in
         ( model
@@ -66,6 +68,8 @@ type Msg
     = FetchMessageSuccess MessageResp
     | FetchMessageError MessageError
     | CurrentDate Date
+    | ErrorManagerMessage ErrorManager.Msg
+    | WindowSize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,18 +84,38 @@ update msg model =
                 , Cmd.none
                 )
 
-        FetchMessageError error ->
+        FetchMessageError rawError ->
             let
-                updatedModel =
-                    { model | errors = ( error.tag, Debug.log "" error.error ) :: model.errors }
+                _ =
+                    Debug.log "" rawError.error
+
+                error =
+                    "Failed to fetch content from " ++ rawError.tag
+
+                ( newErrorMang, fx ) =
+                    ErrorManager.update (ErrorManager.AddError error) model.errorManager
             in
-                ( updatedModel
-                , Cmd.none
+                ( { model | errorManager = newErrorMang }
+                , Cmd.map ErrorManagerMessage fx
                 )
 
         CurrentDate date ->
             ( { model | now = Just date }
             , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
+            )
+
+        ErrorManagerMessage errorMsg ->
+            let
+                ( newErrorMang, fx ) =
+                    ErrorManager.update errorMsg model.errorManager
+            in
+                ( { model | errorManager = newErrorMang }
+                , Cmd.map ErrorManagerMessage fx
+                )
+
+        WindowSize size ->
+            ( { model | width = size.width }
+            , Cmd.none
             )
 
 
@@ -101,39 +125,57 @@ view model =
         [ Header.view
         , body model
         , Footer.view <| Maybe.map Date.year model.now
+        , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
         ]
 
 
 body : Model -> Html Msg
 body model =
-    div [ class "body" ]
-        [ div []
-            <| List.map (cardView model.now)
-            <| List.reverse
-            <| List.sortBy .date model.messages
-        ]
+    let
+        cards =
+            if List.isEmpty model.messages && ErrorManager.noErrors model.errorManager then
+                Spinner.view
+            else
+                div [ class "cards" ]
+                    <| List.map (cardView model.now model.width)
+                    <| List.reverse
+                    <| List.sortBy .date model.messages
+    in
+        div [ class "body" ]
+            [ cards ]
 
 
-cardView : Maybe Date -> Message -> Html Msg
-cardView now msg =
-    div [ class "card" ]
-        [ Tag.view msg.tag
-        , div [ class "card__description" ]
-            [ div [ class "card__description__header" ]
-                [ a
-                    [ href msg.link
-                    , class "card__description__title black_text"
-                    ]
-                    [ text msg.title ]
-                , span [ class "card__description__domain" ]
-                    [ text <| "(" ++ msg.domain ++ ")" ]
+cardView : Maybe Date -> Int -> Message -> Html Msg
+cardView now width msg =
+    let
+        cardLinkAttrs =
+            if width < 600 then
+                [ href msg.link
+                , class "card__link"
                 ]
-            , div []
-                [ text <| "By " ++ msg.author ]
+            else
+                [ class "card__link" ]
+    in
+        a cardLinkAttrs
+            [ div [ class "card" ]
+                [ Tag.view msg.tag
+                , div [ class "card__description" ]
+                    [ div [ class "card__description__header" ]
+                        [ a
+                            [ href msg.link
+                            , class "card__description__title black_text"
+                            ]
+                            [ text msg.title ]
+                        , span [ class "card__description__domain" ]
+                            [ text <| "(" ++ msg.domain ++ ")" ]
+                        ]
+                    , div []
+                        [ text <| "By " ++ msg.author ]
+                    ]
+                , div [ class "card__date" ]
+                    [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
+                ]
             ]
-        , div [ class "card__date" ]
-            [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
-        ]
 
 
 fetch : String -> Task Http.Error (List Message) -> Cmd Msg
@@ -157,6 +199,7 @@ subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchMessageSuccess
         , errorGoogleGroupMsgs FetchMessageError
+        , Window.resizes WindowSize
         ]
 
 

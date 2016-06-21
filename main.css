@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
 
 .header {
@@ -17,7 +18,6 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
 }
 
 .header__description {
@@ -67,8 +67,27 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   flex-grow: 1;
   background-color: #DDDDDD
+}
+
+.spinner {
+  border: 16px solid #FFFFFF;
+  border-top: 16px solid #5A6378;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.cards {
+  max-width: 1000px
 }
 
 .card {
@@ -78,6 +97,13 @@
   padding: 10px;
   margin: 10px;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
+}
+
+.card__link {
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
+  color: #000000;
 }
 
 .tag {
@@ -121,7 +147,7 @@
 
 .card__date {
   align-self: center;
-  min-width: 90px;
+  min-width: 110px;
 }
 
 .footer {
@@ -141,6 +167,45 @@
   flex-direction: column;
   justify-content: center;
   color: #FFFFFF;
+}
+
+.error {
+  position: fixed;
+  right: 12px;
+  color: #FFFFFF;
+  width: 400px;
+  padding: 15px;
+  -webkit-filter: drop-shadow(0 8.4px 8.4px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 3px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(0 8.4px 8.4px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 3px rgba(0, 0, 0, 0.22));
+  background-image: linear-gradient(to bottom, #EE5F5B, #BD362F);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.error__content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10px
+}
+
+.error__text {
+  font-weight: bold;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.error__img {
+  height: 30px;
+  padding-right: 15px
+}
+
+.close {
+  font: 18px/100% arial, sans-serif;
+  text-shadow: 0 1px 0 #777777;
+  align-self: flex-start;
+  cursor: pointer;
+  padding-left: 10px;
 }
 
 /* Color */
@@ -166,9 +231,16 @@
 }
 
 /* Responsive */
+
+@media all and (max-width: 1000px) {
+  .cards {
+    max-width: 100%;
+  }
+}
+
 @media all and (max-width: 900px) {
-  .header__description {
-    display: none;
+  .cards {
+    max-width: 100%;
   }
 }
 
