@@ -9,6 +9,7 @@ import Process
 import Time
 import Basics.Extra exposing (never)
 import Http
+import Window
 import DateFormatter
 import Header
 import Footer
@@ -20,7 +21,8 @@ import Spinner
 import ErrorManager
 
 
--- TODO better click target for mobile
+-- TODO create card component
+-- TODO show which links have been visited
 -- TODO rename messages model
 -- TODO fetch messages over a certain time span and on scroll
 -- TODO google analytics
@@ -33,6 +35,7 @@ type alias Model =
     { messages : List Message
     , now : Maybe Date
     , errorManager : ErrorManager.Model
+    , width : Int
     }
 
 
@@ -43,6 +46,7 @@ init =
             { messages = []
             , now = Nothing
             , errorManager = ErrorManager.init
+            , width = 0
             }
 
         fx =
@@ -52,6 +56,7 @@ init =
                 , fetch Reddit.tag Reddit.fetch
                 , fetch HackerNews.tag HackerNews.fetch
                 , Task.perform never CurrentDate Date.now
+                , Task.perform never WindowSize Window.size
                 ]
     in
         ( model
@@ -64,6 +69,7 @@ type Msg
     | FetchMessageError MessageError
     | CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
+    | WindowSize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,6 +113,11 @@ update msg model =
                 , Cmd.map ErrorManagerMessage fx
                 )
 
+        WindowSize size ->
+            ( { model | width = size.width }
+            , Cmd.none
+            )
+
 
 view : Model -> Html Msg
 view model =
@@ -126,7 +137,7 @@ body model =
                 Spinner.view
             else
                 div [ class "cards" ]
-                    <| List.map (cardView model.now)
+                    <| List.map (cardView model.now model.width)
                     <| List.reverse
                     <| List.sortBy .date model.messages
     in
@@ -134,26 +145,37 @@ body model =
             [ cards ]
 
 
-cardView : Maybe Date -> Message -> Html Msg
-cardView now msg =
-    div [ class "card" ]
-        [ Tag.view msg.tag
-        , div [ class "card__description" ]
-            [ div [ class "card__description__header" ]
-                [ a
-                    [ href msg.link
-                    , class "card__description__title black_text"
-                    ]
-                    [ text msg.title ]
-                , span [ class "card__description__domain" ]
-                    [ text <| "(" ++ msg.domain ++ ")" ]
+cardView : Maybe Date -> Int -> Message -> Html Msg
+cardView now width msg =
+    let
+        cardLinkAttrs =
+            if width < 600 then
+                [ href msg.link
+                , class "card__link"
                 ]
-            , div []
-                [ text <| "By " ++ msg.author ]
+            else
+                [ class "card__link" ]
+    in
+        a cardLinkAttrs
+            [ div [ class "card" ]
+                [ Tag.view msg.tag
+                , div [ class "card__description" ]
+                    [ div [ class "card__description__header" ]
+                        [ a
+                            [ href msg.link
+                            , class "card__description__title black_text"
+                            ]
+                            [ text msg.title ]
+                        , span [ class "card__description__domain" ]
+                            [ text <| "(" ++ msg.domain ++ ")" ]
+                        ]
+                    , div []
+                        [ text <| "By " ++ msg.author ]
+                    ]
+                , div [ class "card__date" ]
+                    [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
+                ]
             ]
-        , div [ class "card__date" ]
-            [ text <| DateFormatter.format now <| Date.fromTime msg.date ]
-        ]
 
 
 fetch : String -> Task Http.Error (List Message) -> Cmd Msg
@@ -177,6 +199,7 @@ subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs FetchMessageSuccess
         , errorGoogleGroupMsgs FetchMessageError
+        , Window.resizes WindowSize
         ]
 
 

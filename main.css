@@ -99,6 +99,13 @@
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
 }
 
+.card__link {
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
+  color: #000000;
+}
+
 .tag {
   padding: 5px;
   min-width: 100px;
