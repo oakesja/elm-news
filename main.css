@@ -119,6 +119,7 @@
   pointer-events: auto;
   text-decoration: none;
   color: #FFFFFF;
+  text-shadow: 0 1px 0 #777777;
 }
 
 .card__description {
@@ -140,7 +141,7 @@
 }
 
 .card__description__domain {
-  color: #888888;
+  color: #777777;
   padding-left: 7px;
   font-size: 0.8em;
 }
