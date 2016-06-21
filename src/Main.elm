@@ -20,7 +20,6 @@ import Spinner
 import ErrorManager
 
 
--- TODO set max widths on cards
 -- TODO better click target for mobile
 -- TODO rename messages model
 -- TODO consider no cards like hacker news or reddit
@@ -125,17 +124,17 @@ view model =
 body : Model -> Html Msg
 body model =
     let
-        content =
+        cards =
             if List.isEmpty model.messages && ErrorManager.noErrors model.errorManager then
                 Spinner.view
             else
-                div []
+                div [ class "cards" ]
                     <| List.map (cardView model.now)
                     <| List.reverse
                     <| List.sortBy .date model.messages
     in
         div [ class "body" ]
-            [ content ]
+            [ cards ]
 
 
 cardView : Maybe Date -> Message -> Html Msg
