@@ -139,12 +139,13 @@
   font-weight: bold;
   text-decoration: none;
   pointer-events: auto;
+  padding-right: 7px;
 }
 
 .card__description__domain {
   color: #777777;
-  padding-left: 7px;
   font-size: 0.8em;
+  display: inline-block;
 }
 
 .card__date {
@@ -245,5 +246,20 @@
 @media all and (max-width: 600px) {
   .tag {
     display: none;
+  }
+  .card {
+    display: block;
+    padding-bottom: 30px;
+  }
+  .card__description{
+    display: block;
+  }
+  .card__author {
+    float: left;
+  }
+  .card__date {
+    float: right;
+    min-width: auto;
+    padding-right: 10px;
   }
 }
