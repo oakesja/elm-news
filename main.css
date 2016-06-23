@@ -142,8 +142,12 @@
   padding-right: 7px;
 }
 
+.card__description__title:visited {
+  color: #888888;
+}
+
 .card__description__domain {
-  color: #777777;
+  color: #888888;
   font-size: 0.8em;
   display: inline-block;
 }

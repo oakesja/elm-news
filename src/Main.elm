@@ -19,7 +19,6 @@ import ErrorManager
 import Body
 
 
--- TODO show which links have been visited
 -- TODO fetch messages over a certain time span and on scroll or paging
 -- TODO better logo
 -- TODO google analytics
