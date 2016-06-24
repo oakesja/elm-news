@@ -34,7 +34,7 @@ card now content =
                 , span [ class "card__description__domain" ]
                     [ text <| "(" ++ content.domain ++ ")" ]
                 ]
-            , div []
+            , div [ class "card__author" ]
                 [ text <| "By " ++ content.author ]
             ]
         , div [ class "card__date" ]
