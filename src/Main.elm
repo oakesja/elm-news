@@ -21,8 +21,7 @@ import Analytics
 
 
 -- TODO fetch messages over a certain time span and on scroll or paging
--- TODO share with others
--- TODO create xml parser in elm using json decoders
+-- TODO write readme for description, bugs, feature request, PRs and move deployment stuff to another md
 
 
 type alias Model =
