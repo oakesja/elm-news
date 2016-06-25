@@ -73,5 +73,5 @@ hackerNewsTag : TagInfo
 hackerNewsTag =
     { name = HackerNews.tag
     , tagColor = "elm_green"
-    , link = "https://news.ycombinator.com/"
+    , link = "https://hn.algolia.com/?query=elm&sort=byDate&prefix=false&page=0&dateRange=all&type=story"
     }
