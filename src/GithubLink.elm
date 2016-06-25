@@ -1,16 +1,17 @@
 module GithubLink exposing (view)
 
-import Html exposing (Html, a, img)
-import Html.Attributes exposing (class, href, src, alt)
+import Html exposing (Html, img)
+import Html.Attributes exposing (class, src, alt)
+import Analytics
 
 
-view : String -> Html msg
+view : String -> Html Analytics.Msg
 view imgClasses =
-    a [ href "https://github.com/oakesja/elm-news" ]
-        [ img
-            [ class imgClasses
-            , src "assets/images/GitHub-Mark-Light-64px.png"
-            , alt "elm-news on github"
-            ]
-            []
+    img
+        [ class <| "github " ++ imgClasses
+        , src "assets/images/GitHub-Mark-Light-64px.png"
+        , alt "elm-news on github"
+        , Analytics.onLinkClick
+            <| Analytics.GithubLink "https://github.com/oakesja/elm-news"
         ]
+        []

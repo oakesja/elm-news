@@ -1,10 +1,11 @@
 module Tag exposing (TagInfo, view)
 
-import Html exposing (Html, div, a, text)
-import Html.Attributes exposing (class, href)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Dict
 import Reddit
 import HackerNews
+import Analytics
 
 
 type alias TagInfo =
@@ -14,19 +15,18 @@ type alias TagInfo =
     }
 
 
-view : String -> Html msg
+view : String -> Html Analytics.Msg
 view name =
     let
         tag =
             lookupTagInfo name
     in
-        div [ class <| "tag " ++ tag.tagColor ]
-            [ a
-                [ href tag.link
-                , class "tag__link"
-                ]
-                [ text tag.name ]
+        div
+            [ class <| "tag " ++ tag.tagColor
+            , Analytics.onLinkClick
+                <| Analytics.TagLink tag.name tag.link
             ]
+            [ text tag.name ]
 
 
 lookupTagInfo : String -> TagInfo

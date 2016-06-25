@@ -12,23 +12,26 @@ import Http
 import Window
 import Header
 import Footer
-import ContentLink exposing (..)
+import NewsLink exposing (..)
 import Reddit
 import HackerNews
 import ErrorManager
 import Body
+import Analytics
 
 
 -- TODO fetch messages over a certain time span and on scroll or paging
 -- TODO better logo
--- TODO google analytics
+-- TODO setup analytics for top news (will need title as well, use custom variable?)
 -- TODO purchase domain and setup with gh pages
+-- TODO HTTPS
+-- TODO hacker news link
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
 
 
 type alias Model =
-    { links : List ContentLink
+    { links : List NewsLink
     , now : Maybe Date
     , errorManager : ErrorManager.Model
     , width : Int
@@ -61,11 +64,12 @@ init =
 
 
 type Msg
-    = FetchSuccess ContentLinkResp
-    | FetchError ContentLinkError
+    = FetchSuccess NewsLinkResp
+    | FetchError NewsLinkError
     | CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
     | WindowSize Window.Size
+    | AnalyticsMsg Analytics.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -114,6 +118,9 @@ update msg model =
             , Cmd.none
             )
 
+        AnalyticsMsg analyticsMsg ->
+            ( model, Analytics.msgToCmd analyticsMsg )
+
 
 view : Model -> Html Msg
 view model =
@@ -122,27 +129,30 @@ view model =
             List.isEmpty model.links && ErrorManager.noErrors model.errorManager
     in
         div [ class "main" ]
-            [ Header.view
-            , Body.view model.now model.width showSpinner model.links
-            , Footer.view <| Maybe.map Date.year model.now
-            , Html.App.map ErrorManagerMessage <| ErrorManager.view model.errorManager
+            [ Html.App.map AnalyticsMsg Header.view
+            , Html.App.map AnalyticsMsg
+                <| Body.view model.now model.width showSpinner model.links
+            , Html.App.map AnalyticsMsg
+                <| Footer.view (Maybe.map Date.year model.now)
+            , Html.App.map ErrorManagerMessage
+                <| ErrorManager.view model.errorManager
             ]
 
 
-fetch : String -> Task Http.Error (List ContentLink) -> Cmd Msg
+fetch : String -> Task Http.Error (List NewsLink) -> Cmd Msg
 fetch tag task =
-    Task.perform (\error -> FetchError <| ContentLinkError tag <| toString error)
-        (\links -> FetchSuccess <| ContentLinkResp tag links)
+    Task.perform (\error -> FetchError <| NewsLinkError tag <| toString error)
+        (\links -> FetchSuccess <| NewsLinkResp tag links)
         task
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg
 
 
-port fetchedGoogleGroupMsgs : (ContentLinkResp -> msg) -> Sub msg
+port fetchedGoogleGroupMsgs : (NewsLinkResp -> msg) -> Sub msg
 
 
-port errorGoogleGroupMsgs : (ContentLinkError -> msg) -> Sub msg
+port errorGoogleGroupMsgs : (NewsLinkError -> msg) -> Sub msg
 
 
 subscriptions : Model -> Sub Msg

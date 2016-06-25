@@ -4,7 +4,7 @@ import Json.Decode exposing (..)
 import Task exposing (Task)
 import Http
 import String
-import ContentLink exposing (ContentLink)
+import NewsLink exposing (NewsLink)
 
 
 tag : String
@@ -12,14 +12,14 @@ tag =
     "reddit"
 
 
-fetch : Task Http.Error (List ContentLink)
+fetch : Task Http.Error (List NewsLink)
 fetch =
     Http.get decoder "https://www.reddit.com/r/elm/new/.json"
 
 
-decoder : Decoder (List ContentLink)
+decoder : Decoder (List NewsLink)
 decoder =
-    object6 ContentLink
+    object6 NewsLink
         ("author" := string)
         ("title" := string)
         ("created_utc" := timeDecoder)

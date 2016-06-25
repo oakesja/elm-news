@@ -1,12 +1,12 @@
-module ContentLink
+module NewsLink
     exposing
-        ( ContentLink
-        , ContentLinkError
-        , ContentLinkResp
+        ( NewsLink
+        , NewsLinkError
+        , NewsLinkResp
         )
 
 
-type alias ContentLink =
+type alias NewsLink =
     { author : String
     , title : String
     , date : Float
@@ -16,13 +16,13 @@ type alias ContentLink =
     }
 
 
-type alias ContentLinkResp =
+type alias NewsLinkResp =
     { tag : String
-    , links : List ContentLink
+    , links : List NewsLink
     }
 
 
-type alias ContentLinkError =
+type alias NewsLinkError =
     { tag : String
     , error : String
     }

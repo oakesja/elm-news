@@ -3,9 +3,10 @@ module Footer exposing (view)
 import Html exposing (Html, div, footer, text)
 import Html.Attributes exposing (class)
 import GithubLink
+import Analytics
 
 
-view : Maybe Int -> Html msg
+view : Maybe Int -> Html Analytics.Msg
 view currentYear =
     footer [ class "footer grey" ]
         [ GithubLink.view "footer__github"
