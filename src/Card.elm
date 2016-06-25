@@ -15,7 +15,7 @@ view now width newsLink =
         attrs =
             if width < 600 then
                 [ Analytics.onLinkClick
-                    <| Analytics.NewsLink newsLink.tag newsLink.link
+                    <| Analytics.NewsLink newsLink.tag newsLink.link newsLink.title
                 , class "card card__link"
                 ]
             else
@@ -41,7 +41,7 @@ linkView { link, title, domain, tag } =
     div [ class "card__description__header" ]
         [ a
             [ Analytics.onLinkClick
-                <| Analytics.NewsLink tag link
+                <| Analytics.NewsLink tag link title
             , href link
             , class "card__description__title"
             ]

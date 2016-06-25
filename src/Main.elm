@@ -22,9 +22,6 @@ import Analytics
 
 -- TODO fetch messages over a certain time span and on scroll or paging
 -- TODO better logo
--- TODO setup analytics for top news (will need title as well, use custom variable?)
--- TODO purchase domain and setup with gh pages
--- TODO HTTPS
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
 

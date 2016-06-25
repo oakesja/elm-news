@@ -12,7 +12,7 @@ import Json.Decode as Json
 
 type Msg
     = GithubLink String
-    | NewsLink String String
+    | NewsLink String String String
     | TagLink String String
 
 
@@ -20,6 +20,8 @@ type alias LinkEvent =
     { category : String
     , action : String
     , url : String
+    , title : Maybe String
+    , tag : Maybe String
     }
 
 
@@ -29,8 +31,8 @@ msgToCmd msg =
         GithubLink url ->
             githubRepo url
 
-        NewsLink tag url ->
-            newsLink tag url
+        NewsLink tag url title ->
+            newsLink tag url title
 
         TagLink tag url ->
             tagLink tag url
@@ -42,15 +44,19 @@ githubRepo url =
         { category = "Github Link"
         , action = "click"
         , url = url
+        , title = Nothing
+        , tag = Nothing
         }
 
 
-newsLink : String -> String -> Cmd msg
-newsLink tag url =
+newsLink : String -> String -> String -> Cmd msg
+newsLink tag url title =
     registerLinkClick
         { category = "News"
-        , action = tag
+        , action = "click"
         , url = url
+        , title = Just title
+        , tag = Just tag
         }
 
 
@@ -58,8 +64,10 @@ tagLink : String -> String -> Cmd msg
 tagLink tag url =
     registerLinkClick
         { category = "Tag"
-        , action = tag
+        , action = "click"
         , url = url
+        , title = Nothing
+        , tag = Just tag
         }
 
 
