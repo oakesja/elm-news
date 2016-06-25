@@ -25,7 +25,7 @@ tag =
 
 fetch : Task Http.Error (List NewsLink)
 fetch =
-    Http.get decoder "http://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
+    Http.get decoder "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
 
 
 decoder : Decoder (List NewsLink)
