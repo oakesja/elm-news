@@ -33,7 +33,11 @@
   height: 45px;
 }
 
-.header__github:hover, .footer__github:hover {
+.github {
+  cursor: pointer;
+}
+
+.github:hover {
   opacity: 0.7;
 }
 
@@ -100,6 +104,7 @@
 }
 
 .card__link {
+  cursor: pointer;
   text-decoration: none;
   color: #000000;
 }
@@ -113,13 +118,9 @@
   margin: 10px;
   align-self: center;
   box-shadow: 0 3px 4px 0 rgba(0,0,0,0.14);
-}
-
-.tag__link {
-  pointer-events: auto;
-  text-decoration: none;
   color: #FFFFFF;
   text-shadow: 0 1px 0 #777777;
+  cursor: pointer;
 }
 
 .card__description {

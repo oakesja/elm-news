@@ -4,9 +4,10 @@ import Html exposing (Html, header, div, text)
 import Html.Attributes exposing (class)
 import Logo
 import GithubLink
+import Analytics
 
 
-view : Html msg
+view : Html Analytics.Msg
 view =
     header [ class "header" ]
         [ Logo.view

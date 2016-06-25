@@ -36,7 +36,7 @@ format maybeNow date =
                     "1 day ago"
                 else if diff >= 172800 && diff < 2592000 then
                     toString (round <| diff / 86400) ++ " days ago"
-                else if diff >= 2629800 && diff < 5259600 then
+                else if diff >= 2592000 && diff < 5259600 then
                     "1 month ago"
                 else if diff >= 5259600 && diff < 31557600 then
                     toString (round <| diff / 2629800) ++ " months ago"
