@@ -21,7 +21,6 @@ import Analytics
 
 
 -- TODO fetch messages over a certain time span and on scroll or paging
--- TODO better logo
 -- TODO share with others
 -- TODO create xml parser in elm using json decoders
 
