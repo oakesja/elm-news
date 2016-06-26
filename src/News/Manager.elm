@@ -17,8 +17,8 @@ import Task
 import Basics.Extra exposing (never)
 import News.Story exposing (..)
 import News.Fetcher as Fetcher
-import Card
-import Spinner
+import News.Card as Card
+import Components.Spinner as Spinner
 import Analytics
 
 

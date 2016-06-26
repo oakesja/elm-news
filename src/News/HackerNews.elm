@@ -1,4 +1,4 @@
-module HackerNews exposing (fetch, tag)
+module News.HackerNews exposing (fetch, tag)
 
 -- https://hn.algolia.com/api
 

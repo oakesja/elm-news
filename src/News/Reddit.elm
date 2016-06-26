@@ -1,4 +1,4 @@
-module Reddit exposing (fetch, tag)
+module News.Reddit exposing (fetch, tag)
 
 import Json.Decode exposing (..)
 import Http

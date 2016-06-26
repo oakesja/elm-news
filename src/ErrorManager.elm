@@ -13,7 +13,7 @@ import Process
 import Time
 import Html exposing (Html, div, text)
 import Html.App
-import ErrorToast
+import Components.ErrorToast as ErrorToast
 
 
 type alias Model =

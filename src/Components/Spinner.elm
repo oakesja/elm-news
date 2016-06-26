@@ -1,4 +1,4 @@
-module Spinner exposing (view)
+module Components.Spinner exposing (view)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)

@@ -1,9 +1,9 @@
-module Header exposing (view)
+module Components.Header exposing (view)
 
 import Html exposing (Html, header, div, text)
 import Html.Attributes exposing (class)
-import Logo
-import GithubLink
+import Components.Logo as Logo
+import Components.GithubLink as GithubLink
 import Analytics
 
 

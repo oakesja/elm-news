@@ -2,8 +2,8 @@ port module News.Fetcher exposing (cmd, subscriptions)
 
 import Task exposing (Task)
 import News.Story exposing (..)
-import Reddit
-import HackerNews
+import News.Reddit as Reddit
+import News.HackerNews as HackerNews
 
 
 cmd : (StoryResp -> msg) -> (StoryError -> msg) -> Cmd msg

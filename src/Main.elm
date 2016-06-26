@@ -9,8 +9,8 @@ import Process
 import Time
 import Basics.Extra exposing (never)
 import Window
-import Header
-import Footer
+import Components.Header as Header
+import Components.Footer as Footer
 import ErrorManager
 import News.Manager as NewsManager
 import Analytics

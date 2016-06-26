@@ -1,8 +1,8 @@
-module Footer exposing (view)
+module Components.Footer exposing (view)
 
 import Html exposing (Html, div, footer, text)
 import Html.Attributes exposing (class)
-import GithubLink
+import Components.GithubLink as GithubLink
 import Analytics
 
 

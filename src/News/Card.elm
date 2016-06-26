@@ -1,11 +1,11 @@
-module Card exposing (view)
+module News.Card exposing (view)
 
 import Date exposing (Date)
 import DateFormatter
 import Html exposing (Html, div, a, text, span)
 import Html.Attributes exposing (class, href)
 import News.Story exposing (Story)
-import Tag
+import News.Tag as Tag
 import Analytics
 
 

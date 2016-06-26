@@ -1,4 +1,4 @@
-module GithubLink exposing (view)
+module Components.GithubLink exposing (view)
 
 import Html exposing (Html, img)
 import Html.Attributes exposing (class, src, alt)

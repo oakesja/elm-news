@@ -1,4 +1,4 @@
-module Logo exposing (..)
+module Components.Logo exposing (..)
 
 import Svg exposing (Svg, svg, path)
 import Svg.Attributes exposing (fill, viewBox, d, height)

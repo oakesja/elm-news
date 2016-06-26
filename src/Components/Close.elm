@@ -1,4 +1,4 @@
-module Close exposing (view)
+module Components.Close exposing (view)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
