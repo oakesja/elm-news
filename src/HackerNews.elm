@@ -3,9 +3,8 @@ module HackerNews exposing (fetch, tag)
 -- https://hn.algolia.com/api
 
 import Json.Decode exposing (..)
-import Task exposing (Task)
 import Http
-import NewsLink exposing (NewsLink)
+import News.Story exposing (Story, StoryTask)
 import Erl
 import String
 
@@ -14,7 +13,7 @@ type alias HackerNewsStory =
     { author : String
     , title : String
     , date : Float
-    , link : Maybe String
+    , url : Maybe String
     }
 
 
@@ -23,17 +22,17 @@ tag =
     "Hacker News"
 
 
-fetch : Task Http.Error (List NewsLink)
+fetch : StoryTask
 fetch =
     Http.get decoder "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
 
 
-decoder : Decoder (List NewsLink)
+decoder : Decoder (List Story)
 decoder =
     customDecoder hackerNewsDecoder
         <| \stories ->
             List.map storyToMessage stories
-                |> List.filter (\s -> s.link /= "")
+                |> List.filter (\s -> s.url /= "")
                 |> Ok
 
 
@@ -54,23 +53,23 @@ timeDecoder =
         (\time -> Ok <| time * 1000)
 
 
-storyToMessage : HackerNewsStory -> NewsLink
+storyToMessage : HackerNewsStory -> Story
 storyToMessage story =
     let
-        link =
-            Maybe.withDefault "" story.link
+        url =
+            Maybe.withDefault "" story.url
     in
         { author = story.author
         , title = story.title
         , date = story.date
-        , link = link
+        , url = url
         , tag = tag
-        , domain = parseDomain link
+        , domain = parseDomain url
         }
 
 
 parseDomain : String -> String
-parseDomain link =
-    Erl.parse link
+parseDomain url =
+    Erl.parse url
         |> .host
         |> String.join "."
