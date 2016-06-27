@@ -3,6 +3,9 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="description" content="All elm news in one place">
+    <meta name="keywords" content="elm, elm lang, news">
+    <meta name="author" content="Jacob Oakes">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>elm news</title>
     <script src="https://storage.googleapis.com/feednami-static/js/feednami-client-v1.0.1.js"></script>
@@ -67,7 +70,8 @@
             });
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
-        var url = "https://groups.google.com/forum/feed/" + tag + "/msgs/rss_v2_0.xml?num=50";
+        // 100 messages is the max that you can get from the rss feed
+        var url = "https://groups.google.com/forum/feed/" + tag + "/msgs/rss_v2_0.xml?num=100";
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {
@@ -77,21 +81,21 @@
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
                 var entries = result.feed.entries
-                var links = []
+                var stories = []
                 for (var i = 0; i < entries.length; i++) {
                     var entry = entries[i]
-                    var link = {
+                    var story = {
                         author: entry.author,
                         title: entry.title,
                         date: entry.date_ms,
-                        link: entry.link,
+                        url: entry.link,
                         tag: tag,
                         domain: "groups.google.com"
                     };
-                    links.push(link);
+                    stories.push(story);
                 }
                 var resp = {
-                    links: links,
+                    stories: stories,
                     tag: tag
                 }
                 app.ports.fetchedGoogleGroupMsgs.send(resp);

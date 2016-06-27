@@ -8,27 +8,21 @@ import Task exposing (Task, andThen)
 import Process
 import Time
 import Basics.Extra exposing (never)
-import Http
 import Window
-import Header
-import Footer
-import NewsLink exposing (..)
-import Reddit
-import HackerNews
+import Components.Header as Header
+import Components.Footer as Footer
 import ErrorManager
-import Body
+import News.Manager as NewsManager
 import Analytics
 
 
 -- TODO fetch messages over a certain time span and on scroll or paging
--- TODO better logo
--- TODO share with others
--- TODO create xml parser in elm using json decoders
+-- TODO write readme for description, bugs, feature request, PRs and move deployment stuff to another md
 
 
 type alias Model =
-    { links : List NewsLink
-    , now : Maybe Date
+    { now : Maybe Date
+    , newsManager : NewsManager.Model
     , errorManager : ErrorManager.Model
     , width : Int
     }
@@ -37,64 +31,37 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
+        ( newsManager, newsManagerCmd ) =
+            NewsManager.init
+
         model =
-            { links = []
-            , now = Nothing
+            { now = Nothing
+            , newsManager = newsManager
             , errorManager = ErrorManager.init
             , width = 0
             }
 
-        fx =
+        cmd =
             Cmd.batch
-                [ fetchGoogleGroupMsgs "elm-dev"
-                , fetchGoogleGroupMsgs "elm-discuss"
-                , fetch Reddit.tag Reddit.fetch
-                , fetch HackerNews.tag HackerNews.fetch
+                [ Cmd.map NewsManagerMsg newsManagerCmd
                 , Task.perform never CurrentDate Date.now
                 , Task.perform never WindowSize Window.size
                 ]
     in
-        ( model
-        , fx
-        )
+        ( model, cmd )
 
 
 type Msg
-    = FetchSuccess NewsLinkResp
-    | FetchError NewsLinkError
-    | CurrentDate Date
+    = CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
     | WindowSize Window.Size
     | AnalyticsMsg Analytics.Msg
+    | NewsManagerMsg NewsManager.InternalMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchSuccess resp ->
-            let
-                updatedModel =
-                    { model | links = model.links ++ resp.links }
-            in
-                ( updatedModel
-                , Cmd.none
-                )
-
-        FetchError rawError ->
-            let
-                _ =
-                    Debug.log "" rawError.error
-
-                error =
-                    "Failed to fetch content from " ++ rawError.tag
-
-                ( newErrorMang, fx ) =
-                    ErrorManager.update (ErrorManager.AddError error) model.errorManager
-            in
-                ( { model | errorManager = newErrorMang }
-                , Cmd.map ErrorManagerMessage fx
-                )
-
         CurrentDate date ->
             ( { model | now = Just date }
             , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
@@ -117,45 +84,41 @@ update msg model =
         AnalyticsMsg analyticsMsg ->
             ( model, Analytics.msgToCmd analyticsMsg )
 
+        NewsManagerMsg cardMangerMsg ->
+            let
+                ( newNewsManager, cmd ) =
+                    NewsManager.update cardMangerMsg model.newsManager
+            in
+                ( { model | newsManager = newNewsManager }
+                , Cmd.map cardMsgTranslator cmd
+                )
+
+
+cardMsgTranslator : NewsManager.Translator Msg
+cardMsgTranslator =
+    NewsManager.translateMsg
+        { onInternalMessage = NewsManagerMsg
+        , onError = ErrorManagerMessage << ErrorManager.AddError
+        }
+
 
 view : Model -> Html Msg
 view model =
-    let
-        showSpinner =
-            List.isEmpty model.links && ErrorManager.noErrors model.errorManager
-    in
-        div [ class "main" ]
-            [ Html.App.map AnalyticsMsg Header.view
-            , Html.App.map AnalyticsMsg
-                <| Body.view model.now model.width showSpinner model.links
-            , Html.App.map AnalyticsMsg
-                <| Footer.view (Maybe.map Date.year model.now)
-            , Html.App.map ErrorManagerMessage
-                <| ErrorManager.view model.errorManager
-            ]
-
-
-fetch : String -> Task Http.Error (List NewsLink) -> Cmd Msg
-fetch tag task =
-    Task.perform (\error -> FetchError <| NewsLinkError tag <| toString error)
-        (\links -> FetchSuccess <| NewsLinkResp tag links)
-        task
-
-
-port fetchGoogleGroupMsgs : String -> Cmd msg
-
-
-port fetchedGoogleGroupMsgs : (NewsLinkResp -> msg) -> Sub msg
-
-
-port errorGoogleGroupMsgs : (NewsLinkError -> msg) -> Sub msg
+    div [ class "main" ]
+        [ Html.App.map AnalyticsMsg Header.view
+        , Html.App.map AnalyticsMsg
+            <| NewsManager.view model.now model.width model.newsManager
+        , Html.App.map AnalyticsMsg
+            <| Footer.view (Maybe.map Date.year model.now)
+        , Html.App.map ErrorManagerMessage
+            <| ErrorManager.view model.errorManager
+        ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ fetchedGoogleGroupMsgs FetchSuccess
-        , errorGoogleGroupMsgs FetchError
+        [ Sub.map NewsManagerMsg NewsManager.subscriptions
         , Window.resizes WindowSize
         ]
 

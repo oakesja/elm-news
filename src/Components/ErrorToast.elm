@@ -1,8 +1,8 @@
-module ErrorToast exposing (view)
+module Components.ErrorToast exposing (view)
 
 import Html exposing (Html, div, text, img)
 import Html.Attributes exposing (class, src, alt, style)
-import Close
+import Components.Close as Close
 
 
 view : String -> Int -> Html ()

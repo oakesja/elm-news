@@ -1,17 +1,17 @@
-module Tag exposing (TagInfo, view)
+module News.Tag exposing (TagInfo, view)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Dict
-import Reddit
-import HackerNews
+import News.Reddit as Reddit
+import News.HackerNews as HackerNews
 import Analytics
 
 
 type alias TagInfo =
     { name : String
     , tagColor : String
-    , link : String
+    , url : String
     }
 
 
@@ -24,7 +24,7 @@ view name =
         div
             [ class <| "tag " ++ tag.tagColor
             , Analytics.onLinkClick
-                <| Analytics.TagLink tag.name tag.link
+                <| Analytics.TagLink tag.name tag.url
             ]
             [ text tag.name ]
 
@@ -49,7 +49,7 @@ elmDiscussTag : TagInfo
 elmDiscussTag =
     { name = "elm-discuss"
     , tagColor = "elm_light_blue"
-    , link = "https://groups.google.com/forum/#!forum/elm-discuss"
+    , url = "https://groups.google.com/forum/#!forum/elm-discuss"
     }
 
 
@@ -57,7 +57,7 @@ elmDevTag : TagInfo
 elmDevTag =
     { name = "elm-dev"
     , tagColor = "elm_dark_blue"
-    , link = "https://groups.google.com/forum/#!forum/elm-dev"
+    , url = "https://groups.google.com/forum/#!forum/elm-dev"
     }
 
 
@@ -65,7 +65,7 @@ redditTag : TagInfo
 redditTag =
     { name = Reddit.tag
     , tagColor = "elm_yellow"
-    , link = "https://www.reddit.com/r/elm/new"
+    , url = "https://www.reddit.com/r/elm/new"
     }
 
 
@@ -73,5 +73,5 @@ hackerNewsTag : TagInfo
 hackerNewsTag =
     { name = HackerNews.tag
     , tagColor = "elm_green"
-    , link = "https://hn.algolia.com/?query=elm&sort=byDate&prefix=false&page=0&dateRange=all&type=story"
+    , url = "https://hn.algolia.com/?query=elm&sort=byDate&prefix=false&page=0&dateRange=all&type=story"
     }
