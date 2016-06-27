@@ -102,6 +102,9 @@
             }
         })
     });
+    app.ports.scrollToTop.subscribe(function() {
+      window.scrollTo(0, 0);
+    });
 </script>
 
 </html>

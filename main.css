@@ -69,7 +69,7 @@
 .body {
   padding: 10px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;;
   justify-content: center;
   align-items: center;
   flex-grow: 1;
@@ -91,7 +91,7 @@
 }
 
 .cards {
-  max-width: 1000px
+  width: 60%
 }
 
 .card {
@@ -156,6 +156,25 @@
 .card__date {
   align-self: center;
   min-width: 110px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  color: #FFFFFF;
+}
+
+.pagination--forward {
+  padding-left: 15px;
+  cursor: pointer;
+}
+
+.pagination--first-back, .pagination--back {
+  padding-right: 10px;
+}
+
+.pagination__icon {
+  cursor: pointer;
 }
 
 .footer {
@@ -236,15 +255,12 @@
 
 /* Responsive */
 
-@media all and (max-width: 1000px) {
-  .cards {
-    max-width: 100%;
-  }
-}
-
 @media all and (max-width: 900px) {
   .header__description {
     display: none;
+  }
+  .cards {
+    width: 100%;
   }
 }
 

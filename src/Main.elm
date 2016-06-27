@@ -90,15 +90,16 @@ update msg model =
                     NewsManager.update cardMangerMsg model.newsManager
             in
                 ( { model | newsManager = newNewsManager }
-                , Cmd.map cardMsgTranslator cmd
+                , Cmd.map newsMsgTranslator cmd
                 )
 
 
-cardMsgTranslator : NewsManager.Translator Msg
-cardMsgTranslator =
+newsMsgTranslator : NewsManager.Translator Msg
+newsMsgTranslator =
     NewsManager.translateMsg
         { onInternalMessage = NewsManagerMsg
         , onError = ErrorManagerMessage << ErrorManager.AddError
+        , onAnalytics = AnalyticsMsg
         }
 
 
@@ -106,7 +107,7 @@ view : Model -> Html Msg
 view model =
     div [ class "main" ]
         [ Html.App.map AnalyticsMsg Header.view
-        , Html.App.map AnalyticsMsg
+        , Html.App.map newsMsgTranslator
             <| NewsManager.view model.now model.width model.newsManager
         , Html.App.map AnalyticsMsg
             <| Footer.view (Maybe.map Date.year model.now)
