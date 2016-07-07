@@ -20,6 +20,7 @@ import News.Fetcher as Fetcher
 import News.Card as Card
 import Components.Spinner as Spinner
 import Analytics
+import ErrorManager
 
 
 type alias Model =
@@ -48,7 +49,7 @@ type InternalMsg
 
 
 type OutMsg
-    = Error String
+    = Error ErrorManager.Error
 
 
 type Msg
@@ -58,7 +59,7 @@ type Msg
 
 type alias MsgTranslator msg =
     { onInternalMessage : InternalMsg -> msg
-    , onError : String -> msg
+    , onError : ErrorManager.Error -> msg
     }
 
 
@@ -86,11 +87,10 @@ update msg model =
 
         FetchError rawError ->
             let
-                _ =
-                    Debug.log "" rawError.error
-
                 error =
-                    "Failed to fetch content from " ++ rawError.tag
+                    { display = "Failed to fetch content from " ++ rawError.tag
+                    , raw = Debug.log "" rawError.error
+                    }
             in
                 ( model
                 , Task.perform never ForParent <| Task.succeed <| Error error

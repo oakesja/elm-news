@@ -55,7 +55,7 @@
     ga('send', 'pageview');
 
     var app = Elm.Main.fullscreen();
-    app.ports.registerLinkClick.subscribe(function(event) {
+    app.ports.registerEvent.subscribe(function(event) {
         ga('send',
             'event',
             event.category,

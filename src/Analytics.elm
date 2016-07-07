@@ -2,7 +2,10 @@ port module Analytics
     exposing
         ( Msg(..)
         , msgToCmd
+        , error
         )
+
+import String
 
 
 type Msg
@@ -11,7 +14,7 @@ type Msg
     | TagLink String String
 
 
-type alias LinkEvent =
+type alias Event =
     { category : String
     , action : String
     , url : String
@@ -35,7 +38,7 @@ msgToCmd msg =
 
 githubRepo : String -> Cmd msg
 githubRepo url =
-    registerLinkClick
+    registerEvent
         { category = "Github Link"
         , action = "click"
         , url = url
@@ -46,18 +49,18 @@ githubRepo url =
 
 newsLink : String -> String -> String -> Cmd msg
 newsLink tag url title =
-    registerLinkClick
+    registerEvent
         { category = "News"
         , action = "click"
         , url = url
-        , title = Just title
+        , title = Just (sanitize title)
         , tag = Just tag
         }
 
 
 tagLink : String -> String -> Cmd msg
 tagLink tag url =
-    registerLinkClick
+    registerEvent
         { category = "Tag"
         , action = "click"
         , url = url
@@ -66,4 +69,30 @@ tagLink tag url =
         }
 
 
-port registerLinkClick : LinkEvent -> Cmd msg
+error : String -> String -> Cmd msg
+error display raw =
+    registerEvent
+        { category = "Error"
+        , action = display
+        , url = raw
+        , title = Nothing
+        , tag = Nothing
+        }
+
+
+sanitize : String -> String
+sanitize title =
+    dropStartString "Re: " title
+        |> dropStartString "[elm-discuss] "
+        |> dropStartString "[elm-dev] "
+
+
+dropStartString : String -> String -> String
+dropStartString prefix str =
+    if String.startsWith prefix str then
+        String.dropLeft (String.length prefix) str
+    else
+        str
+
+
+port registerEvent : Event -> Cmd msg

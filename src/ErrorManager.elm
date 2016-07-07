@@ -1,6 +1,7 @@
 module ErrorManager
     exposing
-        ( Model
+        ( Error
+        , Model
         , Msg(AddError)
         , init
         , update
@@ -14,10 +15,17 @@ import Time
 import Html exposing (Html, div, text)
 import Html.App
 import Components.ErrorToast as ErrorToast
+import Analytics
+
+
+type alias Error =
+    { display : String
+    , raw : String
+    }
 
 
 type alias Model =
-    List ( Bool, String )
+    List ( Bool, Error )
 
 
 init : Model
@@ -26,8 +34,8 @@ init =
 
 
 type Msg
-    = AddError String
-    | AcknowledgeError String
+    = AddError Error
+    | AcknowledgeError Error
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -35,9 +43,10 @@ update msg model =
     case msg of
         AddError error ->
             ( model ++ [ ( False, error ) ]
-            , Task.perform (\_ -> AcknowledgeError error)
-                (\_ -> AcknowledgeError error)
-                (Process.sleep (Time.second * 5))
+            , Cmd.batch
+                [ ackErrorAfterNSeconds error 5
+                , Analytics.error error.display error.raw
+                ]
             )
 
         AcknowledgeError error ->
@@ -46,7 +55,14 @@ update msg model =
             )
 
 
-ackError : String -> Model -> Model
+ackErrorAfterNSeconds : Error -> Float -> Cmd Msg
+ackErrorAfterNSeconds error seconds =
+    Task.perform (\_ -> AcknowledgeError error)
+        (\_ -> AcknowledgeError error)
+        (Process.sleep (Time.second * seconds))
+
+
+ackError : Error -> Model -> Model
 ackError error model =
     case model of
         [] ->
@@ -65,7 +81,7 @@ view model =
         List.indexedMap errorView model
 
 
-errorView : Int -> ( Bool, String ) -> Html Msg
+errorView : Int -> ( Bool, Error ) -> Html Msg
 errorView index ( acked, error ) =
     let
         top =
@@ -75,7 +91,7 @@ errorView index ( acked, error ) =
             -- This is a hack for chrome since it will not refresh when the error toast is removed
             div [] [ text "&nbsp" ]
         else
-            Html.App.map (\_ -> AcknowledgeError error) (ErrorToast.view error top)
+            Html.App.map (\_ -> AcknowledgeError error) (ErrorToast.view error.display top)
 
 
 noErrors : Model -> Bool

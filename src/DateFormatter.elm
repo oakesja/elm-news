@@ -23,7 +23,7 @@ format maybeNow date =
                 else if diff > 0 && diff <= 1 then
                     "1 second ago"
                 else if diff > 1 && diff < 60 then
-                    toString diff ++ " seconds ago"
+                    toString (round diff) ++ " seconds ago"
                 else if diff >= 60 && diff < 120 then
                     "1 minute ago"
                 else if diff >= 120 && diff < 3600 then
