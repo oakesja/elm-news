@@ -2,12 +2,7 @@ port module Analytics
     exposing
         ( Msg(..)
         , msgToCmd
-        , onLinkClick
         )
-
-import Html
-import Html.Events exposing (Options, onWithOptions)
-import Json.Decode as Json
 
 
 type Msg
@@ -69,20 +64,6 @@ tagLink tag url =
         , title = Nothing
         , tag = Just tag
         }
-
-
-onLinkClick : Msg -> Html.Attribute Msg
-onLinkClick msg =
-    onWithOptions "click" clickOptions
-        <| Json.succeed
-        <| msg
-
-
-clickOptions : Options
-clickOptions =
-    { stopPropagation = False
-    , preventDefault = True
-    }
 
 
 port registerLinkClick : LinkEvent -> Cmd msg

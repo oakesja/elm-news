@@ -106,12 +106,12 @@ view : Model -> Html Msg
 view model =
     div [ class "main" ]
         [ Html.App.map AnalyticsMsg Header.view
-        , Html.App.map AnalyticsMsg
-            <| NewsManager.view model.now model.width model.newsManager
-        , Html.App.map AnalyticsMsg
-            <| Footer.view (Maybe.map Date.year model.now)
-        , Html.App.map ErrorManagerMessage
-            <| ErrorManager.view model.errorManager
+        , Html.App.map AnalyticsMsg <|
+            NewsManager.view model.now model.width model.newsManager
+        , Html.App.map AnalyticsMsg <|
+            Footer.view (Maybe.map Date.year model.now)
+        , Html.App.map ErrorManagerMessage <|
+            ErrorManager.view model.errorManager
         ]
 
 

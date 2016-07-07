@@ -29,8 +29,8 @@ fetch =
 
 decoder : Decoder (List Story)
 decoder =
-    customDecoder hackerNewsDecoder
-        <| \stories ->
+    customDecoder hackerNewsDecoder <|
+        \stories ->
             List.map storyToMessage stories
                 |> List.filter (\s -> s.url /= "")
                 |> Ok
