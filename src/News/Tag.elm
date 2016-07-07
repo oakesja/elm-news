@@ -2,6 +2,7 @@ module News.Tag exposing (TagInfo, view)
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
@@ -23,7 +24,7 @@ view name =
     in
         div
             [ class <| "tag " ++ tag.tagColor
-            , Analytics.onLinkClick <|
+            , onClick <|
                 Analytics.TagLink tag.name tag.url
             ]
             [ text tag.name ]

@@ -4,6 +4,7 @@ import Date exposing (Date)
 import DateFormatter
 import Html exposing (Html, div, a, text, span)
 import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick)
 import News.Story exposing (Story)
 import News.Tag as Tag
 import Analytics
@@ -14,7 +15,7 @@ view now width story =
     let
         attrs =
             if width < 600 then
-                [ Analytics.onLinkClick <|
+                [ onClick <|
                     Analytics.NewsLink story.tag story.url story.title
                 , class "card card__link"
                 ]
@@ -40,7 +41,7 @@ linkView : Story -> Html Analytics.Msg
 linkView { url, title, domain, tag } =
     div [ class "card__description__header" ]
         [ a
-            [ Analytics.onLinkClick <|
+            [ onClick <|
                 Analytics.NewsLink tag url title
             , href url
             , class "card__description__title"

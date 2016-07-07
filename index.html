@@ -64,9 +64,6 @@
                 'transport': 'beacon',
                 'dimension1': event.title,
                 'dimension2': event.tag,
-                'hitCallback': function() {
-                    document.location = event.url;
-                }
             });
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
