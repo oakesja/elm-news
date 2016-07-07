@@ -16,10 +16,6 @@ import News.Manager as NewsManager
 import Analytics
 
 
--- TODO fetch messages over a certain time span and on scroll or paging
--- TODO write readme for description, bugs, feature request, PRs and move deployment stuff to another md
-
-
 type alias Model =
     { now : Maybe Date
     , newsManager : NewsManager.Model
