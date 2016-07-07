@@ -29,8 +29,22 @@
   text-overflow: ellipsis;
 }
 
+.header__right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .header__github {
   height: 45px;
+}
+
+.header__top-news {
+  padding-right: 30px;
+  text-align: center;
+  color: #FFFFFF;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .github {
