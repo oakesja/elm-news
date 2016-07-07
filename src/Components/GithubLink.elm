@@ -11,7 +11,7 @@ view imgClasses =
         [ class <| "github " ++ imgClasses
         , src "assets/images/GitHub-Mark-Light-64px.png"
         , alt "elm-news on github"
-        , Analytics.onLinkClick
-            <| Analytics.GithubLink "https://github.com/oakesja/elm-news"
+        , Analytics.onLinkClick <|
+            Analytics.GithubLink "https://github.com/oakesja/elm-news"
         ]
         []

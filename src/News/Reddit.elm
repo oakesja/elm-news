@@ -38,8 +38,8 @@ timeDecoder =
 
 domainDecoder : Decoder String
 domainDecoder =
-    customDecoder string
-        <| \domain ->
+    customDecoder string <|
+        \domain ->
             if String.contains "self.elm" domain then
                 Ok "reddit.com"
             else

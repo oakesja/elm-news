@@ -73,9 +73,9 @@ tagLink tag url =
 
 onLinkClick : Msg -> Html.Attribute Msg
 onLinkClick msg =
-    onWithOptions "click" clickOptions
-        <| Json.succeed
-        <| msg
+    onWithOptions "click" clickOptions <|
+        Json.succeed <|
+            msg
 
 
 clickOptions : Options

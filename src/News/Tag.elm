@@ -23,8 +23,8 @@ view name =
     in
         div
             [ class <| "tag " ++ tag.tagColor
-            , Analytics.onLinkClick
-                <| Analytics.TagLink tag.name tag.url
+            , Analytics.onLinkClick <|
+                Analytics.TagLink tag.name tag.url
             ]
             [ text tag.name ]
 

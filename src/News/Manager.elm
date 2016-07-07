@@ -104,10 +104,10 @@ view now width model =
             if False then
                 Spinner.view
             else
-                div [ class "cards" ]
-                    <| List.map (Card.view now width)
-                    <| List.reverse
-                    <| List.sortBy .date model.allStories
+                div [ class "cards" ] <|
+                    List.map (Card.view now width) <|
+                        List.reverse <|
+                            List.sortBy .date model.allStories
     in
         div [ class "body" ]
             [ cards ]

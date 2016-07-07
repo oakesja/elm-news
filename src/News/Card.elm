@@ -14,8 +14,8 @@ view now width story =
     let
         attrs =
             if width < 600 then
-                [ Analytics.onLinkClick
-                    <| Analytics.NewsLink story.tag story.url story.title
+                [ Analytics.onLinkClick <|
+                    Analytics.NewsLink story.tag story.url story.title
                 , class "card card__link"
                 ]
             else
@@ -40,8 +40,8 @@ linkView : Story -> Html Analytics.Msg
 linkView { url, title, domain, tag } =
     div [ class "card__description__header" ]
         [ a
-            [ Analytics.onLinkClick
-                <| Analytics.NewsLink tag url title
+            [ Analytics.onLinkClick <|
+                Analytics.NewsLink tag url title
             , href url
             , class "card__description__title"
             ]

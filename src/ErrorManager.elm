@@ -61,8 +61,8 @@ ackError error model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        <| List.indexedMap errorView model
+    div [] <|
+        List.indexedMap errorView model
 
 
 errorView : Int -> ( Bool, String ) -> Html Msg
