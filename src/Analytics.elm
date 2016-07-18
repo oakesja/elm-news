@@ -13,6 +13,7 @@ type Msg
     | NewsLink String String String
     | TagLink String String
     | Newsletter
+    | TwitterLink String
 
 
 type alias Event =
@@ -38,6 +39,9 @@ msgToCmd msg =
 
         Newsletter ->
             newsletter
+
+        TwitterLink url ->
+            twitterLink url
 
 
 githubRepo : String -> Cmd msg
@@ -79,6 +83,17 @@ newsletter =
         { category = "Newsletter"
         , action = "click"
         , url = ""
+        , title = Nothing
+        , tag = Nothing
+        }
+
+
+twitterLink : String -> Cmd msg
+twitterLink url =
+    registerEvent
+        { category = "Twitter"
+        , action = "click"
+        , url = url
         , title = Nothing
         , tag = Nothing
         }
