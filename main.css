@@ -39,8 +39,17 @@
   height: 45px;
 }
 
+.header__twitter {
+  height: 50px;
+  padding-right: 20px;
+}
+
+.header__twitter:hover {
+  opacity: 0.7;
+}
+
 .header__top-news {
-  padding-right: 30px;
+  padding-right: 20px;
   text-align: center;
   color: #FFFFFF;
   cursor: pointer;
