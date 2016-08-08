@@ -132,6 +132,12 @@
   color: #000000;
 }
 
+.tag__link {
+  cursor: pointer;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
 .tag {
   padding: 5px;
   min-width: 120px;

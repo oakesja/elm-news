@@ -1,7 +1,7 @@
 module News.Tag exposing (TagInfo, view)
 
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, div, text, a)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
@@ -27,7 +27,12 @@ view name =
             , onClick <|
                 Analytics.TagLink tag.name tag.url
             ]
-            [ text tag.name ]
+            [ a
+                [ class "tag__link"
+                , href tag.url
+                ]
+                [ text tag.name ]
+            ]
 
 
 lookupTagInfo : String -> TagInfo
