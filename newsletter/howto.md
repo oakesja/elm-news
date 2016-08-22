@@ -1,0 +1,7 @@
+- Update date
+- Change articles
+- Ensure links work
+- Commit changes
+- Copy html to gmail
+- Ensure sending from elm-news
+- Update twitter
