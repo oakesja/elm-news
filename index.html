@@ -68,7 +68,7 @@
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
         // 100 messages is the max that you can get from the rss feed
-        var url = "https://groups.google.com/forum/feed/" + tag + "/msgs/rss_v2_0.xml?num=100";
+        var url = "https://groups.google.com/forum/feed/" + tag + "/topics/rss_v2_0.xml?num=100";
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {

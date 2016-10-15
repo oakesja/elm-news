@@ -5,8 +5,6 @@ port module Analytics
         , error
         )
 
-import String
-
 
 type Msg
     = GithubLink String
@@ -61,7 +59,7 @@ newsLink tag url title =
         { category = "News"
         , action = "click"
         , url = url
-        , title = Just (sanitize title)
+        , title = Just title
         , tag = Just tag
         }
 
@@ -108,21 +106,6 @@ error display raw =
         , title = Nothing
         , tag = Nothing
         }
-
-
-sanitize : String -> String
-sanitize title =
-    dropStartString "Re: " title
-        |> dropStartString "[elm-discuss] "
-        |> dropStartString "[elm-dev] "
-
-
-dropStartString : String -> String -> String
-dropStartString prefix str =
-    if String.startsWith prefix str then
-        String.dropLeft (String.length prefix) str
-    else
-        str
 
 
 port registerEvent : Event -> Cmd msg
