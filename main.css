@@ -49,6 +49,7 @@
 }
 
 .header__top-news {
+  padding-left: 10px;
   padding-right: 20px;
   text-align: center;
   color: #FFFFFF;

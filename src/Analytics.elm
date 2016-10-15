@@ -5,12 +5,10 @@ port module Analytics
         , error
         )
 
-import String
-
 
 type Msg
     = GithubLink String
-    | NewsLink String String String
+    | NewsLink String String String String
     | TagLink String String
     | Newsletter
     | TwitterLink String
@@ -22,6 +20,7 @@ type alias Event =
     , url : String
     , title : Maybe String
     , tag : Maybe String
+    , author : Maybe String
     }
 
 
@@ -31,8 +30,8 @@ msgToCmd msg =
         GithubLink url ->
             githubRepo url
 
-        NewsLink tag url title ->
-            newsLink tag url title
+        NewsLink tag url title author ->
+            newsLink tag url title author
 
         TagLink tag url ->
             tagLink tag url
@@ -52,17 +51,19 @@ githubRepo url =
         , url = url
         , title = Nothing
         , tag = Nothing
+        , author = Nothing
         }
 
 
-newsLink : String -> String -> String -> Cmd msg
-newsLink tag url title =
+newsLink : String -> String -> String -> String -> Cmd msg
+newsLink tag url title author =
     registerEvent
         { category = "News"
         , action = "click"
         , url = url
-        , title = Just (sanitize title)
+        , title = Just title
         , tag = Just tag
+        , author = Just author
         }
 
 
@@ -74,6 +75,7 @@ tagLink tag url =
         , url = url
         , title = Nothing
         , tag = Just tag
+        , author = Nothing
         }
 
 
@@ -85,6 +87,7 @@ newsletter =
         , url = ""
         , title = Nothing
         , tag = Nothing
+        , author = Nothing
         }
 
 
@@ -96,6 +99,7 @@ twitterLink url =
         , url = url
         , title = Nothing
         , tag = Nothing
+        , author = Nothing
         }
 
 
@@ -107,22 +111,8 @@ error display raw =
         , url = raw
         , title = Nothing
         , tag = Nothing
+        , author = Nothing
         }
-
-
-sanitize : String -> String
-sanitize title =
-    dropStartString "Re: " title
-        |> dropStartString "[elm-discuss] "
-        |> dropStartString "[elm-dev] "
-
-
-dropStartString : String -> String -> String
-dropStartString prefix str =
-    if String.startsWith prefix str then
-        String.dropLeft (String.length prefix) str
-    else
-        str
 
 
 port registerEvent : Event -> Cmd msg

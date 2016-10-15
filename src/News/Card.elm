@@ -16,7 +16,7 @@ view now width story =
         attrs =
             if width < 600 then
                 [ onClick <|
-                    Analytics.NewsLink story.tag story.url story.title
+                    Analytics.NewsLink story.tag story.url story.title story.author
                 , class "card card__link"
                 ]
             else
@@ -38,11 +38,11 @@ card now story attrs =
 
 
 linkView : Story -> Html Analytics.Msg
-linkView { url, title, domain, tag } =
+linkView { url, title, domain, tag, author } =
     div [ class "card__description__header" ]
         [ a
             [ onClick <|
-                Analytics.NewsLink tag url title
+                Analytics.NewsLink tag url title author
             , href url
             , class "card__description__title"
             ]
