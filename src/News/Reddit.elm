@@ -3,7 +3,8 @@ module News.Reddit exposing (fetch, tag)
 import Json.Decode exposing (..)
 import Http
 import String
-import News.Story exposing (Story, StoryTask)
+import News.Story exposing (Story)
+import Task exposing (Task)
 
 
 tag : String
@@ -11,7 +12,7 @@ tag =
     "reddit"
 
 
-fetch : StoryTask
+fetch : Task Http.Error (List Story)
 fetch =
     Http.get decoder "https://www.reddit.com/r/elm/new/.json"
 

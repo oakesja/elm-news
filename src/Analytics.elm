@@ -1,17 +1,6 @@
-port module Analytics
-    exposing
-        ( Msg(..)
-        , msgToCmd
-        , error
-        )
+port module Analytics exposing (..)
 
-
-type Msg
-    = GithubLink String
-    | NewsLink String String String String
-    | TagLink String String
-    | Newsletter
-    | TwitterLink String
+import News.Story exposing (Story)
 
 
 type alias Event =
@@ -24,95 +13,70 @@ type alias Event =
     }
 
 
-msgToCmd : Msg -> Cmd msg
-msgToCmd msg =
-    case msg of
-        GithubLink url ->
-            githubRepo url
-
-        NewsLink tag url title author ->
-            newsLink tag url title author
-
-        TagLink tag url ->
-            tagLink tag url
-
-        Newsletter ->
-            newsletter
-
-        TwitterLink url ->
-            twitterLink url
-
-
-githubRepo : String -> Cmd msg
+githubRepo : String -> Event
 githubRepo url =
-    registerEvent
-        { category = "Github Link"
-        , action = "click"
-        , url = url
-        , title = Nothing
-        , tag = Nothing
-        , author = Nothing
-        }
+    { category = "Github Link"
+    , action = "click"
+    , url = url
+    , title = Nothing
+    , tag = Nothing
+    , author = Nothing
+    }
 
 
-newsLink : String -> String -> String -> String -> Cmd msg
-newsLink tag url title author =
-    registerEvent
-        { category = "News"
-        , action = "click"
-        , url = url
-        , title = Just title
-        , tag = Just tag
-        , author = Just author
-        }
+newsLink : Story -> Event
+newsLink { tag, url, title, author } =
+    { category = "News"
+    , action = "click"
+    , url = url
+    , title = Just title
+    , tag = Just tag
+    , author = Just author
+    }
 
 
-tagLink : String -> String -> Cmd msg
+tagLink : String -> String -> Event
 tagLink tag url =
-    registerEvent
-        { category = "Tag"
-        , action = "click"
-        , url = url
-        , title = Nothing
-        , tag = Just tag
-        , author = Nothing
-        }
+    { category = "Tag"
+    , action = "click"
+    , url = url
+    , title = Nothing
+    , tag = Just tag
+    , author = Nothing
+    }
 
 
-newsletter : Cmd msg
+newsletter : Event
 newsletter =
-    registerEvent
-        { category = "Newsletter"
-        , action = "click"
-        , url = ""
-        , title = Nothing
-        , tag = Nothing
-        , author = Nothing
-        }
+    { category = "Newsletter"
+    , action = "click"
+    , url = ""
+    , title = Nothing
+    , tag = Nothing
+    , author = Nothing
+    }
 
 
-twitterLink : String -> Cmd msg
+twitterLink : String -> Event
 twitterLink url =
-    registerEvent
-        { category = "Twitter"
-        , action = "click"
-        , url = url
-        , title = Nothing
-        , tag = Nothing
-        , author = Nothing
-        }
+    { category = "Twitter"
+    , action = "click"
+    , url = url
+    , title = Nothing
+    , tag = Nothing
+    , author = Nothing
+    }
 
 
-error : String -> String -> Cmd msg
+error : String -> String -> Event
 error display raw =
-    registerEvent
-        { category = "Error"
-        , action = display
-        , url = raw
-        , title = Nothing
-        , tag = Nothing
-        , author = Nothing
-        }
+    { category = "Error"
+    , action = display
+    , url = raw
+    , title = Nothing
+    , tag = Nothing
+    , author = Nothing
+    }
 
 
 port registerEvent : Event -> Cmd msg

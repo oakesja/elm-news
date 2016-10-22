@@ -6,32 +6,32 @@ import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
-import Analytics
+import Analytics exposing (Event)
 
 
 type alias TagInfo =
-    { name : String
-    , tagColor : String
+    { tagColor : String
     , url : String
     }
 
 
-view : String -> Html Analytics.Msg
-view name =
+view : String -> (Event -> msg) -> Html msg
+view name onLinkClick =
     let
         tag =
             lookupTagInfo name
     in
         div
             [ class <| "tag " ++ tag.tagColor
-            , onClick <|
-                Analytics.TagLink tag.name tag.url
+            , Analytics.tagLink name tag.url
+                |> onLinkClick
+                |> onClick
             ]
             [ a
                 [ class "tag__link"
                 , href tag.url
                 ]
-                [ text tag.name ]
+                [ text name ]
             ]
 
 
@@ -39,7 +39,7 @@ lookupTagInfo : String -> TagInfo
 lookupTagInfo name =
     let
         default =
-            TagInfo "unknown" "grey" ""
+            TagInfo "grey" ""
 
         lookup =
             Dict.empty
@@ -53,31 +53,27 @@ lookupTagInfo name =
 
 elmDiscussTag : TagInfo
 elmDiscussTag =
-    { name = "elm-discuss"
-    , tagColor = "elm_light_blue"
+    { tagColor = "elm_light_blue"
     , url = "https://groups.google.com/forum/#!forum/elm-discuss"
     }
 
 
 elmDevTag : TagInfo
 elmDevTag =
-    { name = "elm-dev"
-    , tagColor = "elm_dark_blue"
+    { tagColor = "elm_dark_blue"
     , url = "https://groups.google.com/forum/#!forum/elm-dev"
     }
 
 
 redditTag : TagInfo
 redditTag =
-    { name = Reddit.tag
-    , tagColor = "elm_yellow"
+    { tagColor = "elm_yellow"
     , url = "https://www.reddit.com/r/elm/new"
     }
 
 
 hackerNewsTag : TagInfo
 hackerNewsTag =
-    { name = HackerNews.tag
-    , tagColor = "elm_green"
+    { tagColor = "elm_green"
     , url = "https://hn.algolia.com/?query=elm&sort=byDate&prefix=false&page=0&dateRange=all&type=story"
     }

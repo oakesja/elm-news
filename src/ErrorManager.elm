@@ -46,6 +46,7 @@ update msg model =
             , Cmd.batch
                 [ ackErrorAfterNSeconds error 5
                 , Analytics.error error.display error.raw
+                    |> Analytics.registerEvent
                 ]
             )
 
@@ -91,7 +92,9 @@ errorView index ( acked, error ) =
             -- This is a hack for chrome since it will not refresh when the error toast is removed
             div [] [ text "&nbsp" ]
         else
-            Html.App.map (\_ -> AcknowledgeError error) (ErrorToast.view error.display top)
+            Html.App.map
+                (\_ -> AcknowledgeError error)
+                (ErrorToast.view error.display top)
 
 
 noErrors : Model -> Bool
