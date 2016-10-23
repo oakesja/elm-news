@@ -3,13 +3,13 @@ module Components.Footer exposing (view)
 import Html exposing (Html, div, footer, text)
 import Html.Attributes exposing (class)
 import Components.GithubLink as GithubLink
-import Analytics
+import Analytics exposing (Event)
 
 
-view : Maybe Int -> Html Analytics.Msg
-view currentYear =
+view : Maybe Int -> (Event -> msg) -> Html msg
+view currentYear onLinkClick =
     footer [ class "footer grey" ]
-        [ GithubLink.view "footer__github"
+        [ GithubLink.view "footer__github" onLinkClick
         , div [ class "footer__description" ]
             [ div [] [ text "Code for this site is open source and written in Elm" ]
             , div [] [ text <| "© " ++ (copyrightYear currentYear) ++ " Jacob Oakes" ]
@@ -19,17 +19,16 @@ view currentYear =
 
 copyrightYear : Maybe Int -> String
 copyrightYear currentYear =
-    case currentYear of
-        Just year ->
-            if year > starYear then
-                toString starYear ++ "-" ++ toString year
-            else
-                toString starYear
+    let
+        startYear =
+            2016
+    in
+        case currentYear of
+            Just year ->
+                if year > startYear then
+                    toString startYear ++ "-" ++ toString year
+                else
+                    toString startYear
 
-        Nothing ->
-            toString starYear
-
-
-starYear : Int
-starYear =
-    2016
+            Nothing ->
+                toString startYear

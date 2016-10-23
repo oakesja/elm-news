@@ -12,13 +12,17 @@ import Window
 import Components.Header as Header
 import Components.Footer as Footer
 import ErrorManager
-import News.Manager as NewsManager
+import News.Story exposing (Story, StoryResp, StoryError)
+import News.View as News
+import News.Reddit as Reddit
+import News.HackerNews as HackerNews
 import Analytics
+import Http
 
 
 type alias Model =
     { now : Maybe Date
-    , newsManager : NewsManager.Model
+    , allStories : List Story
     , errorManager : ErrorManager.Model
     , width : Int
     }
@@ -27,19 +31,19 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        ( newsManager, newsManagerCmd ) =
-            NewsManager.init
-
         model =
             { now = Nothing
-            , newsManager = newsManager
             , errorManager = ErrorManager.init
+            , allStories = []
             , width = 0
             }
 
         cmd =
             Cmd.batch
-                [ Cmd.map NewsManagerMsg newsManagerCmd
+                [ fetchGoogleGroupMsgs "elm-dev"
+                , fetchGoogleGroupMsgs "elm-discuss"
+                , fetch Reddit.tag Reddit.fetch
+                , fetch HackerNews.tag HackerNews.fetch
                 , Task.perform never CurrentDate Date.now
                 , Task.perform never WindowSize Window.size
                 ]
@@ -47,12 +51,25 @@ init =
         ( model, cmd )
 
 
+fetch : String -> Task Http.Error (List Story) -> Cmd Msg
+fetch tag task =
+    Task.perform
+        (\error ->
+            toString error
+                |> StoryError tag
+                |> NewsFetchError
+        )
+        (\links -> NewsFetchSuccess (StoryResp tag links))
+        task
+
+
 type Msg
     = CurrentDate Date
     | ErrorManagerMessage ErrorManager.Msg
     | WindowSize Window.Size
-    | AnalyticsMsg Analytics.Msg
-    | NewsManagerMsg NewsManager.InternalMsg
+    | AnalyticsEvent Analytics.Event
+    | NewsFetchSuccess StoryResp
+    | NewsFetchError StoryError
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -64,59 +81,74 @@ update msg model =
             )
 
         ErrorManagerMessage errorMsg ->
-            let
-                ( newErrorMang, fx ) =
-                    ErrorManager.update errorMsg model.errorManager
-            in
-                ( { model | errorManager = newErrorMang }
-                , Cmd.map ErrorManagerMessage fx
-                )
+            updateErrorManager errorMsg model
 
         WindowSize size ->
             ( { model | width = size.width }
             , Cmd.none
             )
 
-        AnalyticsMsg analyticsMsg ->
-            ( model, Analytics.msgToCmd analyticsMsg )
+        AnalyticsEvent event ->
+            ( model, Analytics.registerEvent event )
 
-        NewsManagerMsg cardMangerMsg ->
+        NewsFetchSuccess resp ->
+            ( { model | allStories = model.allStories ++ resp.stories }
+            , Cmd.none
+            )
+
+        NewsFetchError rawError ->
             let
-                ( newNewsManager, cmd ) =
-                    NewsManager.update cardMangerMsg model.newsManager
+                error =
+                    { display = "Failed to fetch content from " ++ rawError.tag
+                    , raw = Debug.log "" rawError.error
+                    }
             in
-                ( { model | newsManager = newNewsManager }
-                , Cmd.map cardMsgTranslator cmd
-                )
+                updateErrorManager (ErrorManager.AddError error) model
 
 
-cardMsgTranslator : NewsManager.Translator Msg
-cardMsgTranslator =
-    NewsManager.translateMsg
-        { onInternalMessage = NewsManagerMsg
-        , onError = ErrorManagerMessage << ErrorManager.AddError
-        }
+updateErrorManager : ErrorManager.Msg -> Model -> ( Model, Cmd Msg )
+updateErrorManager msg model =
+    let
+        ( newErrorMang, fx ) =
+            ErrorManager.update msg model.errorManager
+    in
+        ( { model | errorManager = newErrorMang }
+        , Cmd.map ErrorManagerMessage fx
+        )
 
 
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ Html.App.map AnalyticsMsg Header.view
-        , Html.App.map AnalyticsMsg <|
-            NewsManager.view model.now model.width model.newsManager
-        , Html.App.map AnalyticsMsg <|
-            Footer.view (Maybe.map Date.year model.now)
-        , Html.App.map ErrorManagerMessage <|
-            ErrorManager.view model.errorManager
+        [ Header.view AnalyticsEvent
+        , News.view
+            { now = model.now
+            , screenWidth = model.width
+            , stories = model.allStories
+            , onLinkClick = AnalyticsEvent
+            }
+        , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
+        , ErrorManager.view model.errorManager
+            |> Html.App.map ErrorManagerMessage
         ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map NewsManagerMsg NewsManager.subscriptions
+        [ fetchedGoogleGroupMsgs NewsFetchSuccess
+        , errorGoogleGroupMsgs NewsFetchError
         , Window.resizes WindowSize
         ]
+
+
+port fetchGoogleGroupMsgs : String -> Cmd msg
+
+
+port fetchedGoogleGroupMsgs : (StoryResp -> msg) -> Sub msg
+
+
+port errorGoogleGroupMsgs : (StoryError -> msg) -> Sub msg
 
 
 main : Program Never

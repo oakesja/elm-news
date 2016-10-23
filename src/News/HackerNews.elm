@@ -4,9 +4,10 @@ module News.HackerNews exposing (fetch, tag)
 
 import Json.Decode exposing (..)
 import Http
-import News.Story exposing (Story, StoryTask)
+import News.Story exposing (Story)
 import Erl
 import String
+import Task exposing (Task)
 
 
 type alias HackerNewsStory =
@@ -22,7 +23,7 @@ tag =
     "Hacker News"
 
 
-fetch : StoryTask
+fetch : Task Http.Error (List Story)
 fetch =
     Http.get decoder "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
 

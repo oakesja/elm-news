@@ -74,7 +74,7 @@
             if (result.error) {
                 var error = {
                     tag: tag,
-                    error: result.error
+                    error: result.error.message
                 }
                 app.ports.errorGoogleGroupMsgs.send(error);
             } else {
