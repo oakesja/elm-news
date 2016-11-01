@@ -1,161 +1,98 @@
-port module Main exposing (..)
+module Main exposing (..)
 
-import Html exposing (Html, a, text, div, h1, span)
-import Html.Attributes exposing (href, class)
+import Html exposing (Html, text)
 import Html.App
-import Date exposing (Date)
-import Task exposing (Task, andThen)
-import Process
-import Time
-import Basics.Extra exposing (never)
-import Window
-import Components.Header as Header
-import Components.Footer as Footer
-import ErrorManager
-import News.Story exposing (Story, StoryResp, StoryError)
-import News.View as News
-import News.Reddit as Reddit
-import News.HackerNews as HackerNews
-import Analytics
-import Http
+import Navigation exposing (Location)
+import HomePage
+import NewslettersPage
+import Page exposing (Page)
 
 
 type alias Model =
-    { now : Maybe Date
-    , allStories : List Story
-    , errorManager : ErrorManager.Model
-    , width : Int
+    { currentPage : Page
+    , homePage : HomePage.Model
+    , newslettersPage : NewslettersPage.Model
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    let
-        model =
-            { now = Nothing
-            , errorManager = ErrorManager.init
-            , allStories = []
-            , width = 0
-            }
-
-        cmd =
-            Cmd.batch
-                [ fetchGoogleGroupMsgs "elm-dev"
-                , fetchGoogleGroupMsgs "elm-discuss"
-                , fetch Reddit.tag Reddit.fetch
-                , fetch HackerNews.tag HackerNews.fetch
-                , Task.perform never CurrentDate Date.now
-                , Task.perform never WindowSize Window.size
-                ]
-    in
-        ( model, cmd )
-
-
-fetch : String -> Task Http.Error (List Story) -> Cmd Msg
-fetch tag task =
-    Task.perform
-        (\error ->
-            toString error
-                |> StoryError tag
-                |> NewsFetchError
-        )
-        (\links -> NewsFetchSuccess (StoryResp tag links))
-        task
+init : Page -> ( Model, Cmd Msg )
+init page =
+    { currentPage = page
+    , homePage = HomePage.init
+    , newslettersPage = NewslettersPage.init
+    }
+        ! [ loadPage page ]
 
 
 type Msg
-    = CurrentDate Date
-    | ErrorManagerMessage ErrorManager.Msg
-    | WindowSize Window.Size
-    | AnalyticsEvent Analytics.Event
-    | NewsFetchSuccess StoryResp
-    | NewsFetchError StoryError
+    = HomePageMsg HomePage.Msg
+    | NewslettersMsg NewslettersPage.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        CurrentDate date ->
-            ( { model | now = Just date }
-            , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
-            )
-
-        ErrorManagerMessage errorMsg ->
-            updateErrorManager errorMsg model
-
-        WindowSize size ->
-            ( { model | width = size.width }
-            , Cmd.none
-            )
-
-        AnalyticsEvent event ->
-            ( model, Analytics.registerEvent event )
-
-        NewsFetchSuccess resp ->
-            ( { model | allStories = model.allStories ++ resp.stories }
-            , Cmd.none
-            )
-
-        NewsFetchError rawError ->
+        HomePageMsg homeMsg ->
             let
-                error =
-                    { display = "Failed to fetch content from " ++ rawError.tag
-                    , raw = Debug.log "" rawError.error
-                    }
+                ( newHomePage, cmds ) =
+                    HomePage.update homeMsg model.homePage
             in
-                updateErrorManager (ErrorManager.AddError error) model
+                ( { model | homePage = newHomePage }
+                , Cmd.map HomePageMsg cmds
+                )
 
-
-updateErrorManager : ErrorManager.Msg -> Model -> ( Model, Cmd Msg )
-updateErrorManager msg model =
-    let
-        ( newErrorMang, fx ) =
-            ErrorManager.update msg model.errorManager
-    in
-        ( { model | errorManager = newErrorMang }
-        , Cmd.map ErrorManagerMessage fx
-        )
+        NewslettersMsg newsLettersMsg ->
+            let
+                ( newNewsletter, cmds ) =
+                    NewslettersPage.update newsLettersMsg model.newslettersPage
+            in
+                ( { model | newslettersPage = newNewsletter }
+                , Cmd.map NewslettersMsg cmds
+                )
 
 
 view : Model -> Html Msg
 view model =
-    div [ class "main" ]
-        [ Header.view AnalyticsEvent
-        , News.view
-            { now = model.now
-            , screenWidth = model.width
-            , stories = model.allStories
-            , onLinkClick = AnalyticsEvent
-            }
-        , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
-        , ErrorManager.view model.errorManager
-            |> Html.App.map ErrorManagerMessage
-        ]
+    case model.currentPage of
+        Page.Home ->
+            HomePage.view model.homePage
+                |> Html.App.map HomePageMsg
+
+        Page.Newsletters ->
+            NewslettersPage.view model.newslettersPage
+                |> Html.App.map NewslettersMsg
+
+        Page.NotFound ->
+            text "404"
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ fetchedGoogleGroupMsgs NewsFetchSuccess
-        , errorGoogleGroupMsgs NewsFetchError
-        , Window.resizes WindowSize
-        ]
+urlUpdate : Page -> Model -> ( Model, Cmd Msg )
+urlUpdate page model =
+    ( { model | currentPage = page }
+    , loadPage page
+    )
 
 
-port fetchGoogleGroupMsgs : String -> Cmd msg
+loadPage : Page -> Cmd Msg
+loadPage page =
+    case page of
+        Page.Home ->
+            Cmd.map HomePageMsg HomePage.onPageLoad
 
+        Page.Newsletters ->
+            Cmd.map NewslettersMsg NewslettersPage.onPageLoad
 
-port fetchedGoogleGroupMsgs : (StoryResp -> msg) -> Sub msg
-
-
-port errorGoogleGroupMsgs : (StoryError -> msg) -> Sub msg
+        Page.NotFound ->
+            Cmd.none
 
 
 main : Program Never
 main =
-    Html.App.program
+    Navigation.program
+        (Navigation.makeParser Page.parse)
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , urlUpdate = urlUpdate
+        , subscriptions = (\_ -> Sub.none)
         }
