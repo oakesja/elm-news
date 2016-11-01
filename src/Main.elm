@@ -1,10 +1,19 @@
 module Main exposing (..)
 
-import Html exposing (Html, text)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
+import Date exposing (Date)
+import Time
+import Task exposing (andThen)
+import Process
+import Components.Header as Header
+import Components.Footer as Footer
 import Html.App
+import Basics.Extra exposing (never)
 import Navigation exposing (Location)
 import HomePage
 import NewslettersPage
+import Analytics
 import Page exposing (Page)
 
 
@@ -12,6 +21,7 @@ type alias Model =
     { currentPage : Page
     , homePage : HomePage.Model
     , newslettersPage : NewslettersPage.Model
+    , now : Maybe Date
     }
 
 
@@ -20,6 +30,7 @@ init page =
     { currentPage = page
     , homePage = HomePage.init
     , newslettersPage = NewslettersPage.init
+    , now = Nothing
     }
         ! [ loadPage page ]
 
@@ -27,6 +38,8 @@ init page =
 type Msg
     = HomePageMsg HomePage.Msg
     | NewslettersMsg NewslettersPage.Msg
+    | AnalyticsEvent Analytics.Event
+    | CurrentDate Date
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,12 +63,29 @@ update msg model =
                 , Cmd.map NewslettersMsg cmds
                 )
 
+        AnalyticsEvent event ->
+            ( model, Analytics.registerEvent event )
+
+        CurrentDate date ->
+            ( { model | now = Just date }
+            , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
+            )
+
 
 view : Model -> Html Msg
 view model =
+    div [ class "main" ]
+        [ Header.view AnalyticsEvent
+        , body model
+        , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
+        ]
+
+
+body : Model -> Html Msg
+body model =
     case model.currentPage of
         Page.Home ->
-            HomePage.view model.homePage
+            HomePage.view model.now model.homePage
                 |> Html.App.map HomePageMsg
 
         Page.Newsletters ->
