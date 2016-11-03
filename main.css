@@ -1,3 +1,23 @@
+h1 {
+  font-size: 2em;
+  font-weight: normal;
+}
+
+
+a {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.internal__link {
+  color: #5A6378;
+  font-weight: bold;
+}
+
+.internal__link:visited {
+  color: #5A6378;
+}
+
 .page {
   margin: 0px;
 }
@@ -8,6 +28,7 @@
   min-height: 100vh;
   justify-content: space-between;
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+  background-color: #DDDDDD;
 }
 
 .header {
@@ -22,12 +43,12 @@
 }
 
 .header__description {
-  font-size: 2em;
   padding-left: 25px;
   padding-right: 25px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0px;
 }
 
 .header__right {
@@ -54,8 +75,6 @@
   padding-right: 20px;
   text-align: center;
   color: #FFFFFF;
-  cursor: pointer;
-  text-decoration: none;
 }
 
 .github {
@@ -98,7 +117,6 @@
   justify-content: center;
   align-items: center;
   flex-grow: 1;
-  background-color: #DDDDDD
 }
 
 .spinner {
@@ -129,14 +147,10 @@
 }
 
 .card__link {
-  cursor: pointer;
-  text-decoration: none;
   color: #000000;
 }
 
 .tag__link {
-  cursor: pointer;
-  text-decoration: none;
   color: #FFFFFF;
 }
 
@@ -246,6 +260,30 @@
   cursor: pointer;
   padding-left: 10px;
 }
+
+.newsletters__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
+.newsletters__col {
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 10px;
+}
+
+.newsletters__description {
+  padding-bottom: 15px;
+}
+
+.newsletters__file {
+  font-size: 1.15em;
+  padding-top: 10px;
+}
+
 
 /* Color */
 

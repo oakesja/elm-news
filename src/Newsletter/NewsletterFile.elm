@@ -3,11 +3,14 @@ module Newsletter.NewsletterFile exposing (NewsletterFile, fetch)
 import Json.Decode exposing (..)
 import Http
 import Task exposing (Task)
+import Date exposing (Date)
+import String
 
 
 type alias NewsletterFile =
-    { name : String
+    { date : Date
     , url : String
+    , name : String
     }
 
 
@@ -19,6 +22,23 @@ fetch =
 
 decoder : Decoder NewsletterFile
 decoder =
-    object2 NewsletterFile
-        ("name" := string)
+    object3 NewsletterFile
+        dateDecoder
         ("download_url" := string)
+        nameDecoder
+
+
+dateDecoder : Decoder Date
+dateDecoder =
+    customDecoder nameDecoder <|
+        \name ->
+            name
+                |> String.split "."
+                |> List.head
+                |> Maybe.withDefault ""
+                |> Date.fromString
+
+
+nameDecoder : Decoder String
+nameDecoder =
+    ("name" := string)

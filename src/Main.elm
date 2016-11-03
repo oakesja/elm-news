@@ -75,8 +75,10 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ Header.view AnalyticsEvent
-        , body model
+        [ div []
+            [ Header.view AnalyticsEvent
+            , body model
+            ]
         , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
         ]
 
