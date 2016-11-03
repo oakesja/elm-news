@@ -32,7 +32,9 @@ init page =
     , newslettersPage = NewslettersPage.init
     , now = Nothing
     }
-        ! [ loadPage page ]
+        ! [ loadPage page
+          , Task.perform never CurrentDate Date.now
+          ]
 
 
 type Msg
