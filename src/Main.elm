@@ -97,7 +97,8 @@ body model =
                 |> Html.App.map NewslettersMsg
 
         Page.NotFound ->
-            text "404"
+            div [ class "not__found" ]
+                [ text "Page Not Found" ]
 
 
 urlUpdate : Page -> Model -> ( Model, Cmd Msg )
