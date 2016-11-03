@@ -118,6 +118,13 @@ loadPage page =
             Cmd.none
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map HomePageMsg (HomePage.subscriptions model.homePage)
+        ]
+
+
 main : Program Never
 main =
     Navigation.program
@@ -126,5 +133,5 @@ main =
         , view = view
         , update = update
         , urlUpdate = urlUpdate
-        , subscriptions = (\_ -> Sub.none)
+        , subscriptions = subscriptions
         }
