@@ -8,3 +8,13 @@ type FetchData a
     | Fetching
     | Failed Http.Error
     | Fetched a
+
+
+default : a -> FetchData a -> a
+default defaultData data =
+    case data of
+        Fetched d ->
+            d
+
+        _ ->
+            defaultData

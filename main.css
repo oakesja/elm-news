@@ -133,7 +133,8 @@ a {
 
 .newsletter__body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .spinner {
@@ -305,6 +306,26 @@ a {
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+
+.newsletter__header {
+  text-align: center;
+  padding: 0px 45px;
+}
+
+.newsletter__articles {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.newsletter__nav {
+  color: #5A6378;
+  cursor: pointer;
+}
+
+.newsletter__nav:hover {
+  background-color: #CCCCCC;
 }
 
 

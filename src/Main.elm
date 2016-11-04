@@ -137,7 +137,8 @@ body model =
                 |> Html.App.map NewslettersMsg
 
         Page.Newsletter name ->
-            NewsletterPage.view model.width model.newsletterPage
+            model.newsletterPage
+                |> NewsletterPage.view model.width (FetchData.default [] model.newsletterFiles) name
                 |> Html.App.map NewsletterMsg
 
         Page.NotFound ->
