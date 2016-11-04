@@ -32,7 +32,7 @@ view config =
                     |> List.map (cardView config)
                     |> div [ class "cards" ]
     in
-        div [ class "body" ]
+        div [ class "news__body" ]
             [ cards ]
 
 

@@ -117,6 +117,10 @@ a {
 }
 
 .body {
+  flex-grow: 1;
+}
+
+.news__body {
   padding: 10px;
   display: flex;
   flex-direction: row;
@@ -288,6 +292,12 @@ a {
 .newsletters__file {
   font-size: 1.15em;
   padding-top: 10px;
+}
+
+.newsletters__spinner {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 

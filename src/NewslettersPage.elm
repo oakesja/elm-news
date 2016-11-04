@@ -3,49 +3,40 @@ module NewslettersPage exposing (Model, Msg, init, view, update, onPageLoad)
 import Html exposing (Html, div, text, h1, span, a)
 import Html.Attributes exposing (class, href)
 import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
-import Task
-import Http
 import Links
 import Date.Format
 import Date
+import FetchData exposing (FetchData)
+import Components.Spinner
 
 
 type alias Model =
-    { files : List NewsletterFile
-    }
+    {}
 
 
 init : Model
 init =
-    { files = []
-    }
+    {}
 
 
 onPageLoad : Cmd Msg
 onPageLoad =
-    Task.perform
-        FailedToFetchFiles
-        FetchedFiles
-        NewsletterFile.fetch
+    Cmd.none
 
 
 type Msg
-    = FailedToFetchFiles Http.Error
-    | FetchedFiles (List NewsletterFile)
+    = NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FailedToFetchFiles error ->
+        NoOp ->
             model ! []
 
-        FetchedFiles files ->
-            { model | files = files } ! []
 
-
-view : Model -> Html Msg
-view model =
+view : FetchData (List NewsletterFile) -> Model -> Html Msg
+view files model =
     div [ class "newsletters__row" ]
         [ div [ class "newsletters__col" ] <|
             [ h1 [] [ text "Weekly Top News Archive" ]
@@ -65,15 +56,29 @@ view model =
                 , text "."
                 ]
             ]
-                ++ (newsletters model.files)
+                ++ (newsletters files)
         ]
 
 
-newsletters : List NewsletterFile -> List (Html Msg)
+newsletters : FetchData (List NewsletterFile) -> List (Html Msg)
 newsletters files =
-    List.sortBy (Date.toTime << .date) files
-        |> List.indexedMap newsletterView
-        |> List.reverse
+    case files of
+        FetchData.NotStarted ->
+            [ text "" ]
+
+        FetchData.Fetching ->
+            [ div
+                [ class "newsletters__spinner" ]
+                [ Components.Spinner.view ]
+            ]
+
+        FetchData.Fetched newsletters ->
+            List.sortBy (Date.toTime << .date) newsletters
+                |> List.indexedMap newsletterView
+                |> List.reverse
+
+        FetchData.Failed error ->
+            [ text "" ]
 
 
 newsletterView : Int -> NewsletterFile -> Html Msg

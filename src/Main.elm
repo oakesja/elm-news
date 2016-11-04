@@ -17,6 +17,9 @@ import NewsletterPage
 import Analytics
 import Page exposing (Page)
 import Window
+import FetchData exposing (FetchData)
+import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
+import Http
 
 
 type alias Model =
@@ -24,6 +27,7 @@ type alias Model =
     , homePage : HomePage.Model
     , newslettersPage : NewslettersPage.Model
     , newsletterPage : NewsletterPage.Model
+    , newsletterFiles : FetchData (List NewsletterFile)
     , now : Maybe Date
     , width : Int
     }
@@ -31,17 +35,22 @@ type alias Model =
 
 init : Page -> ( Model, Cmd Msg )
 init page =
-    { currentPage = page
-    , homePage = HomePage.init
-    , newslettersPage = NewslettersPage.init
-    , newsletterPage = NewsletterPage.init
-    , now = Nothing
-    , width = 0
-    }
-        ! [ loadPage page
-          , Task.perform never CurrentDate Date.now
-          , Task.perform never WindowSize Window.size
-          ]
+    let
+        model =
+            { currentPage = page
+            , homePage = HomePage.init
+            , newslettersPage = NewslettersPage.init
+            , newsletterPage = NewsletterPage.init
+            , newsletterFiles = FetchData.NotStarted
+            , now = Nothing
+            , width = 0
+            }
+    in
+        model
+            ! [ loadPage page model
+              , Task.perform never CurrentDate Date.now
+              , Task.perform never WindowSize Window.size
+              ]
 
 
 type Msg
@@ -51,6 +60,8 @@ type Msg
     | AnalyticsEvent Analytics.Event
     | CurrentDate Date
     | WindowSize Window.Size
+    | FailedToFetchFiles Http.Error
+    | FetchedFiles (List NewsletterFile)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -96,14 +107,20 @@ update msg model =
             , Cmd.none
             )
 
+        FailedToFetchFiles error ->
+            { model | newsletterFiles = FetchData.Failed error } ! []
+
+        FetchedFiles files ->
+            { model | newsletterFiles = FetchData.Fetched files } ! []
+
 
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ div []
-            [ Header.view AnalyticsEvent
-            , body model
-            ]
+        [ Header.view AnalyticsEvent
+        , div
+            [ class "body" ]
+            [ body model ]
         , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
         ]
 
@@ -116,7 +133,7 @@ body model =
                 |> Html.App.map HomePageMsg
 
         Page.Newsletters ->
-            NewslettersPage.view model.newslettersPage
+            NewslettersPage.view model.newsletterFiles model.newslettersPage
                 |> Html.App.map NewslettersMsg
 
         Page.Newsletter name ->
@@ -131,23 +148,39 @@ body model =
 urlUpdate : Page -> Model -> ( Model, Cmd Msg )
 urlUpdate page model =
     ( { model | currentPage = page }
-    , loadPage page
+    , loadPage page model
     )
 
 
-loadPage : Page -> Cmd Msg
-loadPage page =
+loadPage : Page -> Model -> Cmd Msg
+loadPage page model =
     case page of
         Page.Home ->
             Cmd.map HomePageMsg HomePage.onPageLoad
 
         Page.Newsletters ->
-            Cmd.map NewslettersMsg NewslettersPage.onPageLoad
+            Cmd.batch
+                [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
+                , fetchNewsletterFiles model
+                ]
 
         Page.Newsletter name ->
-            Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
+            Cmd.batch
+                [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
+                , fetchNewsletterFiles model
+                ]
 
         Page.NotFound ->
+            Cmd.none
+
+
+fetchNewsletterFiles : Model -> Cmd Msg
+fetchNewsletterFiles model =
+    case model.newsletterFiles of
+        FetchData.NotStarted ->
+            Task.perform FailedToFetchFiles FetchedFiles NewsletterFile.fetch
+
+        _ ->
             Cmd.none
 
 
