@@ -21,19 +21,14 @@ type alias Config msg =
 
 view : Config msg -> Html msg
 view config =
-    let
-        cards =
-            if List.isEmpty config.stories then
-                Spinner.view
-            else
-                config.stories
-                    |> List.sortBy .date
-                    |> List.reverse
-                    |> List.map (cardView config)
-                    |> div [ class "cards" ]
-    in
-        div [ class "news__body" ]
-            [ cards ]
+    if List.isEmpty config.stories then
+        Spinner.view
+    else
+        config.stories
+            |> List.sortBy .date
+            |> List.reverse
+            |> List.map (cardView config)
+            |> div [ class "cards" ]
 
 
 cardView : Config msg -> Story -> Html msg

@@ -71,12 +71,14 @@ view screenWidth model =
 
 displayNewsletter : Int -> Newsletter -> Html Msg
 displayNewsletter screenWidth newsletter =
-    News.View.view
-        { now = Nothing
-        , screenWidth = screenWidth
-        , stories = List.map articleToStory newsletter.articles
-        , onLinkClick = ClickEvent
-        }
+    div [ class "newsletter__body" ]
+        [ News.View.view
+            { now = Nothing
+            , screenWidth = screenWidth
+            , stories = List.map articleToStory newsletter.articles
+            , onLinkClick = ClickEvent
+            }
+        ]
 
 
 articleToStory : Article -> Story

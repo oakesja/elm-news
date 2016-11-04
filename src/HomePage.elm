@@ -10,6 +10,7 @@ port module HomePage
         )
 
 import Html exposing (Html, a, text, div, h1, span)
+import Html.Attributes exposing (class)
 import Html.App
 import Date exposing (Date)
 import Task exposing (Task, andThen)
@@ -101,7 +102,7 @@ updateErrorManager msg model =
 
 view : Maybe Date -> Int -> Model -> Html Msg
 view now screenWidth model =
-    div []
+    div [ class "home__body" ]
         [ News.view
             { now = now
             , screenWidth = screenWidth
