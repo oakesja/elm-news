@@ -13,8 +13,6 @@ import Html exposing (Html, a, text, div, h1, span)
 import Html.App
 import Date exposing (Date)
 import Task exposing (Task, andThen)
-import Basics.Extra exposing (never)
-import Window
 import ErrorManager
 import News.Story exposing (Story, StoryResp, StoryError)
 import News.View as News
@@ -27,7 +25,6 @@ import Http
 type alias Model =
     { allStories : List Story
     , errorManager : ErrorManager.Model
-    , width : Int
     }
 
 
@@ -35,7 +32,6 @@ init : Model
 init =
     { errorManager = ErrorManager.init
     , allStories = []
-    , width = 0
     }
 
 
@@ -46,7 +42,6 @@ onPageLoad =
         , fetchGoogleGroupMsgs "elm-discuss"
         , fetch Reddit.tag Reddit.fetch
         , fetch HackerNews.tag HackerNews.fetch
-        , Task.perform never WindowSize Window.size
         ]
 
 
@@ -64,7 +59,6 @@ fetch tag task =
 
 type Msg
     = ErrorManagerMessage ErrorManager.Msg
-    | WindowSize Window.Size
     | AnalyticsEvent Analytics.Event
     | NewsFetchSuccess StoryResp
     | NewsFetchError StoryError
@@ -75,11 +69,6 @@ update msg model =
     case msg of
         ErrorManagerMessage errorMsg ->
             updateErrorManager errorMsg model
-
-        WindowSize size ->
-            ( { model | width = size.width }
-            , Cmd.none
-            )
 
         AnalyticsEvent event ->
             ( model, Analytics.registerEvent event )
@@ -110,12 +99,12 @@ updateErrorManager msg model =
         )
 
 
-view : Maybe Date -> Model -> Html Msg
-view now model =
+view : Maybe Date -> Int -> Model -> Html Msg
+view now screenWidth model =
     div []
         [ News.view
             { now = now
-            , screenWidth = model.width
+            , screenWidth = screenWidth
             , stories = model.allStories
             , onLinkClick = AnalyticsEvent
             }
@@ -129,7 +118,6 @@ subscriptions model =
     Sub.batch
         [ fetchedGoogleGroupMsgs NewsFetchSuccess
         , errorGoogleGroupMsgs NewsFetchError
-        , Window.resizes WindowSize
         ]
 
 

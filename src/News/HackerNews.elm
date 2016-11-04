@@ -5,9 +5,8 @@ module News.HackerNews exposing (fetch, tag)
 import Json.Decode exposing (..)
 import Http
 import News.Story exposing (Story)
-import Erl
-import String
 import Task exposing (Task)
+import Url
 
 
 type alias HackerNewsStory =
@@ -65,12 +64,5 @@ storyToMessage story =
         , date = story.date
         , url = url
         , tag = tag
-        , domain = parseDomain url
+        , domain = Url.parseDomain url
         }
-
-
-parseDomain : String -> String
-parseDomain url =
-    Erl.parse url
-        |> .host
-        |> String.join "."

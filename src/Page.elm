@@ -8,6 +8,7 @@ import String
 type Page
     = Home
     | Newsletters
+    | Newsletter String
     | NotFound
 
 
@@ -33,6 +34,7 @@ parse location =
 pageParser : Parser (Page -> a) a
 pageParser =
     oneOf
-        [ format Newsletters (s "newsletters")
+        [ format Newsletter (s "newsletters" </> string)
+        , format Newsletters (s "newsletters")
         , format Home (s "")
         ]

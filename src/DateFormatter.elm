@@ -4,22 +4,19 @@ import Date exposing (Date)
 import Date.Format
 
 
-format : Maybe Date -> Date -> String
-format maybeNow date =
+format : Maybe Date -> Float -> String
+format maybeNow dateTime =
     case maybeNow of
         Just now ->
             let
                 nowTime =
                     Date.toTime now
 
-                dateTime =
-                    Date.toTime date
-
                 diff =
                     (nowTime - dateTime) / 1000
             in
                 if diff <= 0 then
-                    Date.Format.format "%b %d" date
+                    Date.Format.format "%b %d" (Date.fromTime dateTime)
                 else if diff > 0 && diff <= 1 then
                     "1 second ago"
                 else if diff > 1 && diff < 60 then
@@ -46,4 +43,7 @@ format maybeNow date =
                     toString (diff / 31557600) ++ " years ago"
 
         Nothing ->
-            Date.Format.format "%b %d" date
+            if dateTime > 0 then
+                Date.Format.format "%b %d" (Date.fromTime dateTime)
+            else
+                ""

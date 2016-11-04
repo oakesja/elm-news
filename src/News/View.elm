@@ -84,7 +84,6 @@ authorView author =
 timeStamp : Maybe Date -> Float -> Html msg
 timeStamp now date =
     div [ class "card__date" ]
-        [ Date.fromTime date
-            |> DateFormatter.format now
+        [ DateFormatter.format now date
             |> text
         ]

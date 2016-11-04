@@ -13,15 +13,19 @@ import Basics.Extra exposing (never)
 import Navigation exposing (Location)
 import HomePage
 import NewslettersPage
+import NewsletterPage
 import Analytics
 import Page exposing (Page)
+import Window
 
 
 type alias Model =
     { currentPage : Page
     , homePage : HomePage.Model
     , newslettersPage : NewslettersPage.Model
+    , newsletterPage : NewsletterPage.Model
     , now : Maybe Date
+    , width : Int
     }
 
 
@@ -30,18 +34,23 @@ init page =
     { currentPage = page
     , homePage = HomePage.init
     , newslettersPage = NewslettersPage.init
+    , newsletterPage = NewsletterPage.init
     , now = Nothing
+    , width = 0
     }
         ! [ loadPage page
           , Task.perform never CurrentDate Date.now
+          , Task.perform never WindowSize Window.size
           ]
 
 
 type Msg
     = HomePageMsg HomePage.Msg
     | NewslettersMsg NewslettersPage.Msg
+    | NewsletterMsg NewsletterPage.Msg
     | AnalyticsEvent Analytics.Event
     | CurrentDate Date
+    | WindowSize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -65,12 +74,26 @@ update msg model =
                 , Cmd.map NewslettersMsg cmds
                 )
 
+        NewsletterMsg newsLetterMsg ->
+            let
+                ( newNewsletter, cmds ) =
+                    NewsletterPage.update newsLetterMsg model.newsletterPage
+            in
+                ( { model | newsletterPage = newNewsletter }
+                , Cmd.map NewsletterMsg cmds
+                )
+
         AnalyticsEvent event ->
             ( model, Analytics.registerEvent event )
 
         CurrentDate date ->
             ( { model | now = Just date }
             , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
+            )
+
+        WindowSize size ->
+            ( { model | width = size.width }
+            , Cmd.none
             )
 
 
@@ -89,12 +112,16 @@ body : Model -> Html Msg
 body model =
     case model.currentPage of
         Page.Home ->
-            HomePage.view model.now model.homePage
+            HomePage.view model.now model.width model.homePage
                 |> Html.App.map HomePageMsg
 
         Page.Newsletters ->
             NewslettersPage.view model.newslettersPage
                 |> Html.App.map NewslettersMsg
+
+        Page.Newsletter name ->
+            NewsletterPage.view model.width model.newsletterPage
+                |> Html.App.map NewsletterMsg
 
         Page.NotFound ->
             div [ class "not__found" ]
@@ -117,6 +144,9 @@ loadPage page =
         Page.Newsletters ->
             Cmd.map NewslettersMsg NewslettersPage.onPageLoad
 
+        Page.Newsletter name ->
+            Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
+
         Page.NotFound ->
             Cmd.none
 
@@ -125,6 +155,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map HomePageMsg (HomePage.subscriptions model.homePage)
+        , Window.resizes WindowSize
         ]
 
 
