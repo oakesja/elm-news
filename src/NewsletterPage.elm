@@ -104,9 +104,9 @@ articles screenWidth files filename newsletter =
         , News.View.view
             { now = Nothing
             , screenWidth = screenWidth
-            , stories = List.map articleToStory newsletter.articles
             , onLinkClick = ClickEvent
             }
+            (List.map articleToStory newsletter.articles)
         , navIcon nextArticle Components.Icons.right files filename
         ]
 

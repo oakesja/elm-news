@@ -43,7 +43,4 @@ format maybeNow dateTime =
                     toString (diff / 31557600) ++ " years ago"
 
         Nothing ->
-            if dateTime > 0 then
-                Date.Format.format "%b %d" (Date.fromTime dateTime)
-            else
-                ""
+            Date.Format.format "%b %d" (Date.fromTime dateTime)

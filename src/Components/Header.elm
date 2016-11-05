@@ -29,7 +29,7 @@ twitterLink onLinkClick =
         [ href Links.twitter ]
         [ img
             [ class "header__twitter"
-            , src "/assets/images/twitter.png"
+            , src Links.twitterIcon
             , alt "Follow @elmlangnews"
             , title "Follow @elmlangnews on Twitter"
             , Analytics.twitterLink Links.twitter

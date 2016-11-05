@@ -9,14 +9,6 @@ import Task exposing (Task)
 import Url
 
 
-type alias HackerNewsStory =
-    { author : String
-    , title : String
-    , date : Float
-    , url : Maybe String
-    }
-
-
 tag : String
 tag =
     "Hacker News"
@@ -29,22 +21,21 @@ fetch =
 
 decoder : Decoder (List Story)
 decoder =
-    customDecoder hackerNewsDecoder <|
-        \stories ->
-            List.map storyToMessage stories
-                |> List.filter (\s -> s.url /= "")
-                |> Ok
-
-
-hackerNewsDecoder : Decoder (List HackerNewsStory)
-hackerNewsDecoder =
-    object4 HackerNewsStory
+    object6 Story
         ("author" := string)
         ("title" := string)
         ("created_at_i" := timeDecoder)
-        ("url" := maybe string)
+        urlDecoder
+        (succeed tag)
+        domainDecoder
         |> list
         |> at [ "hits" ]
+
+
+urlDecoder : Decoder String
+urlDecoder =
+    customDecoder ("url" := maybe string)
+        (Ok << Maybe.withDefault "")
 
 
 timeDecoder : Decoder Float
@@ -53,16 +44,6 @@ timeDecoder =
         (\time -> Ok <| time * 1000)
 
 
-storyToMessage : HackerNewsStory -> Story
-storyToMessage story =
-    let
-        url =
-            Maybe.withDefault "" story.url
-    in
-        { author = story.author
-        , title = story.title
-        , date = story.date
-        , url = url
-        , tag = tag
-        , domain = Url.parseDomain url
-        }
+domainDecoder : Decoder String
+domainDecoder =
+    customDecoder urlDecoder (Ok << Url.parseDomain)

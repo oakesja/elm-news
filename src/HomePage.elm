@@ -106,9 +106,9 @@ view now screenWidth model =
         [ News.view
             { now = now
             , screenWidth = screenWidth
-            , stories = model.allStories
             , onLinkClick = AnalyticsEvent
             }
+            model.allStories
         , ErrorManager.view model.errorManager
             |> Html.App.map ErrorManagerMessage
         ]

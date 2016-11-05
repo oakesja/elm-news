@@ -5,7 +5,6 @@ import Html exposing (Html, div, a, text, span)
 import Html.Attributes exposing (class, href, id)
 import Html.Events exposing (onClick)
 import News.Story exposing (Story)
-import Components.Spinner as Spinner
 import Analytics exposing (Event)
 import News.Tag as Tag
 import DateFormatter
@@ -14,21 +13,17 @@ import DateFormatter
 type alias Config msg =
     { now : Maybe Date
     , screenWidth : Int
-    , stories : List Story
     , onLinkClick : Event -> msg
     }
 
 
-view : Config msg -> Html msg
-view config =
-    if List.isEmpty config.stories then
-        Spinner.view
-    else
-        config.stories
-            |> List.sortBy .date
-            |> List.reverse
-            |> List.map (cardView config)
-            |> div [ class "cards" ]
+view : Config msg -> List Story -> Html msg
+view config stories =
+    stories
+        |> List.sortBy .date
+        |> List.reverse
+        |> List.map (cardView config)
+        |> div [ class "cards" ]
 
 
 cardView : Config msg -> Story -> Html msg

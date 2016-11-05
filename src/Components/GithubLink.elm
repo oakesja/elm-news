@@ -12,8 +12,8 @@ view imgClasses onLinkClick =
     a
         [ href Links.github ]
         [ img
-            [ class <| "github " ++ imgClasses
-            , src "/assets/images/GitHub-Mark-Light-64px.png"
+            [ class ("github " ++ imgClasses)
+            , src Links.githubIcon
             , alt "elm-news on github"
             , title "elm-news on github"
             , Analytics.githubRepo Links.github
