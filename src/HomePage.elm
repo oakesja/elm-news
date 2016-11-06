@@ -16,7 +16,7 @@ import Date exposing (Date)
 import Task exposing (Task, andThen)
 import ErrorManager
 import News.Story exposing (Story, StoryResp, StoryError)
-import News.View as News
+import News.View as News exposing (DisplayStory)
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
 import Analytics
@@ -108,10 +108,20 @@ view now screenWidth model =
             , screenWidth = screenWidth
             , onLinkClick = AnalyticsEvent
             }
-            model.allStories
+            (List.map toDisplayStory model.allStories)
         , ErrorManager.view model.errorManager
             |> Html.App.map ErrorManagerMessage
         ]
+
+
+toDisplayStory : Story -> DisplayStory
+toDisplayStory story =
+    { from = News.Author story.author
+    , title = story.title
+    , date = Just (story.date)
+    , url = story.url
+    , tag = story.tag
+    }
 
 
 subscriptions : Model -> Sub Msg

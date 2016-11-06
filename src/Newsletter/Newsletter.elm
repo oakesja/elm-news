@@ -3,6 +3,7 @@ module Newsletter.Newsletter exposing (Newsletter, Article, fetch)
 import Json.Decode exposing (..)
 import Http
 import Task exposing (Task)
+import News.View as News exposing (DisplayStoryFrom)
 
 
 type alias Newsletter =
@@ -16,7 +17,7 @@ type alias Newsletter =
 type alias Article =
     { url : String
     , title : String
-    , author : String
+    , from : DisplayStoryFrom
     , tag : String
     }
 
@@ -42,5 +43,14 @@ articleDecoder =
     object4 Article
         ("url" := string)
         ("title" := string)
-        ("author" := string)
+        fromDecoder
         ("tag" := string)
+
+
+fromDecoder : Decoder DisplayStoryFrom
+fromDecoder =
+    oneOf
+        [ customDecoder ("author" := string) (Ok << News.Author)
+        , customDecoder ("description" := string) (Ok << News.Other)
+        , fail "Failed to find an author or description"
+        ]

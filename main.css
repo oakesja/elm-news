@@ -174,16 +174,17 @@ a {
 
 .tag {
   padding: 5px;
-  min-width: 120px;
   width: 120px;
   height: 20px;
   text-align: center;
   margin: 10px;
-  align-self: center;
   box-shadow: 0 3px 4px 0 rgba(0,0,0,0.14);
   color: #FFFFFF;
   text-shadow: 0 1px 0 #777777;
-  cursor: pointer;
+}
+
+.tag_disabled {
+  cursor: default;
 }
 
 .card__description {
@@ -345,6 +346,10 @@ a {
 
 .elm_green {
   background-color: #7FD13B
+}
+
+.elm_grey {
+  background-color: #888888;
 }
 
 /* Responsive */

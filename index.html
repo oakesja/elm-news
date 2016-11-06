@@ -35,8 +35,6 @@
                         (q.q ? ('?' + q.q) : '') +
                         l.hash
                     );
-                    console.log('replaced state');
-                    console.debug(window.location);
                 }
             }
         }(window.location))
@@ -121,7 +119,6 @@
                         date: entry.date_ms,
                         url: entry.link,
                         tag: tag,
-                        domain: "groups.google.com"
                     };
                     stories.push(story);
                 }

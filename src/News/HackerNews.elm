@@ -6,7 +6,6 @@ import Json.Decode exposing (..)
 import Http
 import News.Story exposing (Story)
 import Task exposing (Task)
-import Url
 
 
 tag : String
@@ -19,23 +18,34 @@ fetch =
     Http.get decoder "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
 
 
+type alias HackerNewsStory =
+    { author : String
+    , title : String
+    , date : Float
+    , url : Maybe String
+    , tag : String
+    }
+
+
 decoder : Decoder (List Story)
 decoder =
-    object6 Story
-        ("author" := string)
-        ("title" := string)
-        ("created_at_i" := timeDecoder)
-        urlDecoder
-        (succeed tag)
-        domainDecoder
-        |> list
-        |> at [ "hits" ]
+    customDecoder hackerNewsDecoder <|
+        \stories ->
+            List.map storyToMessage stories
+                |> List.filter (\s -> s.url /= "")
+                |> Ok
 
 
-urlDecoder : Decoder String
-urlDecoder =
-    customDecoder ("url" := maybe string)
-        (Ok << Maybe.withDefault "")
+hackerNewsDecoder : Decoder (List HackerNewsStory)
+hackerNewsDecoder =
+    at [ "hits" ] <|
+        list <|
+            object5 HackerNewsStory
+                ("author" := string)
+                ("title" := string)
+                ("created_at_i" := timeDecoder)
+                ("url" := maybe string)
+                (succeed tag)
 
 
 timeDecoder : Decoder Float
@@ -44,6 +54,11 @@ timeDecoder =
         (\time -> Ok <| time * 1000)
 
 
-domainDecoder : Decoder String
-domainDecoder =
-    customDecoder urlDecoder (Ok << Url.parseDomain)
+storyToMessage : HackerNewsStory -> Story
+storyToMessage story =
+    { author = story.author
+    , title = story.title
+    , date = story.date
+    , url = Maybe.withDefault "" story.url
+    , tag = tag
+    }

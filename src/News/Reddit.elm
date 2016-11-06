@@ -2,7 +2,6 @@ module News.Reddit exposing (fetch, tag)
 
 import Json.Decode exposing (..)
 import Http
-import String
 import News.Story exposing (Story)
 import Task exposing (Task)
 
@@ -19,29 +18,18 @@ fetch =
 
 decoder : Decoder (List Story)
 decoder =
-    object6 Story
-        ("author" := string)
-        ("title" := string)
-        ("created_utc" := timeDecoder)
-        ("url" := string)
-        (succeed tag)
-        ("domain" := domainDecoder)
-        |> at [ "data" ]
-        |> list
-        |> at [ "data", "children" ]
+    at [ "data", "children" ] <|
+        list <|
+            at [ "data" ] <|
+                object5 Story
+                    ("author" := string)
+                    ("title" := string)
+                    ("created_utc" := timeDecoder)
+                    ("url" := string)
+                    (succeed tag)
 
 
 timeDecoder : Decoder Float
 timeDecoder =
     customDecoder float
         (\time -> Ok <| time * 1000)
-
-
-domainDecoder : Decoder String
-domainDecoder =
-    customDecoder string <|
-        \domain ->
-            if String.contains "self.elm" domain then
-                Ok "reddit.com"
-            else
-                Ok domain

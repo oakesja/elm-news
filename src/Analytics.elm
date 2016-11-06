@@ -1,7 +1,5 @@
 port module Analytics exposing (..)
 
-import News.Story exposing (Story)
-
 
 type alias Event =
     { category : String
@@ -10,6 +8,14 @@ type alias Event =
     , title : Maybe String
     , tag : Maybe String
     , author : Maybe String
+    }
+
+
+type alias NewsEventInfo =
+    { tag : String
+    , url : String
+    , title : String
+    , author : String
     }
 
 
@@ -24,7 +30,7 @@ githubRepo url =
     }
 
 
-newsLink : Story -> Event
+newsLink : NewsEventInfo -> Event
 newsLink { tag, url, title, author } =
     { category = "News"
     , action = "click"

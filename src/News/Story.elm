@@ -7,7 +7,6 @@ type alias Story =
     , date : Float
     , url : String
     , tag : String
-    , domain : String
     }
 
 

@@ -4,11 +4,9 @@ import Html exposing (Html, div, text, h1)
 import Html.Attributes exposing (class)
 import Newsletter.Newsletter as Newsletter exposing (Newsletter, Article)
 import Newsletter.NewsletterFile exposing (NewsletterFile)
-import News.Story exposing (Story)
-import News.View
+import News.View as News exposing (DisplayStory)
 import Http
 import Task
-import Url
 import Analytics exposing (Event)
 import Components.Icons
 import Navigation
@@ -51,7 +49,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FailedToFetchNewsletter error ->
-            { model | newsletter = Error error } ! []
+            let
+                _ =
+                    Debug.log "error" error
+            in
+                { model | newsletter = Error error } ! []
 
         FetchedNewsletter newsletter ->
             { model | newsletter = Fetched newsletter } ! []
@@ -101,24 +103,23 @@ articles : Int -> List NewsletterFile -> String -> Newsletter -> Html Msg
 articles screenWidth files filename newsletter =
     div [ class "newsletter__articles" ]
         [ navIcon previousArticle Components.Icons.left files filename
-        , News.View.view
+        , News.view
             { now = Nothing
             , screenWidth = screenWidth
             , onLinkClick = ClickEvent
             }
-            (List.map articleToStory newsletter.articles)
+            (List.map toDisplayStory newsletter.articles)
         , navIcon nextArticle Components.Icons.right files filename
         ]
 
 
-articleToStory : Article -> Story
-articleToStory article =
-    { author = article.author
+toDisplayStory : Article -> DisplayStory
+toDisplayStory article =
+    { from = article.from
     , title = article.title
-    , date = -1
+    , date = Nothing
     , url = article.url
     , tag = article.tag
-    , domain = Url.parseDomain article.url
     }
 
 
