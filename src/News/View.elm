@@ -34,11 +34,18 @@ type alias DisplayStory =
 
 view : Config msg -> List DisplayStory -> Html msg
 view config stories =
-    stories
-        |> List.sortBy storyDate
-        |> List.reverse
-        |> List.map (cardView config)
-        |> div [ class "cards" ]
+    let
+        className =
+            if config.screenWidth >= 920 then
+                "cards_max"
+            else
+                "cards"
+    in
+        stories
+            |> List.sortBy storyDate
+            |> List.reverse
+            |> List.map (cardView config)
+            |> div [ class className ]
 
 
 storyDate : DisplayStory -> Float

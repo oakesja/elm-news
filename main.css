@@ -131,12 +131,6 @@ a {
   flex-grow: 1;
 }
 
-.newsletter__body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .spinner {
   border: 16px solid #FFFFFF;
   border-top: 16px solid #5A6378;
@@ -152,7 +146,11 @@ a {
 }
 
 .cards {
-  max-width: 1000px
+  width: 100%
+}
+
+.cards_max {
+  width: 850px
 }
 
 .card {
@@ -175,6 +173,7 @@ a {
 .tag {
   padding: 5px;
   width: 120px;
+  min-width: 120px;
   height: 20px;
   text-align: center;
   margin: 10px;
@@ -280,6 +279,23 @@ a {
   padding-left: 10px;
 }
 
+.newsletter__body {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.newsletter__body_min {
+  display: flex;
+  flex-direction: column;
+}
+
+.newsletter__controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 .newsletters__row {
   display: flex;
   flex-direction: row;
@@ -316,17 +332,26 @@ a {
 
 .newsletter__articles {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
 }
 
-.newsletter__nav {
+.newsletter__nav, .newsletter__nav_min {
   color: #5A6378;
   cursor: pointer;
 }
 
-.newsletter__nav:hover {
+.newsletter__nav {
+  margin-top: 250px;
+}
+
+.newsletter__nav:hover, .newsletter__nav_min:hover {
   background-color: #CCCCCC;
+}
+
+.newsletter__nav_disabled {
+  visibility: hidden;
+  cursor: default;
 }
 
 
@@ -353,12 +378,6 @@ a {
 }
 
 /* Responsive */
-
-@media all and (max-width: 1000px) {
-  .cards {
-    max-width: 100%;
-  }
-}
 
 @media all and (max-width: 900px) {
   .header__description {
