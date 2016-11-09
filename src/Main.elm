@@ -19,7 +19,9 @@ import Page exposing (Page)
 import Window
 import FetchData exposing (FetchData)
 import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
+import Newsletter.Newsletter as Newsletter exposing (Newsletter)
 import Http
+import Dict exposing (Dict)
 
 
 type alias Model =
@@ -28,6 +30,7 @@ type alias Model =
     , newslettersPage : NewslettersPage.Model
     , newsletterPage : NewsletterPage.Model
     , newsletterFiles : FetchData (List NewsletterFile)
+    , newsletters : Dict String (FetchData Newsletter)
     , now : Maybe Date
     , width : Int
     }
@@ -36,18 +39,20 @@ type alias Model =
 init : Page -> ( Model, Cmd Msg )
 init page =
     let
-        model =
-            { currentPage = page
-            , homePage = HomePage.init
-            , newslettersPage = NewslettersPage.init
-            , newsletterPage = NewsletterPage.init
-            , newsletterFiles = FetchData.NotStarted
-            , now = Nothing
-            , width = 0
-            }
+        ( model, cmd ) =
+            loadPage page
+                { currentPage = page
+                , homePage = HomePage.init
+                , newslettersPage = NewslettersPage.init
+                , newsletterPage = NewsletterPage.init
+                , newsletterFiles = FetchData.NotStarted
+                , newsletters = Dict.empty
+                , now = Nothing
+                , width = 0
+                }
     in
         model
-            ! [ loadPage page model
+            ! [ cmd
               , Task.perform never CurrentDate Date.now
               , Task.perform never WindowSize Window.size
               ]
@@ -62,6 +67,8 @@ type Msg
     | WindowSize Window.Size
     | FailedToFetchFiles Http.Error
     | FetchedFiles (List NewsletterFile)
+    | FailedToFetchNewsletter String Http.Error
+    | FetchedNewsletter String Newsletter
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,6 +120,23 @@ update msg model =
         FetchedFiles files ->
             { model | newsletterFiles = FetchData.Fetched files } ! []
 
+        FailedToFetchNewsletter name error ->
+            let
+                _ =
+                    Debug.log "error" error
+
+                newsletters =
+                    Dict.insert name (FetchData.Failed error) model.newsletters
+            in
+                { model | newsletters = newsletters } ! []
+
+        FetchedNewsletter name newsletter ->
+            let
+                newsletters =
+                    Dict.insert name (FetchData.Fetched newsletter) model.newsletters
+            in
+                { model | newsletters = newsletters } ! []
+
 
 view : Model -> Html Msg
 view model =
@@ -137,8 +161,15 @@ body model =
                 |> Html.App.map NewslettersMsg
 
         Page.Newsletter name ->
-            model.newsletterPage
-                |> NewsletterPage.view model.width (FetchData.default [] model.newsletterFiles) name
+            NewsletterPage.view
+                { screenWidth = model.width
+                , files = (FetchData.default [] model.newsletterFiles)
+                , filename = name
+                , newsletter =
+                    Dict.get name model.newsletters
+                        |> Maybe.withDefault FetchData.NotStarted
+                }
+                model.newsletterPage
                 |> Html.App.map NewsletterMsg
 
         Page.NotFound ->
@@ -148,31 +179,34 @@ body model =
 
 urlUpdate : Page -> Model -> ( Model, Cmd Msg )
 urlUpdate page model =
-    ( { model | currentPage = page }
-    , loadPage page model
-    )
+    loadPage page { model | currentPage = page }
 
 
-loadPage : Page -> Model -> Cmd Msg
+loadPage : Page -> Model -> ( Model, Cmd Msg )
 loadPage page model =
     case page of
         Page.Home ->
-            Cmd.map HomePageMsg HomePage.onPageLoad
+            model ! [ Cmd.map HomePageMsg HomePage.onPageLoad ]
 
         Page.Newsletters ->
-            Cmd.batch
-                [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
-                , fetchNewsletterFiles model
-                ]
+            model
+                ! [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
+                  , fetchNewsletterFiles model
+                  ]
 
         Page.Newsletter name ->
-            Cmd.batch
-                [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
-                , fetchNewsletterFiles model
-                ]
+            let
+                ( updatedModel, cmd ) =
+                    fetchNewsletter name model
+            in
+                updatedModel
+                    ! [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
+                      , cmd
+                      , fetchNewsletterFiles model
+                      ]
 
         Page.NotFound ->
-            Cmd.none
+            model ! []
 
 
 fetchNewsletterFiles : Model -> Cmd Msg
@@ -183,6 +217,21 @@ fetchNewsletterFiles model =
 
         _ ->
             Cmd.none
+
+
+fetchNewsletter : String -> Model -> ( Model, Cmd Msg )
+fetchNewsletter name model =
+    case Dict.get name model.newsletters of
+        Nothing ->
+            { model | newsletters = Dict.insert name FetchData.Fetching model.newsletters }
+                ! [ Task.perform
+                        (FailedToFetchNewsletter name)
+                        (FetchedNewsletter name)
+                        (Newsletter.fetch name)
+                  ]
+
+        Just _ ->
+            model ! []
 
 
 subscriptions : Model -> Sub Msg

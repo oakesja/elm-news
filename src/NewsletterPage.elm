@@ -5,43 +5,29 @@ import Html.Attributes exposing (class)
 import Newsletter.Newsletter as Newsletter exposing (Newsletter, Article)
 import Newsletter.NewsletterFile exposing (NewsletterFile)
 import News.View as News exposing (DisplayStory)
-import Http
-import Task
 import Analytics exposing (Event)
 import Components.Icons
 import Navigation
 import Links
+import FetchData exposing (FetchData)
 
 
 type alias Model =
-    { newsletter : Content
-    }
-
-
-type Content
-    = Fetching
-    | Fetched Newsletter
-    | Error Http.Error
+    {}
 
 
 init : Model
 init =
-    { newsletter = Fetching
-    }
+    {}
 
 
 onPageLoad : String -> Cmd Msg
 onPageLoad name =
-    Task.perform
-        FailedToFetchNewsletter
-        FetchedNewsletter
-        (Newsletter.fetch name)
+    Cmd.none
 
 
 type Msg
-    = FailedToFetchNewsletter Http.Error
-    | FetchedNewsletter Newsletter
-    | ClickEvent Event
+    = ClickEvent Event
     | GoToArticle String
     | NoOp
 
@@ -49,16 +35,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FailedToFetchNewsletter error ->
-            let
-                _ =
-                    Debug.log "error" error
-            in
-                { model | newsletter = Error error } ! []
-
-        FetchedNewsletter newsletter ->
-            { model | newsletter = Fetched newsletter } ! []
-
         ClickEvent event ->
             model ! [ Analytics.registerEvent event ]
 
@@ -72,17 +48,28 @@ update msg model =
             model ! []
 
 
-view : Int -> List NewsletterFile -> String -> Model -> Html Msg
-view screenWidth files filename model =
-    case model.newsletter of
-        Fetching ->
+type alias Data =
+    { screenWidth : Int
+    , files : List NewsletterFile
+    , filename : String
+    , newsletter : FetchData Newsletter
+    }
+
+
+view : Data -> Model -> Html Msg
+view data model =
+    case data.newsletter of
+        FetchData.Fetching ->
             text "fetching"
 
-        Error error ->
+        FetchData.Failed error ->
             text "error"
 
-        Fetched newsletter ->
-            displayNewsletter screenWidth files filename newsletter
+        FetchData.Fetched newsletter ->
+            displayNewsletter data.screenWidth data.files data.filename newsletter
+
+        FetchData.NotStarted ->
+            text "not started"
 
 
 displayNewsletter : Int -> List NewsletterFile -> String -> Newsletter -> Html Msg
