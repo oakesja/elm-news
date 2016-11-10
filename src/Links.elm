@@ -23,3 +23,11 @@ newsletterSignup =
 
 newsletter name =
     "/newsletters/" ++ name
+
+
+newsletters =
+    "/newsletters"
+
+
+home =
+    "/"

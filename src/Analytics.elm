@@ -4,7 +4,7 @@ port module Analytics exposing (..)
 type alias Event =
     { category : String
     , action : String
-    , url : String
+    , label : String
     , title : Maybe String
     , tag : Maybe String
     , author : Maybe String
@@ -19,11 +19,11 @@ type alias NewsEventInfo =
     }
 
 
-githubRepo : String -> Event
-githubRepo url =
+githubRepo : Event
+githubRepo =
     { category = "Github Link"
     , action = "click"
-    , url = url
+    , label = ""
     , title = Nothing
     , tag = Nothing
     , author = Nothing
@@ -34,7 +34,7 @@ newsLink : NewsEventInfo -> Event
 newsLink { tag, url, title, author } =
     { category = "News"
     , action = "click"
-    , url = url
+    , label = url
     , title = Just title
     , tag = Just tag
     , author = Just author
@@ -45,29 +45,29 @@ tagLink : String -> String -> Event
 tagLink tag url =
     { category = "Tag"
     , action = "click"
-    , url = url
+    , label = url
     , title = Nothing
     , tag = Just tag
     , author = Nothing
     }
 
 
-newsletter : Event
-newsletter =
+newsletterSignup : Event
+newsletterSignup =
     { category = "Newsletter"
-    , action = "click"
-    , url = ""
+    , action = "signup"
+    , label = ""
     , title = Nothing
     , tag = Nothing
     , author = Nothing
     }
 
 
-twitterLink : String -> Event
-twitterLink url =
+twitterLink : Event
+twitterLink =
     { category = "Twitter"
     , action = "click"
-    , url = url
+    , label = ""
     , title = Nothing
     , tag = Nothing
     , author = Nothing
@@ -78,7 +78,7 @@ error : String -> String -> Event
 error display raw =
     { category = "Error"
     , action = display
-    , url = raw
+    , label = raw
     , title = Nothing
     , tag = Nothing
     , author = Nothing

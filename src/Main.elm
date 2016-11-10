@@ -22,6 +22,7 @@ import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
 import Newsletter.Newsletter as Newsletter exposing (Newsletter)
 import Http
 import Dict exposing (Dict)
+import Links
 
 
 type alias Model =
@@ -69,6 +70,8 @@ type Msg
     | FetchedFiles (List NewsletterFile)
     | FailedToFetchNewsletter String Http.Error
     | FetchedNewsletter String Newsletter
+    | IconClicked
+    | NewsletterClicked
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -137,11 +140,21 @@ update msg model =
             in
                 { model | newsletters = newsletters } ! []
 
+        IconClicked ->
+            model ! [ Navigation.newUrl Links.home ]
+
+        NewsletterClicked ->
+            model ! [ Navigation.newUrl Links.newsletters ]
+
 
 view : Model -> Html Msg
 view model =
     div [ class "main" ]
-        [ Header.view AnalyticsEvent
+        [ Header.view
+            { onLinkClick = AnalyticsEvent
+            , onIconClick = IconClicked
+            , onNewsletterClick = NewsletterClicked
+            }
         , div
             [ class "body" ]
             [ body model ]

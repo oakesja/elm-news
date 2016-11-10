@@ -1,28 +1,41 @@
 module Components.Logo exposing (..)
 
-import Svg exposing (Svg, svg, path)
-import Svg.Attributes exposing (fill, viewBox, d, height)
-import Html exposing (Html, div, text)
-import Html.Attributes
+import Svg exposing (Svg, svg, path, g, text, text')
+import Svg.Attributes exposing (fill, viewBox, d, height, transform, width, fontSize, x, y, class)
+import Svg.Events exposing (onClick)
 
 
-view : Html msg
-view =
-    div [ Html.Attributes.class "logo" ]
+view : msg -> Svg msg
+view clickMsg =
+    svg
+        [ height "40px"
+        , viewBox "0 0 300 100"
+        , class "logo"
+        , onClick clickMsg
+        ]
         [ icon
-        , div [ Html.Attributes.class "logo__text" ]
-            [ div [ Html.Attributes.class "logo_elm" ] [ text "elm" ]
-            , div [ Html.Attributes.class "logo_news" ] [ text "news" ]
+        , g
+            [ transform "translate(140, 45)"
+            , fill "#FFFFFF"
+            , fontSize "3.0em"
+            , class "header__control"
+            ]
+            [ text'
+                []
+                [ text "elm" ]
+            , text'
+                [ x "-10"
+                , y "40"
+                ]
+                [ text "news" ]
             ]
         ]
 
 
 icon : Svg msg
 icon =
-    svg
-        [ height "40px"
-        , viewBox "0 0 100 100"
-        , Svg.Attributes.class "logo__icon"
+    g
+        [ viewBox "0 0 100 100"
         ]
         [ path
             [ d "M 5 0 L 95 0 L 50 55 z"

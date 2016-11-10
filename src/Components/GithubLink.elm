@@ -16,7 +16,7 @@ view imgClasses onLinkClick =
             , src Links.githubIcon
             , alt "elm-news on github"
             , title "elm-news on github"
-            , Analytics.githubRepo Links.github
+            , Analytics.githubRepo
                 |> onLinkClick
                 |> onClick
             ]

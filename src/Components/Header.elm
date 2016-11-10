@@ -1,4 +1,4 @@
-module Components.Header exposing (view)
+module Components.Header exposing (Config, view)
 
 import Html exposing (Html, header, div, text, a, img, h1)
 import Html.Attributes exposing (class, title, href, attribute, alt, src)
@@ -9,16 +9,24 @@ import Analytics exposing (Event)
 import Links
 
 
-view : (Event -> msg) -> Html msg
-view onLinkClick =
+type alias Config msg =
+    { onLinkClick : Event -> msg
+    , onIconClick : msg
+    , onNewsletterClick : msg
+    }
+
+
+view : Config msg -> Html msg
+view config =
     header [ class "header" ]
-        [ Logo.view
-        , h1 [ class "header__description" ]
+        [ div [ class "header__logo" ]
+            [ Logo.view config.onIconClick ]
+        , h1 [ class "header__title" ]
             [ text "All elm news in one place" ]
-        , div [ class "header__right" ]
-            [ topNewsLink onLinkClick
-            , twitterLink onLinkClick
-            , GithubLink.view "header__github" onLinkClick
+        , div [ class "header__controls" ]
+            [ newsletters config.onNewsletterClick
+            , twitterLink config.onLinkClick
+            , GithubLink.view "header__icon header__control" config.onLinkClick
             ]
         ]
 
@@ -28,11 +36,11 @@ twitterLink onLinkClick =
     a
         [ href Links.twitter ]
         [ img
-            [ class "header__twitter"
+            [ class "header__icon header__control"
             , src Links.twitterIcon
             , alt "Follow @elmlangnews"
             , title "Follow @elmlangnews on Twitter"
-            , Analytics.twitterLink Links.twitter
+            , Analytics.twitterLink
                 |> onLinkClick
                 |> onClick
             ]
@@ -40,14 +48,12 @@ twitterLink onLinkClick =
         ]
 
 
-topNewsLink : (Event -> msg) -> Html msg
-topNewsLink onLinkClick =
-    a
-        [ class "header__top-news"
-        , title "Sign up for the weekly top news"
-        , href Links.newsletterSignup
-        , onClick (onLinkClick Analytics.newsletter)
+newsletters : msg -> Html msg
+newsletters msg =
+    div
+        [ class "header__newsletters header__control"
+        , title "An archive of previous weekly newsletters"
+        , onClick msg
         ]
-        [ div [] [ text "Top" ]
-        , div [] [ text "Newsletter" ]
+        [ div [] [ text "Newsletters" ]
         ]
