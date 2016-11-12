@@ -2,12 +2,15 @@ module NewslettersPage exposing (Model, Msg, init, view, update, onPageLoad)
 
 import Html exposing (Html, div, text, h1, span, a)
 import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick)
 import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
 import Links
 import Date.Format
 import Date
 import FetchData exposing (FetchData)
 import Components.Spinner
+import Navigation
+import Analytics
 
 
 type alias Model =
@@ -25,14 +28,25 @@ onPageLoad =
 
 
 type Msg
-    = NoOp
+    = GoToNewletter String
+    | GoToSignup
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            model ! []
+        GoToNewletter name ->
+            model
+                ! [ Navigation.modifyUrl (Links.newsletter name)
+                  , Analytics.newletterLink name
+                        |> Analytics.registerEvent
+                  ]
+
+        GoToSignup ->
+            model
+                ! [ Analytics.newsletterSignup
+                        |> Analytics.registerEvent
+                  ]
 
 
 view : FetchData (List NewsletterFile) -> Model -> Html Msg
@@ -50,6 +64,7 @@ view files model =
                     """
                 , a
                     [ href Links.newsletterSignup
+                    , onClick GoToSignup
                     , class "internal__link"
                     ]
                     [ text "subscribe here" ]
@@ -89,9 +104,9 @@ newsletterView index file =
     in
         span [ class "newsletters__file" ]
             [ text <| "#" ++ issue ++ " ― "
-            , a
-                [ href <| Links.newsletter file.name
-                , class "internal__link"
+            , span
+                [ class "internal__link"
+                , onClick (GoToNewletter file.name)
                 ]
                 [ file.date
                     |> Date.Format.format "%b %d, %Y"

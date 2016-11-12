@@ -18,6 +18,7 @@ a {
 .internal__link {
   color: #5A6378;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .internal__link:visited {

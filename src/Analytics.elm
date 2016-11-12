@@ -74,6 +74,17 @@ twitterLink =
     }
 
 
+newletterLink : String -> Event
+newletterLink name =
+    { category = "Newsletter"
+    , action = "click"
+    , label = name
+    , title = Nothing
+    , tag = Nothing
+    , author = Nothing
+    }
+
+
 error : String -> String -> Event
 error display raw =
     { category = "Error"
