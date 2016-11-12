@@ -18,7 +18,6 @@ view clickMsg =
             [ transform "translate(140, 45)"
             , fill "#FFFFFF"
             , fontSize "3.0em"
-            , class "header__control"
             ]
             [ text'
                 []

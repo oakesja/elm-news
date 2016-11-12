@@ -61,12 +61,11 @@ a {
 }
 
 .header__control {
-  /*color: #FFFFFF;*/
   cursor: pointer;
   padding-left: 20px;
 }
 
-.header__control:hover {
+.header__control:hover, .logo:hover {
   opacity: 0.7;
 }
 
