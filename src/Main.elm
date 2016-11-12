@@ -199,7 +199,11 @@ loadPage : Page -> Model -> ( Model, Cmd Msg )
 loadPage page model =
     case page of
         Page.Home ->
-            model ! [ Cmd.map HomePageMsg HomePage.onPageLoad ]
+            let
+                ( homePage, cmd ) =
+                    HomePage.onPageLoad model.homePage
+            in
+                { model | homePage = homePage } ! [ Cmd.map HomePageMsg cmd ]
 
         Page.Newsletters ->
             model

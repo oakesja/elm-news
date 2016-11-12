@@ -36,14 +36,14 @@ init =
     }
 
 
-onPageLoad : Cmd Msg
-onPageLoad =
-    Cmd.batch
-        [ fetchGoogleGroupMsgs "elm-dev"
-        , fetchGoogleGroupMsgs "elm-discuss"
-        , fetch Reddit.tag Reddit.fetch
-        , fetch HackerNews.tag HackerNews.fetch
-        ]
+onPageLoad : Model -> ( Model, Cmd Msg )
+onPageLoad model =
+    init
+        ! [ fetchGoogleGroupMsgs "elm-dev"
+          , fetchGoogleGroupMsgs "elm-discuss"
+          , fetch Reddit.tag Reddit.fetch
+          , fetch HackerNews.tag HackerNews.fetch
+          ]
 
 
 fetch : String -> Task Http.Error (List Story) -> Cmd Msg
