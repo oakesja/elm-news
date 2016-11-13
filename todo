@@ -1,0 +1,14 @@
+entire card click target when small
+fix spinner not being in center
+removed spinner from newsletters view
+consistent coloring (all links dark blue)
+error handling for newsletters
+move previous and next newsletter file into file and out of the page
+use icon for error svg
+compress css
+look into some elm css framework
+change GA id
+responsiveness to each page
+look into other spa frameworks to remove boilerplate
+http://package.elm-lang.org/packages/yotamDvir/elm-pivot/latest
+move to a single size where it goes between mobile to full version of the website
