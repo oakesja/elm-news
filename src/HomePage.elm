@@ -21,6 +21,7 @@ import News.Reddit as Reddit
 import News.HackerNews as HackerNews
 import Analytics
 import Http
+import Components.Spinner
 
 
 type alias Model =
@@ -102,16 +103,23 @@ updateErrorManager msg model =
 
 view : Maybe Date -> Int -> Model -> Html Msg
 view now screenWidth model =
-    div [ class "home__body" ]
-        [ News.view
-            { now = now
-            , screenWidth = screenWidth
-            , onLinkClick = AnalyticsEvent
-            }
-            (List.map toDisplayStory model.allStories)
-        , ErrorManager.view model.errorManager
-            |> Html.App.map ErrorManagerMessage
-        ]
+    let
+        news =
+            if List.isEmpty model.allStories then
+                Components.Spinner.view
+            else
+                News.view
+                    { now = now
+                    , screenWidth = screenWidth
+                    , onLinkClick = AnalyticsEvent
+                    }
+                    (List.map toDisplayStory model.allStories)
+    in
+        div [ class "home__body" ]
+            [ news
+            , ErrorManager.view model.errorManager
+                |> Html.App.map ErrorManagerMessage
+            ]
 
 
 toDisplayStory : Story -> DisplayStory
