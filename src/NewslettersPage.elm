@@ -8,7 +8,6 @@ import Links
 import Date.Format
 import Date
 import FetchData exposing (FetchData)
-import Components.Spinner
 import Navigation
 import Analytics
 
@@ -70,30 +69,22 @@ view files model =
                     [ text "subscribe here" ]
                 , text "."
                 ]
+            , newsletters files
             ]
-                ++ (newsletters files)
         ]
 
 
-newsletters : FetchData (List NewsletterFile) -> List (Html Msg)
+newsletters : FetchData (List NewsletterFile) -> Html Msg
 newsletters files =
-    case files of
-        FetchData.NotStarted ->
-            [ text "" ]
+    FetchData.view newslettersView files
 
-        FetchData.Fetching ->
-            [ div
-                [ class "newsletters__spinner" ]
-                [ Components.Spinner.view ]
-            ]
 
-        FetchData.Fetched newsletters ->
-            List.sortBy (Date.toTime << .date) newsletters
-                |> List.indexedMap newsletterView
-                |> List.reverse
-
-        FetchData.Failed error ->
-            [ text "" ]
+newslettersView : List NewsletterFile -> Html Msg
+newslettersView newsletters =
+    List.sortBy (Date.toTime << .date) newsletters
+        |> List.indexedMap newsletterView
+        |> List.reverse
+        |> div [ class "newsletters" ]
 
 
 newsletterView : Int -> NewsletterFile -> Html Msg

@@ -58,18 +58,9 @@ type alias Data =
 
 view : Data -> Model -> Html Msg
 view data model =
-    case data.newsletter of
-        FetchData.Fetching ->
-            text "fetching"
-
-        FetchData.Failed error ->
-            text "error"
-
-        FetchData.Fetched newsletter ->
-            displayNewsletter data.screenWidth data.files data.filename newsletter
-
-        FetchData.NotStarted ->
-            text "not started"
+    FetchData.view
+        (displayNewsletter data.screenWidth data.files data.filename)
+        data.newsletter
 
 
 displayNewsletter : Int -> List NewsletterFile -> String -> Newsletter -> Html Msg
