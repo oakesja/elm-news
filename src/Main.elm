@@ -154,6 +154,7 @@ view model =
             { onLinkClick = AnalyticsEvent
             , onIconClick = IconClicked
             , onNewsletterClick = NewsletterClicked
+            , screenWidth = model.width
             }
         , div
             [ class "body" ]

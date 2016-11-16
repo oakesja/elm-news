@@ -2,13 +2,12 @@ module News.View exposing (view, DisplayStory, DisplayStoryFrom(..))
 
 import Date exposing (Date)
 import Html exposing (Html, div, a, text, span)
-import Html.Attributes exposing (class, href, id)
+import Html.Attributes exposing (class, classList, href, id)
 import Html.Events exposing (onClick)
 import Analytics exposing (Event, NewsEventInfo)
 import News.Tag as Tag
 import DateFormatter
-import Erl
-import String
+import Url
 
 
 type alias Config msg =
@@ -34,18 +33,16 @@ type alias DisplayStory =
 
 view : Config msg -> List DisplayStory -> Html msg
 view config stories =
-    let
-        className =
-            if config.screenWidth >= 920 then
-                "cards_max"
-            else
-                "cards"
-    in
-        stories
-            |> List.sortBy storyDate
-            |> List.reverse
-            |> List.map (cardView config)
-            |> div [ class className ]
+    stories
+        |> List.sortBy storyDate
+        |> List.reverse
+        |> List.map (cardView config)
+        |> div
+            [ classList
+                [ ( "cards_max", config.screenWidth >= 850 )
+                , ( "cards_min", config.screenWidth < 850 )
+                ]
+            ]
 
 
 storyDate : DisplayStory -> Float
@@ -55,19 +52,23 @@ storyDate story =
 
 cardView : Config msg -> DisplayStory -> Html msg
 cardView { now, screenWidth, onLinkClick } story =
-    let
-        attrs =
-            if screenWidth < 600 then
-                [ storyEvent story
-                    |> Analytics.newsLink
-                    |> onLinkClick
-                    |> onClick
-                , class "card card__link"
+    if screenWidth < 650 then
+        a
+            [ class "card_min"
+            , storyEvent story
+                |> Analytics.newsLink
+                |> onLinkClick
+                |> onClick
+            , href story.url
+            ]
+            [ linkView story onLinkClick
+            , div [ class "card__description__min" ]
+                [ authorView story.from
+                , timeStamp now story.date
                 ]
-            else
-                [ class "card" ]
-    in
-        div attrs
+            ]
+    else
+        div [ class "card" ]
             [ Tag.view story.tag onLinkClick
             , div [ class "card__description" ]
                 [ linkView story onLinkClick
@@ -90,15 +91,8 @@ linkView story onLinkClick =
             ]
             [ text story.title ]
         , span [ class "card__description__domain" ]
-            [ text <| "(" ++ (parseDomain story.url) ++ ")" ]
+            [ text <| "(" ++ (Url.domain story.url) ++ ")" ]
         ]
-
-
-parseDomain : String -> String
-parseDomain url =
-    Erl.parse url
-        |> .host
-        |> String.join "."
 
 
 storyEvent : DisplayStory -> NewsEventInfo

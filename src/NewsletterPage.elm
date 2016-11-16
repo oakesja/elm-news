@@ -65,20 +65,13 @@ view data model =
 
 displayNewsletter : Int -> List NewsletterFile -> String -> Newsletter -> Html Msg
 displayNewsletter screenWidth files filename newsletter =
-    if screenWidth >= 600 then
-        div [ class "newsletter__body" ]
-            [ navIcon previousArticle Components.Icons.left files filename "newsletter__nav"
-            , articles screenWidth files filename newsletter
-            , navIcon nextArticle Components.Icons.right files filename "newsletter__nav"
+    div [ class "newsletter__body" ]
+        [ articles screenWidth files filename newsletter
+        , div [ class "newsletter__controls" ]
+            [ navIcon previousArticle Components.Icons.left files filename "newsletter__nav_min"
+            , navIcon nextArticle Components.Icons.right files filename "newsletter__nav_min"
             ]
-    else
-        div [ class "newsletter__body_min" ]
-            [ articles screenWidth files filename newsletter
-            , div [ class "newsletter__controls" ]
-                [ navIcon previousArticle Components.Icons.left files filename "newsletter__nav_min"
-                , navIcon nextArticle Components.Icons.right files filename "newsletter__nav_min"
-                ]
-            ]
+        ]
 
 
 articles : Int -> List NewsletterFile -> String -> Newsletter -> Html Msg
