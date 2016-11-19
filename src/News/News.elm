@@ -1,4 +1,13 @@
-module News.View exposing (view, DisplayStory, DisplayStoryFrom(..))
+module News.News
+    exposing
+        ( view
+        , DisplayStory
+        , DisplayStoryFrom(..)
+        , Model
+        , update
+        , Msg
+        , init
+        )
 
 import Date exposing (Date)
 import Html exposing (Html, div, a, text, span)
@@ -8,13 +17,16 @@ import Analytics exposing (Event, NewsEventInfo)
 import News.Tag as Tag
 import DateFormatter
 import Url
+import Navigation
 
 
-type alias Config msg =
-    { now : Maybe Date
-    , screenWidth : Int
-    , onLinkClick : Event -> msg
-    }
+type alias Model =
+    {}
+
+
+init : Model
+init =
+    {}
 
 
 type DisplayStoryFrom
@@ -31,68 +43,24 @@ type alias DisplayStory =
     }
 
 
-view : Config msg -> List DisplayStory -> Html msg
-view config stories =
-    stories
-        |> List.sortBy storyDate
-        |> List.reverse
-        |> List.map (cardView config)
-        |> div
-            [ classList
-                [ ( "cards_max", config.screenWidth >= 850 )
-                , ( "cards_min", config.screenWidth < 850 )
-                ]
-            ]
+type Msg
+    = ClickStory DisplayStory
+    | TrackEvent Event
 
 
-storyDate : DisplayStory -> Float
-storyDate story =
-    Maybe.withDefault 0 story.date
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        ClickStory story ->
+            model
+                ! [ storyEvent story
+                        |> Analytics.newsLink
+                        |> Analytics.registerEvent
+                  , Navigation.modifyUrl ("#" ++ storyId story)
+                  ]
 
-
-cardView : Config msg -> DisplayStory -> Html msg
-cardView { now, screenWidth, onLinkClick } story =
-    if screenWidth < 650 then
-        a
-            [ class "card_min"
-            , storyEvent story
-                |> Analytics.newsLink
-                |> onLinkClick
-                |> onClick
-            , href story.url
-            ]
-            [ linkView story onLinkClick
-            , div [ class "card__description__min" ]
-                [ authorView story.from
-                , timeStamp now story.date
-                ]
-            ]
-    else
-        div [ class "card" ]
-            [ Tag.view story.tag onLinkClick
-            , div [ class "card__description" ]
-                [ linkView story onLinkClick
-                , authorView story.from
-                ]
-            , timeStamp now story.date
-            ]
-
-
-linkView : DisplayStory -> (Event -> msg) -> Html msg
-linkView story onLinkClick =
-    div [ class "card__description__header" ]
-        [ a
-            [ storyEvent story
-                |> Analytics.newsLink
-                |> onLinkClick
-                |> onClick
-            , href story.url
-            , class "card__description__title"
-            ]
-            [ text story.title ]
-        , span [ class "card__description__domain" ]
-            [ text <| "(" ++ (Url.domain story.url) ++ ")" ]
-        ]
+        TrackEvent event ->
+            model ! [ Analytics.registerEvent event ]
 
 
 storyEvent : DisplayStory -> NewsEventInfo
@@ -114,7 +82,80 @@ getAuthor from =
             o
 
 
-authorView : DisplayStoryFrom -> Html msg
+storyId : DisplayStory -> String
+storyId story =
+    story.title ++ "_" ++ (toString story.date)
+
+
+type alias Config =
+    { now : Maybe Date
+    , screenWidth : Int
+    }
+
+
+view : Model -> Config -> List DisplayStory -> Html Msg
+view model config stories =
+    stories
+        |> List.sortBy storyDate
+        |> List.reverse
+        |> List.map (cardView config)
+        |> div
+            [ classList
+                [ ( "cards_max", config.screenWidth >= 850 )
+                , ( "cards_min", config.screenWidth < 850 )
+                ]
+            ]
+
+
+storyDate : DisplayStory -> Float
+storyDate story =
+    Maybe.withDefault 0 story.date
+
+
+cardView : Config -> DisplayStory -> Html Msg
+cardView { now, screenWidth } story =
+    if screenWidth < 650 then
+        a
+            [ class "card_min"
+            , onClick (ClickStory story)
+            , href story.url
+            , id (storyId story)
+            ]
+            [ linkView story
+            , div [ class "card__description__min" ]
+                [ authorView story.from
+                , timeStamp now story.date
+                ]
+            ]
+    else
+        div
+            [ class "card"
+            , id (storyId story)
+            ]
+            [ Tag.view story.tag TrackEvent
+            , div [ class "card__description" ]
+                [ linkView story
+                , authorView story.from
+                ]
+            , timeStamp now story.date
+            ]
+
+
+linkView : DisplayStory -> Html Msg
+linkView story =
+    div [ class "card__description__header" ]
+        [ a
+            [ onClick (ClickStory story)
+            , href story.url
+            , class "card__description__title"
+            ]
+            [ text story.title ]
+        , span [ class "card__description__domain" ]
+            [ text <| "(" ++ (Url.domain story.url) ++ ")" ]
+        ]
+
+
+authorView : DisplayStoryFrom -> Html Msg
 authorView from =
     let
         fromText =
@@ -129,7 +170,7 @@ authorView from =
             [ text fromText ]
 
 
-timeStamp : Maybe Date -> Maybe Float -> Html msg
+timeStamp : Maybe Date -> Maybe Float -> Html Msg
 timeStamp now date =
     case date of
         Just d ->

@@ -3,7 +3,7 @@ module Newsletter.Newsletter exposing (Newsletter, Article, fetch)
 import Json.Decode exposing (..)
 import Http
 import Task exposing (Task)
-import News.View as News exposing (DisplayStoryFrom)
+import News.News as News exposing (DisplayStoryFrom)
 
 
 type alias Newsletter =

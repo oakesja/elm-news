@@ -16,7 +16,7 @@ import Date exposing (Date)
 import Task exposing (Task, andThen)
 import ErrorManager
 import News.Story exposing (Story, StoryResp, StoryError)
-import News.View as News exposing (DisplayStory)
+import News.News as News exposing (DisplayStory)
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
 import Analytics
@@ -27,6 +27,7 @@ import Components.Spinner
 type alias Model =
     { allStories : List Story
     , errorManager : ErrorManager.Model
+    , news : News.Model
     }
 
 
@@ -64,6 +65,7 @@ type Msg
     | AnalyticsEvent Analytics.Event
     | NewsFetchSuccess StoryResp
     | NewsFetchError StoryError
+    | NewsMsg News.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,6 +91,13 @@ update msg model =
             in
                 updateErrorManager (ErrorManager.AddError error) model
 
+        NewsMsg newsMsg ->
+            let
+                ( newNews, cmd ) =
+                    News.update newsMsg model.news
+            in
+                { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
+
 
 updateErrorManager : ErrorManager.Msg -> Model -> ( Model, Cmd Msg )
 updateErrorManager msg model =
@@ -109,11 +118,12 @@ view now screenWidth model =
                 Components.Spinner.view
             else
                 News.view
+                    model.news
                     { now = now
                     , screenWidth = screenWidth
-                    , onLinkClick = AnalyticsEvent
                     }
                     (List.map toDisplayStory model.allStories)
+                    |> Html.App.map NewsMsg
     in
         div [ class "home__body" ]
             [ news
