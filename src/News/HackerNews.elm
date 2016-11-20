@@ -5,7 +5,6 @@ module News.HackerNews exposing (fetch, tag)
 import Json.Decode exposing (..)
 import Http
 import News.Story exposing (Story)
-import Task exposing (Task)
 
 
 tag : String
@@ -13,9 +12,11 @@ tag =
     "Hacker News"
 
 
-fetch : Task Http.Error (List Story)
+fetch : Http.Request (List Story)
 fetch =
-    Http.get decoder "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
+    Http.get
+        "https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)"
+        decoder
 
 
 type alias HackerNewsStory =
@@ -29,29 +30,29 @@ type alias HackerNewsStory =
 
 decoder : Decoder (List Story)
 decoder =
-    customDecoder hackerNewsDecoder <|
-        \stories ->
+    map
+        (\stories ->
             List.map storyToMessage stories
                 |> List.filter (\s -> s.url /= "")
-                |> Ok
+        )
+        hackerNewsDecoder
 
 
 hackerNewsDecoder : Decoder (List HackerNewsStory)
 hackerNewsDecoder =
     at [ "hits" ] <|
         list <|
-            object5 HackerNewsStory
-                ("author" := string)
-                ("title" := string)
-                ("created_at_i" := timeDecoder)
-                ("url" := maybe string)
+            map5 HackerNewsStory
+                (field "author" string)
+                (field "title" string)
+                (field "created_at_i" timeDecoder)
+                (maybe (field "url" string))
                 (succeed tag)
 
 
 timeDecoder : Decoder Float
 timeDecoder =
-    customDecoder float
-        (\time -> Ok <| time * 1000)
+    map (\time -> time * 1000) float
 
 
 storyToMessage : HackerNewsStory -> Story

@@ -11,7 +11,6 @@ port module HomePage
 
 import Html exposing (Html, a, text, div, h1, span)
 import Html.Attributes exposing (class)
-import Html.App
 import Date exposing (Date)
 import Task exposing (Task, andThen)
 import ErrorManager
@@ -35,6 +34,7 @@ init : Model
 init =
     { errorManager = ErrorManager.init
     , allStories = []
+    , news = News.init
     }
 
 
@@ -48,23 +48,17 @@ onPageLoad model =
           ]
 
 
-fetch : String -> Task Http.Error (List Story) -> Cmd Msg
-fetch tag task =
-    Task.perform
-        (\error ->
-            toString error
-                |> StoryError tag
-                |> NewsFetchError
-        )
-        (\links -> NewsFetchSuccess (StoryResp tag links))
-        task
+fetch : String -> Http.Request (List Story) -> Cmd Msg
+fetch tag request =
+    Task.attempt
+        (\result -> FetchedNews tag (Result.mapError toString result))
+        (Http.toTask request)
 
 
 type Msg
     = ErrorManagerMessage ErrorManager.Msg
     | AnalyticsEvent Analytics.Event
-    | NewsFetchSuccess StoryResp
-    | NewsFetchError StoryError
+    | FetchedNews String (Result String (List Story))
     | NewsMsg News.Msg
 
 
@@ -77,16 +71,16 @@ update msg model =
         AnalyticsEvent event ->
             ( model, Analytics.registerEvent event )
 
-        NewsFetchSuccess resp ->
-            ( { model | allStories = model.allStories ++ resp.stories }
+        FetchedNews tag (Ok stories) ->
+            ( { model | allStories = model.allStories ++ stories }
             , Cmd.none
             )
 
-        NewsFetchError rawError ->
+        FetchedNews tag (Err rawError) ->
             let
                 error =
-                    { display = "Failed to fetch content from " ++ rawError.tag
-                    , raw = Debug.log "" rawError.error
+                    { display = "Failed to fetch content from " ++ tag
+                    , raw = Debug.log "" rawError
                     }
             in
                 updateErrorManager (ErrorManager.AddError error) model
@@ -123,12 +117,12 @@ view now screenWidth model =
                     , screenWidth = screenWidth
                     }
                     (List.map toDisplayStory model.allStories)
-                    |> Html.App.map NewsMsg
+                    |> Html.map NewsMsg
     in
         div [ class "home__body" ]
             [ news
             , ErrorManager.view model.errorManager
-                |> Html.App.map ErrorManagerMessage
+                |> Html.map ErrorManagerMessage
             ]
 
 
@@ -145,8 +139,8 @@ toDisplayStory story =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ fetchedGoogleGroupMsgs NewsFetchSuccess
-        , errorGoogleGroupMsgs NewsFetchError
+        [ fetchedGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Ok resp.stories))
+        , errorGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Err resp.error))
         ]
 
 

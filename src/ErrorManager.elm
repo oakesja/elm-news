@@ -13,7 +13,6 @@ import Task exposing (andThen)
 import Process
 import Time
 import Html exposing (Html, div, text)
-import Html.App
 import Components.ErrorToast as ErrorToast
 import Analytics
 
@@ -58,7 +57,7 @@ update msg model =
 
 ackErrorAfterNSeconds : Error -> Float -> Cmd Msg
 ackErrorAfterNSeconds error seconds =
-    Task.perform (\_ -> AcknowledgeError error)
+    Task.perform
         (\_ -> AcknowledgeError error)
         (Process.sleep (Time.second * seconds))
 
@@ -92,7 +91,7 @@ errorView index ( acked, error ) =
             -- This is a hack for chrome since it will not refresh when the error toast is removed
             div [] [ text "&nbsp" ]
         else
-            Html.App.map
+            Html.map
                 (\_ -> AcknowledgeError error)
                 (ErrorToast.view error.display top)
 

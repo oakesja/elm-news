@@ -2,7 +2,6 @@ module NewsletterPage exposing (Model, Msg, init, view, update, onPageLoad)
 
 import Html exposing (Html, div, text, h1)
 import Html.Attributes exposing (class)
-import Html.App
 import Newsletter.Newsletter as Newsletter exposing (Newsletter, Article)
 import Newsletter.NewsletterFile exposing (NewsletterFile)
 import News.News as News exposing (DisplayStory)
@@ -95,7 +94,7 @@ articles screenWidth files filename newsletter model =
             , screenWidth = screenWidth
             }
             (List.map toDisplayStory newsletter.articles)
-            |> Html.App.map NewsMsg
+            |> Html.map NewsMsg
         ]
 
 

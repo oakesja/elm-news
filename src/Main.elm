@@ -8,8 +8,6 @@ import Task exposing (andThen)
 import Process
 import Components.Header as Header
 import Components.Footer as Footer
-import Html.App
-import Basics.Extra exposing (never)
 import Navigation exposing (Location)
 import HomePage
 import NewslettersPage
@@ -37,9 +35,12 @@ type alias Model =
     }
 
 
-init : Page -> ( Model, Cmd Msg )
-init page =
+init : Navigation.Location -> ( Model, Cmd Msg )
+init location =
     let
+        page =
+            Page.parse location
+
         ( model, cmd ) =
             loadPage page
                 { currentPage = page
@@ -54,22 +55,21 @@ init page =
     in
         model
             ! [ cmd
-              , Task.perform never CurrentDate Date.now
-              , Task.perform never WindowSize Window.size
+              , Task.perform CurrentDate Date.now
+              , Task.perform WindowSize Window.size
               ]
 
 
 type Msg
-    = HomePageMsg HomePage.Msg
+    = UrlChange Navigation.Location
+    | HomePageMsg HomePage.Msg
     | NewslettersMsg NewslettersPage.Msg
     | NewsletterMsg NewsletterPage.Msg
     | AnalyticsEvent Analytics.Event
     | CurrentDate Date
     | WindowSize Window.Size
-    | FailedToFetchFiles Http.Error
-    | FetchedFiles (List NewsletterFile)
-    | FailedToFetchNewsletter String Http.Error
-    | FetchedNewsletter String Newsletter
+    | FetchedFiles (Result Http.Error (List NewsletterFile))
+    | FetchedNewsletter String (Result Http.Error Newsletter)
     | IconClicked
     | NewsletterClicked
 
@@ -77,53 +77,57 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UrlChange location ->
+            let
+                page =
+                    Page.parse location
+            in
+                loadPage page { model | currentPage = page }
+
         HomePageMsg homeMsg ->
             let
                 ( newHomePage, cmds ) =
                     HomePage.update homeMsg model.homePage
             in
-                ( { model | homePage = newHomePage }
-                , Cmd.map HomePageMsg cmds
-                )
+                { model | homePage = newHomePage }
+                    ! [ Cmd.map HomePageMsg cmds ]
 
         NewslettersMsg newsLettersMsg ->
             let
                 ( newNewsletter, cmds ) =
                     NewslettersPage.update newsLettersMsg model.newslettersPage
             in
-                ( { model | newslettersPage = newNewsletter }
-                , Cmd.map NewslettersMsg cmds
-                )
+                { model | newslettersPage = newNewsletter }
+                    ! [ Cmd.map NewslettersMsg cmds ]
 
         NewsletterMsg newsLetterMsg ->
             let
                 ( newNewsletter, cmds ) =
                     NewsletterPage.update newsLetterMsg model.newsletterPage
             in
-                ( { model | newsletterPage = newNewsletter }
-                , Cmd.map NewsletterMsg cmds
-                )
+                { model | newsletterPage = newNewsletter }
+                    ! [ Cmd.map NewsletterMsg cmds ]
 
         AnalyticsEvent event ->
-            ( model, Analytics.registerEvent event )
+            model ! [ Analytics.registerEvent event ]
 
         CurrentDate date ->
-            ( { model | now = Just date }
-            , Task.perform never CurrentDate <| (Process.sleep Time.minute) `andThen` \_ -> Date.now
-            )
+            { model | now = Just date }
+                ! [ Process.sleep Time.minute
+                        |> andThen (\_ -> Date.now)
+                        |> Task.perform CurrentDate
+                  ]
 
         WindowSize size ->
-            ( { model | width = size.width }
-            , Cmd.none
-            )
+            { model | width = size.width } ! []
 
-        FailedToFetchFiles error ->
+        FetchedFiles (Err error) ->
             { model | newsletterFiles = FetchData.Failed error } ! []
 
-        FetchedFiles files ->
+        FetchedFiles (Ok files) ->
             { model | newsletterFiles = FetchData.Fetched files } ! []
 
-        FailedToFetchNewsletter name error ->
+        FetchedNewsletter name (Err error) ->
             let
                 _ =
                     Debug.log "error" error
@@ -133,7 +137,7 @@ update msg model =
             in
                 { model | newsletters = newsletters } ! []
 
-        FetchedNewsletter name newsletter ->
+        FetchedNewsletter name (Ok newsletter) ->
             let
                 newsletters =
                     Dict.insert name (FetchData.Fetched newsletter) model.newsletters
@@ -168,11 +172,11 @@ body model =
     case model.currentPage of
         Page.Home ->
             HomePage.view model.now model.width model.homePage
-                |> Html.App.map HomePageMsg
+                |> Html.map HomePageMsg
 
         Page.Newsletters ->
             NewslettersPage.view model.newsletterFiles model.newslettersPage
-                |> Html.App.map NewslettersMsg
+                |> Html.map NewslettersMsg
 
         Page.Newsletter name ->
             NewsletterPage.view
@@ -184,16 +188,11 @@ body model =
                         |> Maybe.withDefault FetchData.NotStarted
                 }
                 model.newsletterPage
-                |> Html.App.map NewsletterMsg
+                |> Html.map NewsletterMsg
 
         Page.NotFound ->
             div [ class "not__found" ]
                 [ text "Page Not Found" ]
-
-
-urlUpdate : Page -> Model -> ( Model, Cmd Msg )
-urlUpdate page model =
-    loadPage page { model | currentPage = page }
 
 
 loadPage : Page -> Model -> ( Model, Cmd Msg )
@@ -231,7 +230,7 @@ fetchNewsletterFiles : Model -> Cmd Msg
 fetchNewsletterFiles model =
     case model.newsletterFiles of
         FetchData.NotStarted ->
-            Task.perform FailedToFetchFiles FetchedFiles NewsletterFile.fetch
+            Http.send FetchedFiles NewsletterFile.fetch
 
         _ ->
             Cmd.none
@@ -242,8 +241,7 @@ fetchNewsletter name model =
     case Dict.get name model.newsletters of
         Nothing ->
             { model | newsletters = Dict.insert name FetchData.Fetching model.newsletters }
-                ! [ Task.perform
-                        (FailedToFetchNewsletter name)
+                ! [ Http.send
                         (FetchedNewsletter name)
                         (Newsletter.fetch name)
                   ]
@@ -260,13 +258,11 @@ subscriptions model =
         ]
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
-    Navigation.program
-        (Navigation.makeParser Page.parse)
+    Navigation.program UrlChange
         { init = init
         , view = view
         , update = update
-        , urlUpdate = urlUpdate
         , subscriptions = subscriptions
         }

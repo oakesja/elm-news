@@ -2,7 +2,6 @@ module Newsletter.Newsletter exposing (Newsletter, Article, fetch)
 
 import Json.Decode exposing (..)
 import Http
-import Task exposing (Task)
 import News.News as News exposing (DisplayStoryFrom)
 
 
@@ -22,35 +21,37 @@ type alias Article =
     }
 
 
-fetch : String -> Task Http.Error Newsletter
+fetch : String -> Http.Request Newsletter
 fetch name =
-    Http.get decoder <|
-        "https://raw.githubusercontent.com/oakesja/elm-news-newsletters/master/newsletters/"
+    Http.get
+        ("https://raw.githubusercontent.com/oakesja/elm-news-newsletters/master/newsletters/"
             ++ name
+        )
+        decoder
 
 
 decoder : Decoder Newsletter
 decoder =
-    object4 Newsletter
-        ("start_date" := string)
-        ("end_date" := string)
-        ("year" := string)
-        ("articles" := list articleDecoder)
+    map4 Newsletter
+        (field "start_date" string)
+        (field "end_date" string)
+        (field "year" string)
+        (field "articles" (list articleDecoder))
 
 
 articleDecoder : Decoder Article
 articleDecoder =
-    object4 Article
-        ("url" := string)
-        ("title" := string)
+    map4 Article
+        (field "url" string)
+        (field "title" string)
         fromDecoder
-        ("tag" := string)
+        (field "tag" string)
 
 
 fromDecoder : Decoder DisplayStoryFrom
 fromDecoder =
     oneOf
-        [ customDecoder ("author" := string) (Ok << News.Author)
-        , customDecoder ("description" := string) (Ok << News.Other)
+        [ map News.Author (field "author" string)
+        , map News.Other (field "description" string)
         , fail "Failed to find an author or description"
         ]

@@ -1,8 +1,8 @@
 module Newsletter.NewsletterFile exposing (NewsletterFile, fetch)
 
 import Json.Decode exposing (..)
+import Json
 import Http
-import Task exposing (Task)
 import Date exposing (Date)
 import String
 
@@ -14,31 +14,37 @@ type alias NewsletterFile =
     }
 
 
-fetch : Task Http.Error (List NewsletterFile)
+fetch : Http.Request (List NewsletterFile)
 fetch =
-    Http.get (list decoder)
+    Http.get
         "https://api.github.com/repos/oakesja/elm-news-newsletters/contents/newsletters"
+        (list decoder)
 
 
 decoder : Decoder NewsletterFile
 decoder =
-    object3 NewsletterFile
-        dateDecoder
-        ("download_url" := string)
+    map3 NewsletterFile
+        (Json.result dateFromNameDecoder)
+        (field "download_url" string)
         nameDecoder
 
 
-dateDecoder : Decoder Date
-dateDecoder =
-    customDecoder nameDecoder <|
-        \name ->
-            name
-                |> String.split "."
-                |> List.head
-                |> Maybe.withDefault ""
-                |> Date.fromString
+dateFromNameDecoder : Decoder (Result String Date)
+dateFromNameDecoder =
+    map
+        parseDateFromFile
+        nameDecoder
+
+
+parseDateFromFile : String -> Result String Date
+parseDateFromFile name =
+    name
+        |> String.split "."
+        |> List.head
+        |> Maybe.withDefault ""
+        |> Date.fromString
 
 
 nameDecoder : Decoder String
 nameDecoder =
-    ("name" := string)
+    field "name" string

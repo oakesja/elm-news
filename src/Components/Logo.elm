@@ -1,6 +1,6 @@
 module Components.Logo exposing (..)
 
-import Svg exposing (Svg, svg, path, g, text, text')
+import Svg exposing (Svg, svg, path, g, text, text_)
 import Svg.Attributes exposing (fill, viewBox, d, height, transform, width, fontSize, x, y, class)
 import Svg.Events exposing (onClick)
 
@@ -19,10 +19,10 @@ view clickMsg =
             , fill "#FFFFFF"
             , fontSize "3.0em"
             ]
-            [ text'
+            [ text_
                 []
                 [ text "elm" ]
-            , text'
+            , text_
                 [ x "-10"
                 , y "40"
                 ]
