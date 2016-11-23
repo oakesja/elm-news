@@ -21,12 +21,15 @@ import News.HackerNews as HackerNews
 import Analytics
 import Http
 import Components.Spinner
+import List
 
 
 type alias Model =
     { allStories : List Story
     , errorManager : ErrorManager.Model
     , news : News.Model
+    , previousStoryId : Maybe String
+    , remainingPlacesToFetchFrom : List String
     }
 
 
@@ -35,12 +38,14 @@ init =
     { errorManager = ErrorManager.init
     , allStories = []
     , news = News.init
+    , previousStoryId = Nothing
+    , remainingPlacesToFetchFrom = [ "elm-dev", "elm-discuss", Reddit.tag, HackerNews.tag ]
     }
 
 
-onPageLoad : Model -> ( Model, Cmd Msg )
-onPageLoad model =
-    init
+onPageLoad : Maybe String -> Model -> ( Model, Cmd Msg )
+onPageLoad previousStoryId model =
+    { model | previousStoryId = previousStoryId }
         ! [ fetchGoogleGroupMsgs "elm-dev"
           , fetchGoogleGroupMsgs "elm-discuss"
           , fetch Reddit.tag Reddit.fetch
@@ -69,12 +74,15 @@ update msg model =
             updateErrorManager errorMsg model
 
         AnalyticsEvent event ->
-            ( model, Analytics.registerEvent event )
+            model ! [ Analytics.registerEvent event ]
 
         FetchedNews tag (Ok stories) ->
-            ( { model | allStories = model.allStories ++ stories }
-            , Cmd.none
-            )
+            let
+                updatedModel =
+                    updateRemainingToFetch tag
+                        { model | allStories = model.allStories ++ stories }
+            in
+                updatedModel ! [ cmdToScrollToPrevious updatedModel ]
 
         FetchedNews tag (Err rawError) ->
             let
@@ -82,8 +90,15 @@ update msg model =
                     { display = "Failed to fetch content from " ++ tag
                     , raw = Debug.log "" rawError
                     }
+
+                ( updatedWithError, errorCmd ) =
+                    updateErrorManager (ErrorManager.AddError error) model
+
+                updatedModel =
+                    updateRemainingToFetch tag updatedWithError
             in
-                updateErrorManager (ErrorManager.AddError error) model
+                updatedModel
+                    ! [ errorCmd, cmdToScrollToPrevious updatedModel ]
 
         NewsMsg newsMsg ->
             let
@@ -91,6 +106,24 @@ update msg model =
                     News.update newsMsg model.news
             in
                 { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
+
+
+updateRemainingToFetch : String -> Model -> Model
+updateRemainingToFetch tag model =
+    { model
+        | remainingPlacesToFetchFrom =
+            model.remainingPlacesToFetchFrom
+                |> List.filter (\t -> t /= tag)
+    }
+
+
+cmdToScrollToPrevious : Model -> Cmd Msg
+cmdToScrollToPrevious model =
+    if List.isEmpty model.remainingPlacesToFetchFrom then
+        Maybe.map scrollIntoView model.previousStoryId
+            |> Maybe.withDefault Cmd.none
+    else
+        Cmd.none
 
 
 updateErrorManager : ErrorManager.Msg -> Model -> ( Model, Cmd Msg )
@@ -142,6 +175,9 @@ subscriptions model =
         [ fetchedGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Ok resp.stories))
         , errorGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Err resp.error))
         ]
+
+
+port scrollIntoView : String -> Cmd msg
 
 
 port fetchGoogleGroupMsgs : String -> Cmd msg

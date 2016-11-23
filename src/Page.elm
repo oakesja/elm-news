@@ -5,7 +5,7 @@ import UrlParser exposing (..)
 
 
 type Page
-    = Home
+    = Home (Maybe String)
     | Newsletters
     | Newsletter String
     | NotFound
@@ -22,5 +22,5 @@ pageParser =
     oneOf
         [ map Newsletter (s "newsletters" </> string)
         , map Newsletters (s "newsletters")
-        , map Home (s "")
+        , map Home (s "" <?> stringParam "storyId")
         ]

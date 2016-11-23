@@ -170,7 +170,7 @@ view model =
 body : Model -> Html Msg
 body model =
     case model.currentPage of
-        Page.Home ->
+        Page.Home _ ->
             HomePage.view model.now model.width model.homePage
                 |> Html.map HomePageMsg
 
@@ -198,10 +198,10 @@ body model =
 loadPage : Page -> Model -> ( Model, Cmd Msg )
 loadPage page model =
     case page of
-        Page.Home ->
+        Page.Home id ->
             let
                 ( homePage, cmd ) =
-                    HomePage.onPageLoad model.homePage
+                    HomePage.onPageLoad id model.homePage
             in
                 { model | homePage = homePage } ! [ Cmd.map HomePageMsg cmd ]
 

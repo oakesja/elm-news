@@ -58,7 +58,7 @@
                         var url = getQueryVariable(q.q, 'url');
                         var label = getQueryVariable(q.q, 'label') || 'unknown';
                         if (ga) {
-                          ga('send', 'event', 'email', url, label);
+                            ga('send', 'event', 'email', url, label);
                         }
                         window.location.replace(url);
                     } else {
@@ -117,6 +117,12 @@
                 'dimension2': event.tag,
                 'dimension3': event.author,
             });
+    });
+    app.ports.scrollIntoView.subscribe(function(id) {
+        // setTimeout is used to allow time for things to finish rendering
+        setTimeout(function() {
+            document.getElementById(id).scrollIntoView();
+        }, 100)
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
         // 100 messages is the max that you can get from the rss feed

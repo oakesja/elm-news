@@ -56,7 +56,7 @@ update msg model =
                 ! [ storyEvent story
                         |> Analytics.newsLink
                         |> Analytics.registerEvent
-                  , Navigation.modifyUrl ("#" ++ storyId story)
+                  , Navigation.modifyUrl ("?storyId=" ++ storyId story)
                   ]
 
         TrackEvent event ->
@@ -84,7 +84,7 @@ getAuthor from =
 
 storyId : DisplayStory -> String
 storyId story =
-    story.title ++ "_" ++ (toString story.date)
+    story.title ++ "_" ++ toString story.tag ++ "_" ++ (getAuthor story.from)
 
 
 type alias Config =
