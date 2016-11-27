@@ -1,5 +1,4 @@
-git clean -fd
-git clean -fX
+git clean -fdX
 rm -rf dist
 git checkout master
 git pull origin master
