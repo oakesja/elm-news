@@ -1,0 +1,71 @@
+var _user$project$Components_Footer$copyrightYear = function (currentYear) {
+	var startYear = 2016;
+	var _p0 = currentYear;
+	if (_p0.ctor === 'Just') {
+		var _p1 = _p0._0;
+		return (_elm_lang$core$Native_Utils.cmp(_p1, startYear) > 0) ? A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(startYear),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'-',
+				_elm_lang$core$Basics$toString(_p1))) : _elm_lang$core$Basics$toString(startYear);
+	} else {
+		return _elm_lang$core$Basics$toString(startYear);
+	}
+};
+var _user$project$Components_Footer$view = F2(
+	function (currentYear, onLinkClick) {
+		return A2(
+			_elm_lang$html$Html$footer,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('footer grey'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(_user$project$Components_GithubLink$view, 'footer__github', onLinkClick),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('footer__description'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Code for this site is open source and written in Elm'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'© ',
+												A2(
+													_elm_lang$core$Basics_ops['++'],
+													_user$project$Components_Footer$copyrightYear(currentYear),
+													' Jacob Oakes'))),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});

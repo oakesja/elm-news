@@ -1,0 +1,24 @@
+var _user$project$Newsletter_NewsletterFile$nameDecoder = A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string);
+var _user$project$Newsletter_NewsletterFile$parseDateFromFile = function (name) {
+	return _elm_lang$core$Date$fromString(
+		A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			_elm_lang$core$List$head(
+				A2(_elm_lang$core$String$split, '.', name))));
+};
+var _user$project$Newsletter_NewsletterFile$dateFromNameDecoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Newsletter_NewsletterFile$parseDateFromFile, _user$project$Newsletter_NewsletterFile$nameDecoder);
+var _user$project$Newsletter_NewsletterFile$NewsletterFile = F3(
+	function (a, b, c) {
+		return {date: a, url: b, name: c};
+	});
+var _user$project$Newsletter_NewsletterFile$decoder = A4(
+	_elm_lang$core$Json_Decode$map3,
+	_user$project$Newsletter_NewsletterFile$NewsletterFile,
+	_user$project$Json$result(_user$project$Newsletter_NewsletterFile$dateFromNameDecoder),
+	A2(_elm_lang$core$Json_Decode$field, 'download_url', _elm_lang$core$Json_Decode$string),
+	_user$project$Newsletter_NewsletterFile$nameDecoder);
+var _user$project$Newsletter_NewsletterFile$fetch = A2(
+	_elm_lang$http$Http$get,
+	'https://api.github.com/repos/oakesja/elm-news-newsletters/contents/newsletters',
+	_elm_lang$core$Json_Decode$list(_user$project$Newsletter_NewsletterFile$decoder));

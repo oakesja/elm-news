@@ -1,0 +1,51 @@
+var _user$project$Newsletter_Newsletter$fromDecoder = _elm_lang$core$Json_Decode$oneOf(
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$core$Json_Decode$map,
+			_user$project$News_News$Author,
+			A2(_elm_lang$core$Json_Decode$field, 'author', _elm_lang$core$Json_Decode$string)),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$core$Json_Decode$map,
+				_user$project$News_News$Other,
+				A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string)),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$core$Json_Decode$fail('Failed to find an author or description'),
+				_1: {ctor: '[]'}
+			}
+		}
+	});
+var _user$project$Newsletter_Newsletter$Newsletter = F4(
+	function (a, b, c, d) {
+		return {startDate: a, endDate: b, year: c, articles: d};
+	});
+var _user$project$Newsletter_Newsletter$Article = F4(
+	function (a, b, c, d) {
+		return {url: a, title: b, from: c, tag: d};
+	});
+var _user$project$Newsletter_Newsletter$articleDecoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Newsletter_Newsletter$Article,
+	A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string),
+	_user$project$Newsletter_Newsletter$fromDecoder,
+	A2(_elm_lang$core$Json_Decode$field, 'tag', _elm_lang$core$Json_Decode$string));
+var _user$project$Newsletter_Newsletter$decoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Newsletter_Newsletter$Newsletter,
+	A2(_elm_lang$core$Json_Decode$field, 'start_date', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'end_date', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'year', _elm_lang$core$Json_Decode$string),
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'articles',
+		_elm_lang$core$Json_Decode$list(_user$project$Newsletter_Newsletter$articleDecoder)));
+var _user$project$Newsletter_Newsletter$fetch = function (name) {
+	return A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], 'https://raw.githubusercontent.com/oakesja/elm-news-newsletters/master/newsletters/', name),
+		_user$project$Newsletter_Newsletter$decoder);
+};

@@ -1,0 +1,41 @@
+var _user$project$Components_Icons$icon = F4(
+	function (pathString, className, h, onClickMsg) {
+		return A2(
+			_elm_lang$svg$Svg$svg,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$class(className),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 24 24'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$height(
+							_elm_lang$core$Basics$toString(h)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$fill('currentColor'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Events$onClick(onClickMsg),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$svg$Svg$path,
+					{
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$d(pathString),
+						_1: {ctor: '[]'}
+					},
+					{ctor: '[]'}),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$Components_Icons$right = _user$project$Components_Icons$icon('M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z');
+var _user$project$Components_Icons$left = _user$project$Components_Icons$icon('M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z');

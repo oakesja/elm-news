@@ -1,0 +1,13 @@
+{
+    "elm-lang/navigation": "2.0.1",
+    "elm-lang/virtual-dom": "2.0.2",
+    "evancz/url-parser": "2.0.1",
+    "mgold/elm-date-format": "1.1.7",
+    "elm-lang/dom": "1.1.1",
+    "elm-lang/html": "2.0.0",
+    "elm-lang/http": "1.0.0",
+    "elm-lang/svg": "2.0.0",
+    "elm-lang/window": "1.0.1",
+    "sporto/erl": "10.0.2",
+    "elm-lang/core": "5.0.0"
+}

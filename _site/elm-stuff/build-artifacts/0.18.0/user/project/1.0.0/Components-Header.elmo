@@ -1,0 +1,162 @@
+var _user$project$Components_Header$newsletters = function (msg) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('header__newsletters header__control'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$title('An archive of previous weekly newsletters'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onClick(msg),
+					_1: {ctor: '[]'}
+				}
+			}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Newsletters'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Components_Header$twitterLink = function (onLinkClick) {
+	return A2(
+		_elm_lang$html$Html$a,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$href(_user$project$Links$twitter),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$img,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('header__icon header__control'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$src(_user$project$Links$twitterIcon),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$alt('Follow @elmlangnews'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$title('Follow @elmlangnews on Twitter'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										onLinkClick(_user$project$Analytics$twitterLink)),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				},
+				{ctor: '[]'}),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$Components_Header$view = function (config) {
+	var minimized = _elm_lang$core$Native_Utils.cmp(config.screenWidth, 1000) < 0;
+	return A2(
+		_elm_lang$html$Html$header,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('header'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$classList(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'header__logo', _1: true},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'header__logo_min', _1: minimized},
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _user$project$Components_Logo$view(config.onIconClick),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$h1,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$classList(
+							{
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'header__title', _1: true},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'header__title_hidden', _1: minimized},
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('All elm news in one place'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$classList(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'header__controls', _1: true},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'header__controls_min', _1: minimized},
+										_1: {ctor: '[]'}
+									}
+								}),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _user$project$Components_Header$newsletters(config.onNewsletterClick),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Components_Header$twitterLink(config.onLinkClick),
+								_1: {
+									ctor: '::',
+									_0: A2(_user$project$Components_GithubLink$view, 'header__icon header__control', config.onLinkClick),
+									_1: {ctor: '[]'}
+								}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}
+		});
+};
+var _user$project$Components_Header$Config = F4(
+	function (a, b, c, d) {
+		return {onLinkClick: a, onIconClick: b, onNewsletterClick: c, screenWidth: d};
+	});

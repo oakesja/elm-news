@@ -1,0 +1,49 @@
+var _user$project$News_HackerNews$timeDecoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	function (time) {
+		return time * 1000;
+	},
+	_elm_lang$core$Json_Decode$float);
+var _user$project$News_HackerNews$tag = 'Hacker News';
+var _user$project$News_HackerNews$storyToMessage = function (story) {
+	return {
+		author: story.author,
+		title: story.title,
+		date: story.date,
+		url: A2(_elm_lang$core$Maybe$withDefault, '', story.url),
+		tag: _user$project$News_HackerNews$tag
+	};
+};
+var _user$project$News_HackerNews$HackerNewsStory = F5(
+	function (a, b, c, d, e) {
+		return {author: a, title: b, date: c, url: d, tag: e};
+	});
+var _user$project$News_HackerNews$hackerNewsDecoder = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'hits',
+		_1: {ctor: '[]'}
+	},
+	_elm_lang$core$Json_Decode$list(
+		A6(
+			_elm_lang$core$Json_Decode$map5,
+			_user$project$News_HackerNews$HackerNewsStory,
+			A2(_elm_lang$core$Json_Decode$field, 'author', _elm_lang$core$Json_Decode$string),
+			A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string),
+			A2(_elm_lang$core$Json_Decode$field, 'created_at_i', _user$project$News_HackerNews$timeDecoder),
+			_elm_lang$core$Json_Decode$maybe(
+				A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string)),
+			_elm_lang$core$Json_Decode$succeed(_user$project$News_HackerNews$tag))));
+var _user$project$News_HackerNews$decoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	function (stories) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (s) {
+				return !_elm_lang$core$Native_Utils.eq(s.url, '');
+			},
+			A2(_elm_lang$core$List$map, _user$project$News_HackerNews$storyToMessage, stories));
+	},
+	_user$project$News_HackerNews$hackerNewsDecoder);
+var _user$project$News_HackerNews$fetch = A2(_elm_lang$http$Http$get, 'https://hn.algolia.com/api/v1/search_by_date?query=%22elm%22&tags=(story,show,poll,pollopt,ask_hn)', _user$project$News_HackerNews$decoder);

@@ -1,0 +1,51 @@
+var _user$project$FetchData$view = F2(
+	function (fetchedView, data) {
+		var _p0 = data;
+		switch (_p0.ctor) {
+			case 'Fetched':
+				return fetchedView(_p0._0);
+			case 'Failed':
+				return A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('center__error'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('Failed to load'),
+						_1: {ctor: '[]'}
+					});
+			default:
+				return A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('center__spinner'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _user$project$Components_Spinner$view,
+						_1: {ctor: '[]'}
+					});
+		}
+	});
+var _user$project$FetchData$default = F2(
+	function (defaultData, data) {
+		var _p1 = data;
+		if (_p1.ctor === 'Fetched') {
+			return _p1._0;
+		} else {
+			return defaultData;
+		}
+	});
+var _user$project$FetchData$Fetched = function (a) {
+	return {ctor: 'Fetched', _0: a};
+};
+var _user$project$FetchData$Failed = function (a) {
+	return {ctor: 'Failed', _0: a};
+};
+var _user$project$FetchData$Fetching = {ctor: 'Fetching'};
+var _user$project$FetchData$NotStarted = {ctor: 'NotStarted'};

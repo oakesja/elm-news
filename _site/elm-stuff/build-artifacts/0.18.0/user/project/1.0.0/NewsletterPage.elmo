@@ -1,0 +1,229 @@
+var _user$project$NewsletterPage$nextArticle = F2(
+	function (name, files) {
+		nextArticle:
+		while (true) {
+			var _p0 = files;
+			if (_p0.ctor === '[]') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				if (_p0._1.ctor === '[]') {
+					return _elm_lang$core$Maybe$Nothing;
+				} else {
+					var _p1 = _p0._1._0;
+					if (_elm_lang$core$Native_Utils.eq(_p0._0.name, name)) {
+						return _elm_lang$core$Maybe$Just(_p1);
+					} else {
+						var _v1 = name,
+							_v2 = {ctor: '::', _0: _p1, _1: _p0._1._1};
+						name = _v1;
+						files = _v2;
+						continue nextArticle;
+					}
+				}
+			}
+		}
+	});
+var _user$project$NewsletterPage$previousArticle = F2(
+	function (name, files) {
+		previousArticle:
+		while (true) {
+			var _p2 = files;
+			if (_p2.ctor === '[]') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				if (_p2._1.ctor === '[]') {
+					return _elm_lang$core$Maybe$Nothing;
+				} else {
+					var _p3 = _p2._1._0;
+					if (_elm_lang$core$Native_Utils.eq(_p3.name, name)) {
+						return _elm_lang$core$Maybe$Just(_p2._0);
+					} else {
+						var _v4 = name,
+							_v5 = {ctor: '::', _0: _p3, _1: _p2._1._1};
+						name = _v4;
+						files = _v5;
+						continue previousArticle;
+					}
+				}
+			}
+		}
+	});
+var _user$project$NewsletterPage$toDisplayStory = function (article) {
+	return {from: article.from, title: article.title, date: _elm_lang$core$Maybe$Nothing, url: article.url, tag: article.tag};
+};
+var _user$project$NewsletterPage$title = function (newsletter) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'Top News for ',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			newsletter.startDate,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				' - ',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					newsletter.endDate,
+					A2(_elm_lang$core$Basics_ops['++'], ', ', newsletter.year)))));
+};
+var _user$project$NewsletterPage$onPageLoad = function (name) {
+	return _elm_lang$core$Platform_Cmd$none;
+};
+var _user$project$NewsletterPage$init = {news: _user$project$News_News$init};
+var _user$project$NewsletterPage$Model = function (a) {
+	return {news: a};
+};
+var _user$project$NewsletterPage$Data = F4(
+	function (a, b, c, d) {
+		return {screenWidth: a, files: b, filename: c, newsletter: d};
+	});
+var _user$project$NewsletterPage$NoOp = {ctor: 'NoOp'};
+var _user$project$NewsletterPage$NewsMsg = function (a) {
+	return {ctor: 'NewsMsg', _0: a};
+};
+var _user$project$NewsletterPage$update = F2(
+	function (msg, model) {
+		var _p4 = msg;
+		switch (_p4.ctor) {
+			case 'ClickEvent':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					{
+						ctor: '::',
+						_0: _user$project$Analytics$registerEvent(_p4._0),
+						_1: {ctor: '[]'}
+					});
+			case 'GoToArticle':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					{
+						ctor: '::',
+						_0: _elm_lang$navigation$Navigation$newUrl(
+							_user$project$Links$newsletter(_p4._0)),
+						_1: {ctor: '[]'}
+					});
+			case 'NewsMsg':
+				var _p5 = A3(
+					_user$project$News_News$update,
+					{newsEvent: _user$project$Analytics$archivedNewsLink, redirectToId: false},
+					_p4._0,
+					model.news);
+				var newNews = _p5._0;
+				var cmd = _p5._1;
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{news: newNews}),
+					{
+						ctor: '::',
+						_0: A2(_elm_lang$core$Platform_Cmd$map, _user$project$NewsletterPage$NewsMsg, cmd),
+						_1: {ctor: '[]'}
+					});
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					{ctor: '[]'});
+		}
+	});
+var _user$project$NewsletterPage$articles = F5(
+	function (screenWidth, files, filename, newsletter, model) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('newsletter__articles'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$h1,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('newsletter__header'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							_user$project$NewsletterPage$title(newsletter)),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$map,
+						_user$project$NewsletterPage$NewsMsg,
+						A3(
+							_user$project$News_News$view,
+							model.news,
+							{now: _elm_lang$core$Maybe$Nothing, screenWidth: screenWidth},
+							A2(_elm_lang$core$List$map, _user$project$NewsletterPage$toDisplayStory, newsletter.articles))),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$NewsletterPage$GoToArticle = function (a) {
+	return {ctor: 'GoToArticle', _0: a};
+};
+var _user$project$NewsletterPage$navIcon = F5(
+	function (findArticle, icon, files, filename, baseClass) {
+		var _p6 = A2(findArticle, filename, files);
+		if (_p6.ctor === 'Just') {
+			return A3(
+				icon,
+				baseClass,
+				48,
+				_user$project$NewsletterPage$GoToArticle(_p6._0.name));
+		} else {
+			return A3(icon, 'newsletter__nav_disabled', 48, _user$project$NewsletterPage$NoOp);
+		}
+	});
+var _user$project$NewsletterPage$displayNewsletter = F5(
+	function (screenWidth, files, filename, model, newsletter) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('newsletter__body'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A5(_user$project$NewsletterPage$articles, screenWidth, files, filename, newsletter, model),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('newsletter__controls'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A5(_user$project$NewsletterPage$navIcon, _user$project$NewsletterPage$previousArticle, _user$project$Components_Icons$left, files, filename, 'newsletter__nav_min'),
+							_1: {
+								ctor: '::',
+								_0: A5(_user$project$NewsletterPage$navIcon, _user$project$NewsletterPage$nextArticle, _user$project$Components_Icons$right, files, filename, 'newsletter__nav_min'),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$NewsletterPage$view = F2(
+	function (data, model) {
+		return A2(
+			_user$project$FetchData$view,
+			A4(_user$project$NewsletterPage$displayNewsletter, data.screenWidth, data.files, data.filename, model),
+			data.newsletter);
+	});
+var _user$project$NewsletterPage$ClickEvent = function (a) {
+	return {ctor: 'ClickEvent', _0: a};
+};
