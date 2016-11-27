@@ -37,8 +37,6 @@ update msg model =
         GoToNewletter name ->
             model
                 ! [ Navigation.modifyUrl (Links.newsletter name)
-                  , Analytics.newletterLink name
-                        |> Analytics.registerEvent
                   ]
 
         GoToSignup ->

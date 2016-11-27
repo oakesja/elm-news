@@ -50,7 +50,7 @@ update msg model =
         NewsMsg newsMsg ->
             let
                 ( newNews, cmd ) =
-                    News.update newsMsg model.news
+                    News.update Analytics.archivedNewsLink newsMsg model.news
             in
                 { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
 

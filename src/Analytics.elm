@@ -41,6 +41,17 @@ newsLink { tag, url, title, author } =
     }
 
 
+archivedNewsLink : NewsEventInfo -> Event
+archivedNewsLink { tag, url, title, author } =
+    { category = "Archived News"
+    , action = "click"
+    , label = url
+    , title = Just title
+    , tag = Just tag
+    , author = Just author
+    }
+
+
 tagLink : String -> String -> Event
 tagLink tag url =
     { category = "Tag"
@@ -74,17 +85,6 @@ twitterLink =
     }
 
 
-newletterLink : String -> Event
-newletterLink name =
-    { category = "Newsletter"
-    , action = "click"
-    , label = name
-    , title = Nothing
-    , tag = Nothing
-    , author = Nothing
-    }
-
-
 error : String -> String -> Event
 error display raw =
     { category = "Error"
@@ -97,3 +97,6 @@ error display raw =
 
 
 port registerEvent : Event -> Cmd msg
+
+
+port pageView : String -> Cmd msg

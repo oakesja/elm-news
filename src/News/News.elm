@@ -48,13 +48,13 @@ type Msg
     | TrackEvent Event
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : (NewsEventInfo -> Event) -> Msg -> Model -> ( Model, Cmd Msg )
+update newsEvent msg model =
     case msg of
         ClickStory story ->
             model
                 ! [ storyEvent story
-                        |> Analytics.newsLink
+                        |> newsEvent
                         |> Analytics.registerEvent
                   , Navigation.modifyUrl ("?storyId=" ++ storyId story)
                   ]

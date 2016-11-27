@@ -103,8 +103,6 @@
 <body class="page"> </body>
 
 <script type="text/javascript">
-    ga('send', 'pageview');
-
     var app = Elm.Main.fullscreen();
     app.ports.registerEvent.subscribe(function(event) {
         ga('send',
@@ -123,6 +121,10 @@
         setTimeout(function() {
             document.getElementById(id).scrollIntoView();
         }, 100)
+    });
+    app.ports.pageView.subscribe(function(page) {
+        ga('set', 'page', page);
+        ga('send', 'pageview');
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
         // 100 messages is the max that you can get from the rss feed

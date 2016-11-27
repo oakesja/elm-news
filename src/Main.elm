@@ -38,12 +38,9 @@ type alias Model =
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     let
-        page =
-            Page.parse location
-
         ( model, cmd ) =
-            loadPage page
-                { currentPage = page
+            loadPage location
+                { currentPage = Page.NotFound
                 , homePage = HomePage.init
                 , newslettersPage = NewslettersPage.init
                 , newsletterPage = NewsletterPage.init
@@ -78,11 +75,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlChange location ->
-            let
-                page =
-                    Page.parse location
-            in
-                loadPage page { model | currentPage = page }
+            loadPage location model
 
         HomePageMsg homeMsg ->
             let
@@ -195,35 +188,46 @@ body model =
                 [ text "Page Not Found" ]
 
 
-loadPage : Page -> Model -> ( Model, Cmd Msg )
-loadPage page model =
-    case page of
-        Page.Home id ->
-            let
-                ( homePage, cmd ) =
-                    HomePage.onPageLoad id model.homePage
-            in
-                { model | homePage = homePage } ! [ Cmd.map HomePageMsg cmd ]
+loadPage : Navigation.Location -> Model -> ( Model, Cmd Msg )
+loadPage location model =
+    let
+        page =
+            Page.parse location
 
-        Page.Newsletters ->
-            model
-                ! [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
-                  , fetchNewsletterFiles model
-                  ]
+        ( newModel, cmd ) =
+            case page of
+                Page.Home id ->
+                    let
+                        ( homePage, cmd ) =
+                            HomePage.onPageLoad id model.homePage
+                    in
+                        { model | homePage = homePage }
+                            ! [ Cmd.map HomePageMsg cmd ]
 
-        Page.Newsletter name ->
-            let
-                ( updatedModel, cmd ) =
-                    fetchNewsletter name model
-            in
-                updatedModel
-                    ! [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
-                      , cmd
-                      , fetchNewsletterFiles model
-                      ]
+                Page.Newsletters ->
+                    model
+                        ! [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
+                          , fetchNewsletterFiles model
+                          ]
 
-        Page.NotFound ->
-            model ! []
+                Page.Newsletter name ->
+                    let
+                        ( updatedModel, cmd ) =
+                            fetchNewsletter name model
+                    in
+                        updatedModel
+                            ! [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
+                              , cmd
+                              , fetchNewsletterFiles model
+                              ]
+
+                Page.NotFound ->
+                    model ! []
+    in
+        { newModel | currentPage = page }
+            ! [ cmd
+              , Analytics.pageView location.pathname
+              ]
 
 
 fetchNewsletterFiles : Model -> Cmd Msg

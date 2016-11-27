@@ -45,7 +45,10 @@ init =
 
 onPageLoad : Maybe String -> Model -> ( Model, Cmd Msg )
 onPageLoad previousStoryId model =
-    { model | previousStoryId = previousStoryId }
+    { model
+        | previousStoryId = previousStoryId
+        , allStories = []
+    }
         ! [ fetchGoogleGroupMsgs "elm-dev"
           , fetchGoogleGroupMsgs "elm-discuss"
           , fetch Reddit.tag Reddit.fetch
@@ -103,7 +106,7 @@ update msg model =
         NewsMsg newsMsg ->
             let
                 ( newNews, cmd ) =
-                    News.update newsMsg model.news
+                    News.update Analytics.newsLink newsMsg model.news
             in
                 { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
 
