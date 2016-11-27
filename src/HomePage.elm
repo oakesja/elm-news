@@ -30,6 +30,7 @@ type alias Model =
     , news : News.Model
     , previousStoryId : Maybe String
     , remainingPlacesToFetchFrom : List String
+    , fetchedStories : Bool
     }
 
 
@@ -40,20 +41,28 @@ init =
     , news = News.init
     , previousStoryId = Nothing
     , remainingPlacesToFetchFrom = [ "elm-dev", "elm-discuss", Reddit.tag, HackerNews.tag ]
+    , fetchedStories = False
     }
 
 
 onPageLoad : Maybe String -> Model -> ( Model, Cmd Msg )
 onPageLoad previousStoryId model =
-    { model
-        | previousStoryId = previousStoryId
-        , allStories = []
-    }
-        ! [ fetchGoogleGroupMsgs "elm-dev"
-          , fetchGoogleGroupMsgs "elm-discuss"
-          , fetch Reddit.tag Reddit.fetch
-          , fetch HackerNews.tag HackerNews.fetch
-          ]
+    let
+        cmds =
+            if model.fetchedStories then
+                []
+            else
+                [ fetchGoogleGroupMsgs "elm-dev"
+                , fetchGoogleGroupMsgs "elm-discuss"
+                , fetch Reddit.tag Reddit.fetch
+                , fetch HackerNews.tag HackerNews.fetch
+                ]
+    in
+        { model
+            | previousStoryId = previousStoryId
+            , fetchedStories = True
+        }
+            ! cmds
 
 
 fetch : String -> Http.Request (List Story) -> Cmd Msg
