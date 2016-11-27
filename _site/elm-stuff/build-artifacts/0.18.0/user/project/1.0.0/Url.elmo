@@ -1,9 +1,0 @@
-var _user$project$Url$domain = function (url) {
-	return A2(
-		_elm_lang$core$String$join,
-		'.',
-		function (_) {
-			return _.host;
-		}(
-			_sporto$erl$Erl$parse(url)));
-};

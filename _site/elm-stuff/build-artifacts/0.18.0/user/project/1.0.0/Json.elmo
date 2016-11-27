@@ -1,9 +1,0 @@
-var _user$project$Json$result = _elm_lang$core$Json_Decode$andThen(
-	function (result) {
-		var _p0 = result;
-		if (_p0.ctor === 'Ok') {
-			return _elm_lang$core$Json_Decode$succeed(_p0._0);
-		} else {
-			return _elm_lang$core$Json_Decode$fail(_p0._0);
-		}
-	});
