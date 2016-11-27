@@ -48,16 +48,29 @@ type Msg
     | TrackEvent Event
 
 
-update : (NewsEventInfo -> Event) -> Msg -> Model -> ( Model, Cmd Msg )
-update newsEvent msg model =
+type alias UpdateConfig =
+    { newsEvent : NewsEventInfo -> Event
+    , redirectToId : Bool
+    }
+
+
+update : UpdateConfig -> Msg -> Model -> ( Model, Cmd Msg )
+update config msg model =
     case msg of
         ClickStory story ->
-            model
-                ! [ storyEvent story
-                        |> newsEvent
-                        |> Analytics.registerEvent
-                  , Navigation.modifyUrl ("?storyId=" ++ storyId story)
-                  ]
+            let
+                redirectCmd =
+                    if config.redirectToId then
+                        Navigation.modifyUrl ("?storyId=" ++ storyId story)
+                    else
+                        Cmd.none
+            in
+                model
+                    ! [ storyEvent story
+                            |> config.newsEvent
+                            |> Analytics.registerEvent
+                      , redirectCmd
+                      ]
 
         TrackEvent event ->
             model ! [ Analytics.registerEvent event ]

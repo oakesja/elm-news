@@ -50,7 +50,12 @@ update msg model =
         NewsMsg newsMsg ->
             let
                 ( newNews, cmd ) =
-                    News.update Analytics.archivedNewsLink newsMsg model.news
+                    News.update
+                        { newsEvent = Analytics.archivedNewsLink
+                        , redirectToId = False
+                        }
+                        newsMsg
+                        model.news
             in
                 { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
 

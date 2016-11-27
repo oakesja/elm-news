@@ -200,14 +200,22 @@ loadPage location model =
                     let
                         ( homePage, cmd ) =
                             HomePage.onPageLoad id model.homePage
+
+                        registerPageView =
+                            id
+                                |> Maybe.map (\_ -> Analytics.pageView location.pathname)
+                                |> Maybe.withDefault Cmd.none
                     in
                         { model | homePage = homePage }
-                            ! [ Cmd.map HomePageMsg cmd ]
+                            ! [ Cmd.map HomePageMsg cmd
+                              , registerPageView
+                              ]
 
                 Page.Newsletters ->
                     model
                         ! [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
                           , fetchNewsletterFiles model
+                          , Analytics.pageView location.pathname
                           ]
 
                 Page.Newsletter name ->
@@ -219,14 +227,14 @@ loadPage location model =
                             ! [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
                               , cmd
                               , fetchNewsletterFiles model
+                              , Analytics.pageView location.pathname
                               ]
 
                 Page.NotFound ->
-                    model ! []
+                    model ! [ Analytics.pageView location.pathname ]
     in
         { newModel | currentPage = page }
             ! [ cmd
-              , Analytics.pageView location.pathname
               ]
 
 
