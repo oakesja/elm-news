@@ -6,7 +6,6 @@ port module HomePage
         , update
         , view
         , subscriptions
-        , onPageLoad
         )
 
 import Html exposing (Html, a, text, div, h1, span)
@@ -30,39 +29,22 @@ type alias Model =
     , news : News.Model
     , previousStoryId : Maybe String
     , remainingPlacesToFetchFrom : List String
-    , fetchedStories : Bool
     }
 
 
-init : Model
-init =
+init : Maybe String -> ( Model, Cmd Msg )
+init previousStoryId =
     { errorManager = ErrorManager.init
     , allStories = []
     , news = News.init
-    , previousStoryId = Nothing
+    , previousStoryId = previousStoryId
     , remainingPlacesToFetchFrom = [ "elm-dev", "elm-discuss", Reddit.tag, HackerNews.tag ]
-    , fetchedStories = False
     }
-
-
-onPageLoad : Maybe String -> Model -> ( Model, Cmd Msg )
-onPageLoad previousStoryId model =
-    let
-        cmds =
-            if model.fetchedStories then
-                []
-            else
-                [ fetchGoogleGroupMsgs "elm-dev"
-                , fetchGoogleGroupMsgs "elm-discuss"
-                , fetch Reddit.tag Reddit.fetch
-                , fetch HackerNews.tag HackerNews.fetch
-                ]
-    in
-        { model
-            | previousStoryId = previousStoryId
-            , fetchedStories = True
-        }
-            ! cmds
+        ! [ fetchGoogleGroupMsgs "elm-dev"
+          , fetchGoogleGroupMsgs "elm-discuss"
+          , fetch Reddit.tag Reddit.fetch
+          , fetch HackerNews.tag HackerNews.fetch
+          ]
 
 
 fetch : String -> Http.Request (List Story) -> Cmd Msg
@@ -186,8 +168,8 @@ toDisplayStory story =
     }
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions : Sub Msg
+subscriptions =
     Sub.batch
         [ fetchedGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Ok resp.stories))
         , errorGoogleGroupMsgs (\resp -> FetchedNews resp.tag (Err resp.error))

@@ -1,4 +1,4 @@
-module NewsletterPage exposing (Model, Msg, init, view, update, onPageLoad)
+module NewsletterPage exposing (Model, Msg, init, view, update)
 
 import Html exposing (Html, div, text, h1)
 import Html.Attributes exposing (class)
@@ -14,18 +14,16 @@ import FetchData exposing (FetchData)
 
 type alias Model =
     { news : News.Model
+    , filename : String
     }
 
 
-init : Model
-init =
+init : String -> ( Model, Cmd Msg )
+init filename =
     { news = News.init
+    , filename = filename
     }
-
-
-onPageLoad : String -> Cmd Msg
-onPageLoad name =
-    Cmd.none
+        ! []
 
 
 type Msg
@@ -66,7 +64,6 @@ update msg model =
 type alias Data =
     { screenWidth : Int
     , files : List NewsletterFile
-    , filename : String
     , newsletter : FetchData Newsletter
     }
 
@@ -74,23 +71,23 @@ type alias Data =
 view : Data -> Model -> Html Msg
 view data model =
     FetchData.view
-        (displayNewsletter data.screenWidth data.files data.filename model)
+        (displayNewsletter data.screenWidth data.files model)
         data.newsletter
 
 
-displayNewsletter : Int -> List NewsletterFile -> String -> Model -> Newsletter -> Html Msg
-displayNewsletter screenWidth files filename model newsletter =
+displayNewsletter : Int -> List NewsletterFile -> Model -> Newsletter -> Html Msg
+displayNewsletter screenWidth files model newsletter =
     div [ class "newsletter__body" ]
-        [ articles screenWidth files filename newsletter model
+        [ articles screenWidth files newsletter model
         , div [ class "newsletter__controls" ]
-            [ navIcon previousArticle Components.Icons.left files filename "newsletter__nav_min"
-            , navIcon nextArticle Components.Icons.right files filename "newsletter__nav_min"
+            [ navIcon previousArticle Components.Icons.left files model.filename "newsletter__nav_min"
+            , navIcon nextArticle Components.Icons.right files model.filename "newsletter__nav_min"
             ]
         ]
 
 
-articles : Int -> List NewsletterFile -> String -> Newsletter -> Model -> Html Msg
-articles screenWidth files filename newsletter model =
+articles : Int -> List NewsletterFile -> Newsletter -> Model -> Html Msg
+articles screenWidth files newsletter model =
     div [ class "newsletter__articles" ]
         [ h1 [ class "newsletter__header" ] [ text (title newsletter) ]
         , News.view

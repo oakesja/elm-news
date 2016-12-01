@@ -24,10 +24,7 @@ import Links
 
 
 type alias Model =
-    { currentPage : Page
-    , homePage : HomePage.Model
-    , newslettersPage : NewslettersPage.Model
-    , newsletterPage : NewsletterPage.Model
+    { currentPage : PageModel
     , newsletterFiles : FetchData (List NewsletterFile)
     , newsletters : Dict String (FetchData Newsletter)
     , now : Maybe Date
@@ -35,15 +32,19 @@ type alias Model =
     }
 
 
+type PageModel
+    = HomePage HomePage.Model
+    | NewslettersPage NewslettersPage.Model
+    | NewsletterPage NewsletterPage.Model
+    | NotFound
+
+
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     let
         ( model, cmd ) =
             loadPage location
-                { currentPage = Page.NotFound
-                , homePage = HomePage.init
-                , newslettersPage = NewslettersPage.init
-                , newsletterPage = NewsletterPage.init
+                { currentPage = NotFound
                 , newsletterFiles = FetchData.NotStarted
                 , newsletters = Dict.empty
                 , now = Nothing
@@ -73,54 +74,54 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        UrlChange location ->
+    case ( msg, model.currentPage ) of
+        ( UrlChange location, _ ) ->
             loadPage location model
 
-        HomePageMsg homeMsg ->
+        ( HomePageMsg homeMsg, HomePage homePage ) ->
             let
                 ( newHomePage, cmds ) =
-                    HomePage.update homeMsg model.homePage
+                    HomePage.update homeMsg homePage
             in
-                { model | homePage = newHomePage }
+                { model | currentPage = HomePage newHomePage }
                     ! [ Cmd.map HomePageMsg cmds ]
 
-        NewslettersMsg newsLettersMsg ->
+        ( NewslettersMsg newsLettersMsg, NewslettersPage page ) ->
             let
                 ( newNewsletter, cmds ) =
-                    NewslettersPage.update newsLettersMsg model.newslettersPage
+                    NewslettersPage.update newsLettersMsg page
             in
-                { model | newslettersPage = newNewsletter }
+                { model | currentPage = NewslettersPage newNewsletter }
                     ! [ Cmd.map NewslettersMsg cmds ]
 
-        NewsletterMsg newsLetterMsg ->
+        ( NewsletterMsg newsLetterMsg, NewsletterPage page ) ->
             let
                 ( newNewsletter, cmds ) =
-                    NewsletterPage.update newsLetterMsg model.newsletterPage
+                    NewsletterPage.update newsLetterMsg page
             in
-                { model | newsletterPage = newNewsletter }
+                { model | currentPage = NewsletterPage newNewsletter }
                     ! [ Cmd.map NewsletterMsg cmds ]
 
-        AnalyticsEvent event ->
+        ( AnalyticsEvent event, _ ) ->
             model ! [ Analytics.registerEvent event ]
 
-        CurrentDate date ->
+        ( CurrentDate date, _ ) ->
             { model | now = Just date }
                 ! [ Process.sleep Time.minute
                         |> andThen (\_ -> Date.now)
                         |> Task.perform CurrentDate
                   ]
 
-        WindowSize size ->
+        ( WindowSize size, _ ) ->
             { model | width = size.width } ! []
 
-        FetchedFiles (Err error) ->
+        ( FetchedFiles (Err error), _ ) ->
             { model | newsletterFiles = FetchData.Failed error } ! []
 
-        FetchedFiles (Ok files) ->
+        ( FetchedFiles (Ok files), _ ) ->
             { model | newsletterFiles = FetchData.Fetched files } ! []
 
-        FetchedNewsletter name (Err error) ->
+        ( FetchedNewsletter name (Err error), _ ) ->
             let
                 _ =
                     Debug.log "error" error
@@ -130,18 +131,25 @@ update msg model =
             in
                 { model | newsletters = newsletters } ! []
 
-        FetchedNewsletter name (Ok newsletter) ->
+        ( FetchedNewsletter name (Ok newsletter), _ ) ->
             let
                 newsletters =
                     Dict.insert name (FetchData.Fetched newsletter) model.newsletters
             in
                 { model | newsletters = newsletters } ! []
 
-        IconClicked ->
+        ( IconClicked, _ ) ->
             model ! [ Navigation.newUrl Links.home ]
 
-        NewsletterClicked ->
+        ( NewsletterClicked, _ ) ->
             model ! [ Navigation.newUrl Links.newsletters ]
+
+        ( _, _ ) ->
+            let
+                _ =
+                    Debug.log "received unexpected message" msg
+            in
+                model ! []
 
 
 view : Model -> Html Msg
@@ -163,79 +171,76 @@ view model =
 body : Model -> Html Msg
 body model =
     case model.currentPage of
-        Page.Home _ ->
-            HomePage.view model.now model.width model.homePage
+        HomePage page ->
+            HomePage.view model.now model.width page
                 |> Html.map HomePageMsg
 
-        Page.Newsletters ->
-            NewslettersPage.view model.newsletterFiles model.newslettersPage
+        NewslettersPage page ->
+            NewslettersPage.view model.newsletterFiles page
                 |> Html.map NewslettersMsg
 
-        Page.Newsletter name ->
+        NewsletterPage page ->
             NewsletterPage.view
                 { screenWidth = model.width
                 , files = (FetchData.default [] model.newsletterFiles)
-                , filename = name
                 , newsletter =
-                    Dict.get name model.newsletters
+                    Dict.get page.filename model.newsletters
                         |> Maybe.withDefault FetchData.NotStarted
                 }
-                model.newsletterPage
+                page
                 |> Html.map NewsletterMsg
 
-        Page.NotFound ->
+        NotFound ->
             div [ class "not__found" ]
                 [ text "Page Not Found" ]
 
 
 loadPage : Navigation.Location -> Model -> ( Model, Cmd Msg )
 loadPage location model =
-    let
-        page =
-            Page.parse location
+    case Page.parse location of
+        Page.Home id ->
+            let
+                ( homePage, cmd ) =
+                    HomePage.init id
 
-        ( newModel, cmd ) =
-            case page of
-                Page.Home id ->
-                    let
-                        ( homePage, cmd ) =
-                            HomePage.onPageLoad id model.homePage
+                registerPageView =
+                    id
+                        |> Maybe.map (\_ -> Analytics.pageView location.pathname)
+                        |> Maybe.withDefault Cmd.none
+            in
+                { model | currentPage = HomePage homePage }
+                    ! [ Cmd.map HomePageMsg cmd
+                      , registerPageView
+                      ]
 
-                        registerPageView =
-                            id
-                                |> Maybe.map (\_ -> Analytics.pageView location.pathname)
-                                |> Maybe.withDefault Cmd.none
-                    in
-                        { model | homePage = homePage }
-                            ! [ Cmd.map HomePageMsg cmd
-                              , registerPageView
-                              ]
+        Page.Newsletters ->
+            let
+                ( page, cmd ) =
+                    NewslettersPage.init
+            in
+                { model | currentPage = NewslettersPage page }
+                    ! [ Cmd.map NewslettersMsg cmd
+                      , fetchNewsletterFiles model
+                      , Analytics.pageView location.pathname
+                      ]
 
-                Page.Newsletters ->
-                    model
-                        ! [ Cmd.map NewslettersMsg NewslettersPage.onPageLoad
-                          , fetchNewsletterFiles model
-                          , Analytics.pageView location.pathname
-                          ]
+        Page.Newsletter name ->
+            let
+                ( updatedModel, cmd ) =
+                    fetchNewsletter name model
 
-                Page.Newsletter name ->
-                    let
-                        ( updatedModel, cmd ) =
-                            fetchNewsletter name model
-                    in
-                        updatedModel
-                            ! [ Cmd.map NewsletterMsg (NewsletterPage.onPageLoad name)
-                              , cmd
-                              , fetchNewsletterFiles model
-                              , Analytics.pageView location.pathname
-                              ]
+                ( page, pageCmd ) =
+                    NewsletterPage.init name
+            in
+                { updatedModel | currentPage = NewsletterPage page }
+                    ! [ Cmd.map NewsletterMsg pageCmd
+                      , cmd
+                      , fetchNewsletterFiles model
+                      , Analytics.pageView location.pathname
+                      ]
 
-                Page.NotFound ->
-                    model ! [ Analytics.pageView location.pathname ]
-    in
-        { newModel | currentPage = page }
-            ! [ cmd
-              ]
+        Page.NotFound ->
+            model ! [ Analytics.pageView location.pathname ]
 
 
 fetchNewsletterFiles : Model -> Cmd Msg
@@ -265,7 +270,7 @@ fetchNewsletter name model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map HomePageMsg (HomePage.subscriptions model.homePage)
+        [ Sub.map HomePageMsg HomePage.subscriptions
         , Window.resizes WindowSize
         ]
 
