@@ -21,6 +21,7 @@ import Newsletter.Newsletter as Newsletter exposing (Newsletter)
 import Http
 import Dict exposing (Dict)
 import Links
+import Return exposing (Return)
 
 
 type alias Model =
@@ -41,28 +42,20 @@ type PageModel
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
-    let
-        ( model, cmd ) =
-            loadPage location
-                { currentPage = NotFound
-                , newsletterFiles = FetchData.NotStarted
-                , newsletters = Dict.empty
-                , now = Nothing
-                , width = 0
-                }
-    in
-        model
-            ! [ cmd
-              , Task.perform CurrentDate Date.now
-              , Task.perform WindowSize Window.size
-              ]
+    loadPage location
+        { currentPage = NotFound
+        , newsletterFiles = FetchData.NotStarted
+        , newsletters = Dict.empty
+        , now = Nothing
+        , width = 0
+        }
+        |> Return.command (Task.perform CurrentDate Date.now)
+        |> Return.command (Task.perform WindowSize Window.size)
 
 
 type Msg
     = UrlChange Navigation.Location
-    | HomePageMsg HomePage.Msg
-    | NewslettersMsg NewslettersPage.Msg
-    | NewsletterMsg NewsletterPage.Msg
+    | PageMsg PageMsg
     | AnalyticsEvent Analytics.Event
     | CurrentDate Date
     | WindowSize Window.Size
@@ -72,56 +65,42 @@ type Msg
     | NewsletterClicked
 
 
+type PageMsg
+    = HomePageMsg HomePage.Msg
+    | NewslettersMsg NewslettersPage.Msg
+    | NewsletterMsg NewsletterPage.Msg
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model.currentPage ) of
-        ( UrlChange location, _ ) ->
+    case msg of
+        UrlChange location ->
             loadPage location model
 
-        ( HomePageMsg homeMsg, HomePage homePage ) ->
-            let
-                ( newHomePage, cmds ) =
-                    HomePage.update homeMsg homePage
-            in
-                { model | currentPage = HomePage newHomePage }
-                    ! [ Cmd.map HomePageMsg cmds ]
+        PageMsg pageMsg ->
+            updateCurrentPage pageMsg model.currentPage
+                |> Return.mapBoth PageMsg (\page -> { model | currentPage = page })
 
-        ( NewslettersMsg newsLettersMsg, NewslettersPage page ) ->
-            let
-                ( newNewsletter, cmds ) =
-                    NewslettersPage.update newsLettersMsg page
-            in
-                { model | currentPage = NewslettersPage newNewsletter }
-                    ! [ Cmd.map NewslettersMsg cmds ]
-
-        ( NewsletterMsg newsLetterMsg, NewsletterPage page ) ->
-            let
-                ( newNewsletter, cmds ) =
-                    NewsletterPage.update newsLetterMsg page
-            in
-                { model | currentPage = NewsletterPage newNewsletter }
-                    ! [ Cmd.map NewsletterMsg cmds ]
-
-        ( AnalyticsEvent event, _ ) ->
+        AnalyticsEvent event ->
             model ! [ Analytics.registerEvent event ]
 
-        ( CurrentDate date, _ ) ->
+        CurrentDate date ->
             { model | now = Just date }
                 ! [ Process.sleep Time.minute
                         |> andThen (\_ -> Date.now)
                         |> Task.perform CurrentDate
                   ]
 
-        ( WindowSize size, _ ) ->
+        WindowSize size ->
             { model | width = size.width } ! []
 
-        ( FetchedFiles (Err error), _ ) ->
+        FetchedFiles (Err error) ->
             { model | newsletterFiles = FetchData.Failed error } ! []
 
-        ( FetchedFiles (Ok files), _ ) ->
+        FetchedFiles (Ok files) ->
             { model | newsletterFiles = FetchData.Fetched files } ! []
 
-        ( FetchedNewsletter name (Err error), _ ) ->
+        FetchedNewsletter name (Err error) ->
             let
                 _ =
                     Debug.log "error" error
@@ -131,116 +110,81 @@ update msg model =
             in
                 { model | newsletters = newsletters } ! []
 
-        ( FetchedNewsletter name (Ok newsletter), _ ) ->
+        FetchedNewsletter name (Ok newsletter) ->
             let
                 newsletters =
                     Dict.insert name (FetchData.Fetched newsletter) model.newsletters
             in
                 { model | newsletters = newsletters } ! []
 
-        ( IconClicked, _ ) ->
+        IconClicked ->
             model ! [ Navigation.newUrl Links.home ]
 
-        ( NewsletterClicked, _ ) ->
+        NewsletterClicked ->
             model ! [ Navigation.newUrl Links.newsletters ]
 
-        ( _, _ ) ->
+
+updateCurrentPage : PageMsg -> PageModel -> ( PageModel, Cmd PageMsg )
+updateCurrentPage msg model =
+    case ( msg, model ) of
+        ( HomePageMsg msg, HomePage page ) ->
+            HomePage.update msg page
+                |> Return.mapBoth HomePageMsg HomePage
+
+        ( NewslettersMsg msg, NewslettersPage page ) ->
+            NewslettersPage.update msg page
+                |> Return.mapBoth NewslettersMsg NewslettersPage
+
+        ( NewsletterMsg msg, NewsletterPage page ) ->
+            NewsletterPage.update msg page
+                |> Return.mapBoth NewsletterMsg NewsletterPage
+
+        x ->
             let
                 _ =
                     Debug.log "received unexpected message" msg
             in
-                model ! []
-
-
-view : Model -> Html Msg
-view model =
-    div [ class "main" ]
-        [ Header.view
-            { onLinkClick = AnalyticsEvent
-            , onIconClick = IconClicked
-            , onNewsletterClick = NewsletterClicked
-            , screenWidth = model.width
-            }
-        , div
-            [ class "body" ]
-            [ body model ]
-        , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
-        ]
-
-
-body : Model -> Html Msg
-body model =
-    case model.currentPage of
-        HomePage page ->
-            HomePage.view model.now model.width page
-                |> Html.map HomePageMsg
-
-        NewslettersPage page ->
-            NewslettersPage.view model.newsletterFiles page
-                |> Html.map NewslettersMsg
-
-        NewsletterPage page ->
-            NewsletterPage.view
-                { screenWidth = model.width
-                , files = (FetchData.default [] model.newsletterFiles)
-                , newsletter =
-                    Dict.get page.filename model.newsletters
-                        |> Maybe.withDefault FetchData.NotStarted
-                }
-                page
-                |> Html.map NewsletterMsg
-
-        NotFound ->
-            div [ class "not__found" ]
-                [ text "Page Not Found" ]
+                Return.singleton model
 
 
 loadPage : Navigation.Location -> Model -> ( Model, Cmd Msg )
 loadPage location model =
-    case Page.parse location of
-        Page.Home id ->
-            let
-                ( homePage, cmd ) =
+    let
+        pageView =
+            Analytics.pageView location.pathname
+
+        mapToCurrentPage pageMsg pageModel =
+            Return.mapBoth
+                (PageMsg << pageMsg)
+                (\page -> { model | currentPage = pageModel page })
+    in
+        case Page.parse location of
+            Page.Home id ->
+                let
+                    registerPageView =
+                        id
+                            |> Maybe.map (\_ -> pageView)
+                            |> Maybe.withDefault Cmd.none
+                in
                     HomePage.init id
+                        |> mapToCurrentPage HomePageMsg HomePage
+                        |> Return.command registerPageView
 
-                registerPageView =
-                    id
-                        |> Maybe.map (\_ -> Analytics.pageView location.pathname)
-                        |> Maybe.withDefault Cmd.none
-            in
-                { model | currentPage = HomePage homePage }
-                    ! [ Cmd.map HomePageMsg cmd
-                      , registerPageView
-                      ]
+            Page.Newsletters ->
+                NewslettersPage.init
+                    |> mapToCurrentPage NewslettersMsg NewslettersPage
+                    |> Return.effect_ fetchNewsletterFiles
+                    |> Return.command pageView
 
-        Page.Newsletters ->
-            let
-                ( page, cmd ) =
-                    NewslettersPage.init
-            in
-                { model | currentPage = NewslettersPage page }
-                    ! [ Cmd.map NewslettersMsg cmd
-                      , fetchNewsletterFiles model
-                      , Analytics.pageView location.pathname
-                      ]
+            Page.Newsletter name ->
+                NewsletterPage.init name
+                    |> mapToCurrentPage NewsletterMsg NewsletterPage
+                    |> Return.andThen (fetchNewsletter name)
+                    |> Return.effect_ fetchNewsletterFiles
+                    |> Return.command pageView
 
-        Page.Newsletter name ->
-            let
-                ( updatedModel, cmd ) =
-                    fetchNewsletter name model
-
-                ( page, pageCmd ) =
-                    NewsletterPage.init name
-            in
-                { updatedModel | currentPage = NewsletterPage page }
-                    ! [ Cmd.map NewsletterMsg pageCmd
-                      , cmd
-                      , fetchNewsletterFiles model
-                      , Analytics.pageView location.pathname
-                      ]
-
-        Page.NotFound ->
-            model ! [ Analytics.pageView location.pathname ]
+            Page.NotFound ->
+                model ! [ pageView ]
 
 
 fetchNewsletterFiles : Model -> Cmd Msg
@@ -267,10 +211,53 @@ fetchNewsletter name model =
             model ! []
 
 
+view : Model -> Html Msg
+view model =
+    div [ class "main" ]
+        [ Header.view
+            { onLinkClick = AnalyticsEvent
+            , onIconClick = IconClicked
+            , onNewsletterClick = NewsletterClicked
+            , screenWidth = model.width
+            }
+        , div
+            [ class "body" ]
+            [ body model ]
+        , Footer.view (Maybe.map Date.year model.now) AnalyticsEvent
+        ]
+
+
+body : Model -> Html Msg
+body model =
+    case model.currentPage of
+        HomePage page ->
+            HomePage.view model.now model.width page
+                |> Html.map (PageMsg << HomePageMsg)
+
+        NewslettersPage page ->
+            NewslettersPage.view model.newsletterFiles page
+                |> Html.map (PageMsg << NewslettersMsg)
+
+        NewsletterPage page ->
+            NewsletterPage.view
+                { screenWidth = model.width
+                , files = (FetchData.default [] model.newsletterFiles)
+                , newsletter =
+                    Dict.get page.filename model.newsletters
+                        |> Maybe.withDefault FetchData.NotStarted
+                }
+                page
+                |> Html.map (PageMsg << NewsletterMsg)
+
+        NotFound ->
+            div [ class "not__found" ]
+                [ text "Page Not Found" ]
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map HomePageMsg HomePage.subscriptions
+        [ Sub.map (PageMsg << HomePageMsg) HomePage.subscriptions
         , Window.resizes WindowSize
         ]
 
