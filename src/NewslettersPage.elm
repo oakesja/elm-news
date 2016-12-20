@@ -1,4 +1,4 @@
-module NewslettersPage exposing (Model, Msg, init, view, update, onPageLoad)
+module NewslettersPage exposing (Model, Msg, init, view, update)
 
 import Html exposing (Html, div, text, h1, span, a)
 import Html.Attributes exposing (class, href)
@@ -16,14 +16,9 @@ type alias Model =
     {}
 
 
-init : Model
+init : ( Model, Cmd Msg )
 init =
-    {}
-
-
-onPageLoad : Cmd Msg
-onPageLoad =
-    Cmd.none
+    {} ! []
 
 
 type Msg
