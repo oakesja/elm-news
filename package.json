@@ -1,0 +1,28 @@
+{
+  "name": "elm-news",
+  "version": "1.0.0",
+  "description": "All your elm news from elm-discuss, elm-dev, hacker news, and reddit in one place.",
+  "dependencies": {},
+  "devDependencies": {
+    "autoprefixer": "^6.5.4",
+    "backstopjs": "^2.3.5",
+    "gulp": "^3.9.1",
+    "gulp-elm": "^0.6.1",
+    "gulp-postcss": "^6.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.9.1",
+    "gulp-uglify": "^2.0.0",
+    "gulp-uglifycss": "^1.0.6",
+    "nock": "^9.0.2"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oakesja/elm-news.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/oakesja/elm-news/issues"
+  },
+  "homepage": "https://github.com/oakesja/elm-news#readme"
+}

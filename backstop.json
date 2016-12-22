@@ -1,0 +1,38 @@
+{
+    "id": "prod_test",
+    "viewports": [{
+        "name": "phone",
+        "width": 320,
+        "height": 480
+    }, {
+        "name": "tablet_h",
+        "width": 1024,
+        "height": 768
+    }],
+    "scenarios": [ {
+        "label": "Newsletter",
+        "url": "http://localhost:4000/newsletters/2016-12-19.json",
+        "hideSelectors": [],
+        "removeSelectors": [],
+        "selectorExpansion": true,
+        "selectors": [
+            "document"
+        ],
+        "readyEvent": null,
+        "delay": 1000,
+        "misMatchThreshold": 0.1,
+        "onBeforeScript": "onBefore.js",
+        "onReadyScript": "onReady.js"
+    }],
+    "paths": {
+      "bitmaps_reference": "backstop_data/bitmaps_reference",
+      "bitmaps_test": "backstop_data/bitmaps_test",
+      "casper_scripts": "backstop_data/casper_scripts",
+      "html_report": "backstop_data/html_report",
+      "ci_report": "backstop_data/ci_report"
+    },
+    "casperFlags": [],
+    "engine": "phantomjs",
+    "report": ["CI", "browser"],
+    "debug": false
+}
