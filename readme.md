@@ -11,6 +11,7 @@ Found a bug? Have a feature request? Please make a github issue!
 Run locally with:
 
 ```
+npm install -g elm-css
 ./build.sh
 bundle install
 bundle exec jekyll serve
