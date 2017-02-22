@@ -50,7 +50,6 @@ update msg model =
                 ( newNews, cmd ) =
                     News.update
                         { newsEvent = Analytics.archivedNewsLink
-                        , redirectToId = False
                         }
                         newsMsg
                         model.news

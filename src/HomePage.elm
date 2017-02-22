@@ -99,7 +99,6 @@ update msg model =
                 ( newNews, cmd ) =
                     News.update
                         { newsEvent = Analytics.newsLink
-                        , redirectToId = True
                         }
                         newsMsg
                         model.news

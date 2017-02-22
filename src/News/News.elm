@@ -17,7 +17,6 @@ import Analytics exposing (Event, NewsEventInfo)
 import News.Tag as Tag
 import DateFormatter
 import Url
-import Navigation
 
 
 type alias Model =
@@ -50,7 +49,6 @@ type Msg
 
 type alias UpdateConfig =
     { newsEvent : NewsEventInfo -> Event
-    , redirectToId : Bool
     }
 
 
@@ -58,19 +56,11 @@ update : UpdateConfig -> Msg -> Model -> ( Model, Cmd Msg )
 update config msg model =
     case msg of
         ClickStory story ->
-            let
-                redirectCmd =
-                    if config.redirectToId then
-                        Navigation.modifyUrl ("?storyId=" ++ storyId story)
-                    else
-                        Cmd.none
-            in
-                model
-                    ! [ storyEvent story
-                            |> config.newsEvent
-                            |> Analytics.registerEvent
-                      , redirectCmd
-                      ]
+            model
+                ! [ storyEvent story
+                        |> config.newsEvent
+                        |> Analytics.registerEvent
+                  ]
 
         TrackEvent event ->
             model ! [ Analytics.registerEvent event ]
