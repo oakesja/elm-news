@@ -45,22 +45,22 @@ view : FetchData (List NewsletterFile) -> Model -> Html Msg
 view files model =
     div [ class "newsletters__row" ]
         [ div [ class "newsletters__col" ] <|
-            [ h1 [] [ text "Weekly Top News Archive" ]
+            [ h1 [ class "newletters__header" ] [ text "Weekly Top News Archive" ]
             , span [ class "newsletters__description" ]
                 [ text
                     """
                     Every Monday a newsletter is sent out for the previous
                     week's top visited elm news articles from the site.
-                    This is an archive for these past newsletters.
-                    If you are interested, then please
+                    This is an archive for past newsletters.
                     """
-                , a
+                ]
+            , div [ class "signup__row" ]
+                [ a
                     [ href Links.newsletterSignup
                     , onClick GoToSignup
-                    , class "internal__link"
+                    , class "signup__button"
                     ]
-                    [ text "subscribe here" ]
-                , text "."
+                    [ text "Subscribe" ]
                 ]
             , newsletters files
             ]

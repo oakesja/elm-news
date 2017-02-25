@@ -286,6 +286,8 @@ a {
 .newsletters {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding-top: 5px;
 }
 
 .newsletters__row {
@@ -303,13 +305,34 @@ a {
   padding: 0px 10px;
 }
 
+.newletters__header {
+  text-align: center;
+}
+
 .newsletters__description {
   padding-bottom: 15px;
+  text-align: center;
 }
 
 .newsletters__file {
-  font-size: 1.15em;
+  font-size: 1.5em;
   padding-top: 10px;
+}
+
+.signup__row {
+  display: flex;
+  justify-content: center;
+}
+
+.signup__button {
+  display: inline-block;
+  border-radius: 2px;
+  padding: 10px;
+  background-color: #5A6378;
+  color: #FFF;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.2s;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 
 .newsletter__header {
