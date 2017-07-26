@@ -27,17 +27,15 @@ type alias Model =
     { allStories : List Story
     , errorManager : ErrorManager.Model
     , news : News.Model
-    , previousStoryId : Maybe String
     , remainingPlacesToFetchFrom : List String
     }
 
 
-init : Maybe String -> ( Model, Cmd Msg )
-init previousStoryId =
+init : ( Model, Cmd Msg )
+init =
     { errorManager = ErrorManager.init
     , allStories = []
     , news = News.init
-    , previousStoryId = previousStoryId
     , remainingPlacesToFetchFrom = [ "elm-dev", "elm-discuss", Reddit.tag, HackerNews.tag ]
     }
         ! [ fetchGoogleGroupMsgs "elm-dev"
@@ -76,7 +74,7 @@ update msg model =
                     updateRemainingToFetch tag
                         { model | allStories = model.allStories ++ stories }
             in
-                updatedModel ! [ cmdToScrollToPrevious updatedModel ]
+                updatedModel ! []
 
         FetchedNews tag (Err rawError) ->
             let
@@ -92,7 +90,7 @@ update msg model =
                     updateRemainingToFetch tag updatedWithError
             in
                 updatedModel
-                    ! [ errorCmd, cmdToScrollToPrevious updatedModel ]
+                    ! [ errorCmd ]
 
         NewsMsg newsMsg ->
             let
@@ -113,15 +111,6 @@ updateRemainingToFetch tag model =
             model.remainingPlacesToFetchFrom
                 |> List.filter (\t -> t /= tag)
     }
-
-
-cmdToScrollToPrevious : Model -> Cmd Msg
-cmdToScrollToPrevious model =
-    if List.isEmpty model.remainingPlacesToFetchFrom then
-        Maybe.map scrollIntoView model.previousStoryId
-            |> Maybe.withDefault Cmd.none
-    else
-        Cmd.none
 
 
 updateErrorManager : ErrorManager.Msg -> Model -> ( Model, Cmd Msg )

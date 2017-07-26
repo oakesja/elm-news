@@ -159,16 +159,10 @@ loadPage location model =
                 (\page -> { model | currentPage = pageModel page })
     in
         case Page.parse location of
-            Page.Home id ->
-                let
-                    registerPageView =
-                        id
-                            |> Maybe.map (\_ -> pageView)
-                            |> Maybe.withDefault Cmd.none
-                in
-                    HomePage.init id
-                        |> mapToCurrentPage HomePageMsg HomePage
-                        |> Return.command registerPageView
+            Page.Home ->
+                HomePage.init
+                    |> mapToCurrentPage HomePageMsg HomePage
+                    |> Return.command pageView
 
             Page.Newsletters ->
                 NewslettersPage.init
