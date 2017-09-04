@@ -55,7 +55,7 @@
                 });
                 if (q.p !== undefined) {
                     if (q.p == '/redirect') {
-                        var url = getQueryVariable(q.q, 'url');
+                        var url = decodeURIComponent(getQueryVariable(q.q, 'url'));
                         var label = getQueryVariable(q.q, 'label') || 'unknown';
                         if (ga) {
                             ga('send', 'event', 'email', url, label);
