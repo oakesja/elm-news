@@ -17,6 +17,7 @@ import News.Story exposing (Story, StoryResp, StoryError)
 import News.News as News exposing (DisplayStory)
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
+import News.Discourse as Discourse
 import Analytics
 import Http
 import Components.Spinner
@@ -42,6 +43,7 @@ init =
           , fetchGoogleGroupMsgs "elm-discuss"
           , fetch Reddit.tag Reddit.fetch
           , fetch HackerNews.tag HackerNews.fetch
+          , fetch Discourse.tag Discourse.fetch
           ]
 
 

@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
+import News.Discourse as Discourse
 import Analytics exposing (Event)
 import String
 
@@ -58,6 +59,7 @@ lookupTagInfo name =
                 |> Dict.insert "elm-dev" elmDevTag
                 |> Dict.insert (String.toLower Reddit.tag) redditTag
                 |> Dict.insert (String.toLower HackerNews.tag) hackerNewsTag
+                |> Dict.insert (String.toLower Discourse.tag) discourseTag
     in
         Maybe.withDefault default (Dict.get name lookup)
 
@@ -91,4 +93,12 @@ hackerNewsTag =
     { tagColor = "elm_green"
     , url = Just "https://hn.algolia.com/?query=elm&sort=byDate&prefix=false&page=0&dateRange=all&type=story"
     , displayName = HackerNews.tag
+    }
+
+
+discourseTag : TagInfo
+discourseTag =
+    { tagColor = "elm_dark_teal"
+    , url = Just "https://discourse.elm-lang.org"
+    , displayName = Discourse.tag
     }
