@@ -6,7 +6,7 @@ import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
-import News.Discourse as Discourse
+import News.Feed as Feed
 import Analytics exposing (Event)
 import String
 
@@ -55,11 +55,11 @@ lookupTagInfo name =
 
         lookup =
             Dict.empty
-                |> Dict.insert "elm-discuss" elmDiscussTag
-                |> Dict.insert "elm-dev" elmDevTag
+                |> Dict.insert Feed.elmDiscuss elmDiscussTag
+                |> Dict.insert Feed.elmDev elmDevTag
                 |> Dict.insert (String.toLower Reddit.tag) redditTag
                 |> Dict.insert (String.toLower HackerNews.tag) hackerNewsTag
-                |> Dict.insert (String.toLower Discourse.tag) discourseTag
+                |> Dict.insert (String.toLower Feed.elmDiscourse) discourseTag
     in
         Maybe.withDefault default (Dict.get name lookup)
 
@@ -68,7 +68,7 @@ elmDiscussTag : TagInfo
 elmDiscussTag =
     { tagColor = "elm_light_blue"
     , url = Just "https://groups.google.com/forum/#!forum/elm-discuss"
-    , displayName = "elm-discuss"
+    , displayName = Feed.elmDiscuss
     }
 
 
@@ -76,7 +76,7 @@ elmDevTag : TagInfo
 elmDevTag =
     { tagColor = "elm_dark_blue"
     , url = Just "https://groups.google.com/forum/#!forum/elm-dev"
-    , displayName = "elm-dev"
+    , displayName = Feed.elmDev
     }
 
 
@@ -100,5 +100,5 @@ discourseTag : TagInfo
 discourseTag =
     { tagColor = "elm_dark_teal"
     , url = Just "https://discourse.elm-lang.org"
-    , displayName = Discourse.tag
+    , displayName = Feed.elmDiscourse
     }
