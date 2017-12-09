@@ -15,6 +15,7 @@ import Task exposing (Task, andThen)
 import ErrorManager
 import News.Story exposing (Story, StoryResp, StoryError)
 import News.News as News exposing (DisplayStory)
+import News.Feed as Feed
 import News.Reddit as Reddit
 import News.HackerNews as HackerNews
 import Analytics
@@ -36,10 +37,11 @@ init =
     { errorManager = ErrorManager.init
     , allStories = []
     , news = News.init
-    , remainingPlacesToFetchFrom = [ "elm-dev", "elm-discuss", Reddit.tag, HackerNews.tag ]
+    , remainingPlacesToFetchFrom = [ Feed.elmDev, Feed.elmDiscuss, Feed.elmDiscourse, Reddit.tag, HackerNews.tag ]
     }
-        ! [ fetchGoogleGroupMsgs "elm-dev"
-          , fetchGoogleGroupMsgs "elm-discuss"
+        ! [ fetchGoogleGroupMsgs Feed.elmDev
+          , fetchGoogleGroupMsgs Feed.elmDiscuss
+          , fetchGoogleGroupMsgs Feed.elmDiscourse
           , fetch Reddit.tag Reddit.fetch
           , fetch HackerNews.tag HackerNews.fetch
           ]
