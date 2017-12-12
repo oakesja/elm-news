@@ -1,5 +1,6 @@
 module Components.Icons exposing (left, right)
 
+import Html exposing (a)
 import Svg exposing (Svg, path, svg)
 import Svg.Attributes exposing (class, viewBox, height, fill, d)
 import Svg.Events exposing (onClick)
@@ -17,12 +18,14 @@ right =
 
 icon : String -> String -> Int -> msg -> Svg msg
 icon pathString className h onClickMsg =
-    svg
-        [ class className
-        , viewBox "0 0 24 24"
-        , height (toString h)
-        , fill "currentColor"
-        , onClick onClickMsg
-        ]
-        [ path [ d pathString ] []
+    a [ onClick onClickMsg ]
+        [ svg
+            [ class className
+            , viewBox "0 0 24 24"
+            , height (toString h)
+            , fill "currentColor"
+            , onClick onClickMsg
+            ]
+            [ path [ d pathString ] []
+            ]
         ]
