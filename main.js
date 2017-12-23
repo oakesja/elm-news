@@ -6863,6 +6863,12 @@ return {
 
 }();
 
+var _elm_lang$dom$Dom$blur = _elm_lang$dom$Native_Dom.blur;
+var _elm_lang$dom$Dom$focus = _elm_lang$dom$Native_Dom.focus;
+var _elm_lang$dom$Dom$NotFound = function (a) {
+	return {ctor: 'NotFound', _0: a};
+};
+
 var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
 var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 
@@ -11935,6 +11941,19 @@ var _user$project$Components_Footer$view = F2(
 			});
 	});
 
+var _user$project$HtmlEvents$onEnter = function (onEnterAction) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'keyup',
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (keyCode) {
+				return _elm_lang$core$Native_Utils.eq(keyCode, 13) ? _elm_lang$core$Json_Decode$succeed(onEnterAction) : _elm_lang$core$Json_Decode$fail(
+					_elm_lang$core$Basics$toString(keyCode));
+			},
+			_elm_lang$html$Html_Events$keyCode));
+};
+
 var _user$project$Components_Logo$icon = A2(
 	_elm_lang$svg$Svg$g,
 	{
@@ -12099,7 +12118,19 @@ var _user$project$Components_Header$newsletters = function (msg) {
 			ctor: '::',
 			_0: A2(
 				_elm_lang$html$Html$div,
-				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(_elm_lang$html$Html_Attributes$attribute, 'role', 'button'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$tabindex(0),
+						_1: {
+							ctor: '::',
+							_0: _user$project$HtmlEvents$onEnter(msg),
+							_1: {ctor: '[]'}
+						}
+					}
+				},
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text('Newsletters'),
@@ -12175,8 +12206,38 @@ var _user$project$Components_Header$view = function (config) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$Components_Logo$view(config.onIconClick),
-					_1: {ctor: '[]'}
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: A2(_elm_lang$html$Html_Attributes$attribute, 'role', 'button'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$tabindex(0),
+								_1: {
+									ctor: '::',
+									_0: _user$project$HtmlEvents$onEnter(config.onIconClick),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$id('logo'),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _user$project$Components_Logo$view(config.onIconClick),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					}
 				}),
 			_1: {
 				ctor: '::',
@@ -12632,10 +12693,14 @@ var _user$project$News_Tag$linkAttrs = F3(
 					_0: _elm_lang$html$Html_Attributes$href(_p1),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							onLinkClick(
-								A2(_user$project$Analytics$tagLink, name, _p1))),
-						_1: {ctor: '[]'}
+						_0: _elm_lang$html$Html_Attributes$tabindex(-1),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								onLinkClick(
+									A2(_user$project$Analytics$tagLink, name, _p1))),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			};
@@ -13417,7 +13482,20 @@ var _user$project$NewslettersPage$newsletterView = F2(
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
 									_user$project$NewslettersPage$GoToNewletter(file.name)),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$tabindex(0),
+									_1: {
+										ctor: '::',
+										_0: A2(_elm_lang$html$Html_Attributes$attribute, 'row', 'button'),
+										_1: {
+											ctor: '::',
+											_0: _user$project$HtmlEvents$onEnter(
+												_user$project$NewslettersPage$GoToNewletter(file.name)),
+											_1: {ctor: '[]'}
+										}
+									}
+								}
 							}
 						},
 						{
@@ -13777,11 +13855,32 @@ var _user$project$NewsletterPage$navIcon = F5(
 	function (findArticle, icon, files, filename, baseClass) {
 		var _p6 = A2(findArticle, filename, files);
 		if (_p6.ctor === 'Just') {
-			return A3(
-				icon,
-				baseClass,
-				48,
-				_user$project$NewsletterPage$GoToArticle(_p6._0.name));
+			var _p7 = _p6._0;
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$tabindex(0),
+					_1: {
+						ctor: '::',
+						_0: A2(_elm_lang$html$Html_Attributes$attribute, 'role', 'button'),
+						_1: {
+							ctor: '::',
+							_0: _user$project$HtmlEvents$onEnter(
+								_user$project$NewsletterPage$GoToArticle(_p7.name)),
+							_1: {ctor: '[]'}
+						}
+					}
+				},
+				{
+					ctor: '::',
+					_0: A3(
+						icon,
+						baseClass,
+						48,
+						_user$project$NewsletterPage$GoToArticle(_p7.name)),
+					_1: {ctor: '[]'}
+				});
 		} else {
 			return A3(icon, 'newsletter__nav_disabled', 48, _user$project$NewsletterPage$NoOp);
 		}
@@ -13884,6 +13983,13 @@ var _user$project$Main$NewslettersPage = function (a) {
 var _user$project$Main$HomePage = function (a) {
 	return {ctor: 'HomePage', _0: a};
 };
+var _user$project$Main$NoOp = {ctor: 'NoOp'};
+var _user$project$Main$resetFocus = A2(
+	_elm_lang$core$Task$attempt,
+	function (_p0) {
+		return _user$project$Main$NoOp;
+	},
+	_elm_lang$dom$Dom$focus('logo'));
 var _user$project$Main$NewsletterClicked = {ctor: 'NewsletterClicked'};
 var _user$project$Main$IconClicked = {ctor: 'IconClicked'};
 var _user$project$Main$FetchedNewsletter = F2(
@@ -13892,8 +13998,8 @@ var _user$project$Main$FetchedNewsletter = F2(
 	});
 var _user$project$Main$fetchNewsletter = F2(
 	function (name, model) {
-		var _p0 = A2(_elm_lang$core$Dict$get, name, model.newsletters);
-		if (_p0.ctor === 'Nothing') {
+		var _p1 = A2(_elm_lang$core$Dict$get, name, model.newsletters);
+		if (_p1.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$core$Platform_Cmd_ops['!'],
 				_elm_lang$core$Native_Utils.update(
@@ -13920,8 +14026,8 @@ var _user$project$Main$FetchedFiles = function (a) {
 	return {ctor: 'FetchedFiles', _0: a};
 };
 var _user$project$Main$fetchNewsletterFiles = function (model) {
-	var _p1 = model.newsletterFiles;
-	if (_p1.ctor === 'NotStarted') {
+	var _p2 = model.newsletterFiles;
+	if (_p2.ctor === 'NotStarted') {
 		return A2(_elm_lang$http$Http$send, _user$project$Main$FetchedFiles, _user$project$Newsletter_NewsletterFile$fetch);
 	} else {
 		return _elm_lang$core$Platform_Cmd$none;
@@ -13953,38 +14059,38 @@ var _user$project$Main$HomePageMsg = function (a) {
 };
 var _user$project$Main$updateCurrentPage = F2(
 	function (msg, model) {
-		var _p2 = {ctor: '_Tuple2', _0: msg, _1: model};
+		var _p3 = {ctor: '_Tuple2', _0: msg, _1: model};
 		_v2_3:
 		do {
-			if (_p2.ctor === '_Tuple2') {
-				switch (_p2._0.ctor) {
+			if (_p3.ctor === '_Tuple2') {
+				switch (_p3._0.ctor) {
 					case 'HomePageMsg':
-						if (_p2._1.ctor === 'HomePage') {
+						if (_p3._1.ctor === 'HomePage') {
 							return A3(
 								_Fresheyeball$elm_return$Return$mapBoth,
 								_user$project$Main$HomePageMsg,
 								_user$project$Main$HomePage,
-								A2(_user$project$HomePage$update, _p2._0._0, _p2._1._0));
+								A2(_user$project$HomePage$update, _p3._0._0, _p3._1._0));
 						} else {
 							break _v2_3;
 						}
 					case 'NewslettersMsg':
-						if (_p2._1.ctor === 'NewslettersPage') {
+						if (_p3._1.ctor === 'NewslettersPage') {
 							return A3(
 								_Fresheyeball$elm_return$Return$mapBoth,
 								_user$project$Main$NewslettersMsg,
 								_user$project$Main$NewslettersPage,
-								A2(_user$project$NewslettersPage$update, _p2._0._0, _p2._1._0));
+								A2(_user$project$NewslettersPage$update, _p3._0._0, _p3._1._0));
 						} else {
 							break _v2_3;
 						}
 					default:
-						if (_p2._1.ctor === 'NewsletterPage') {
+						if (_p3._1.ctor === 'NewsletterPage') {
 							return A3(
 								_Fresheyeball$elm_return$Return$mapBoth,
 								_user$project$Main$NewsletterMsg,
 								_user$project$Main$NewsletterPage,
-								A2(_user$project$NewsletterPage$update, _p2._0._0, _p2._1._0));
+								A2(_user$project$NewsletterPage$update, _p3._0._0, _p3._1._0));
 						} else {
 							break _v2_3;
 						}
@@ -13993,7 +14099,7 @@ var _user$project$Main$updateCurrentPage = F2(
 				break _v2_3;
 			}
 		} while(false);
-		var _p3 = A2(_elm_lang$core$Debug$log, 'received unexpected message', msg);
+		var _p4 = A2(_elm_lang$core$Debug$log, 'received unexpected message', msg);
 		return _Fresheyeball$elm_return$Return$singleton(model);
 	});
 var _user$project$Main$loadPage = F2(
@@ -14002,9 +14108,9 @@ var _user$project$Main$loadPage = F2(
 			function (pageMsg, pageModel) {
 				return A2(
 					_Fresheyeball$elm_return$Return$mapBoth,
-					function (_p4) {
+					function (_p5) {
 						return _user$project$Main$PageMsg(
-							pageMsg(_p4));
+							pageMsg(_p5));
 					},
 					function (page) {
 						return _elm_lang$core$Native_Utils.update(
@@ -14015,37 +14121,46 @@ var _user$project$Main$loadPage = F2(
 					});
 			});
 		var pageView = _user$project$Analytics$pageView(location.pathname);
-		var _p5 = _user$project$Page$parse(location);
-		switch (_p5.ctor) {
+		var _p6 = _user$project$Page$parse(location);
+		switch (_p6.ctor) {
 			case 'Home':
 				return A2(
 					_Fresheyeball$elm_return$Return$command,
 					pageView,
-					A3(mapToCurrentPage, _user$project$Main$HomePageMsg, _user$project$Main$HomePage, _user$project$HomePage$init));
+					A2(
+						_Fresheyeball$elm_return$Return$command,
+						_user$project$Main$resetFocus,
+						A3(mapToCurrentPage, _user$project$Main$HomePageMsg, _user$project$Main$HomePage, _user$project$HomePage$init)));
 			case 'Newsletters':
 				return A2(
 					_Fresheyeball$elm_return$Return$command,
 					pageView,
 					A2(
-						_Fresheyeball$elm_return$Return$effect_,
-						_user$project$Main$fetchNewsletterFiles,
-						A3(mapToCurrentPage, _user$project$Main$NewslettersMsg, _user$project$Main$NewslettersPage, _user$project$NewslettersPage$init)));
+						_Fresheyeball$elm_return$Return$command,
+						_user$project$Main$resetFocus,
+						A2(
+							_Fresheyeball$elm_return$Return$effect_,
+							_user$project$Main$fetchNewsletterFiles,
+							A3(mapToCurrentPage, _user$project$Main$NewslettersMsg, _user$project$Main$NewslettersPage, _user$project$NewslettersPage$init))));
 			case 'Newsletter':
-				var _p6 = _p5._0;
+				var _p7 = _p6._0;
 				return A2(
 					_Fresheyeball$elm_return$Return$command,
 					pageView,
 					A2(
-						_Fresheyeball$elm_return$Return$effect_,
-						_user$project$Main$fetchNewsletterFiles,
+						_Fresheyeball$elm_return$Return$command,
+						_user$project$Main$resetFocus,
 						A2(
-							_Fresheyeball$elm_return$Return$andThen,
-							_user$project$Main$fetchNewsletter(_p6),
-							A3(
-								mapToCurrentPage,
-								_user$project$Main$NewsletterMsg,
-								_user$project$Main$NewsletterPage,
-								_user$project$NewsletterPage$init(_p6)))));
+							_Fresheyeball$elm_return$Return$effect_,
+							_user$project$Main$fetchNewsletterFiles,
+							A2(
+								_Fresheyeball$elm_return$Return$andThen,
+								_user$project$Main$fetchNewsletter(_p7),
+								A3(
+									mapToCurrentPage,
+									_user$project$Main$NewsletterMsg,
+									_user$project$Main$NewsletterPage,
+									_user$project$NewsletterPage$init(_p7))))));
 			default:
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
@@ -14071,10 +14186,10 @@ var _user$project$Main$init = function (location) {
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
+		var _p8 = msg;
+		switch (_p8.ctor) {
 			case 'UrlChange':
-				return A2(_user$project$Main$loadPage, _p7._0, model);
+				return A2(_user$project$Main$loadPage, _p8._0, model);
 			case 'PageMsg':
 				return A3(
 					_Fresheyeball$elm_return$Return$mapBoth,
@@ -14084,14 +14199,14 @@ var _user$project$Main$update = F2(
 							model,
 							{currentPage: page});
 					},
-					A2(_user$project$Main$updateCurrentPage, _p7._0, model.currentPage));
+					A2(_user$project$Main$updateCurrentPage, _p8._0, model.currentPage));
 			case 'AnalyticsEvent':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					model,
 					{
 						ctor: '::',
-						_0: _user$project$Analytics$registerEvent(_p7._0),
+						_0: _user$project$Analytics$registerEvent(_p8._0),
 						_1: {ctor: '[]'}
 					});
 			case 'CurrentDate':
@@ -14100,7 +14215,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							now: _elm_lang$core$Maybe$Just(_p7._0)
+							now: _elm_lang$core$Maybe$Just(_p8._0)
 						}),
 					{
 						ctor: '::',
@@ -14109,7 +14224,7 @@ var _user$project$Main$update = F2(
 							_user$project$Main$CurrentDate,
 							A2(
 								_elm_lang$core$Task$andThen,
-								function (_p8) {
+								function (_p9) {
 									return _elm_lang$core$Date$now;
 								},
 								_elm_lang$core$Process$sleep(_elm_lang$core$Time$minute))),
@@ -14120,16 +14235,16 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{width: _p7._0.width}),
+						{width: _p8._0.width}),
 					{ctor: '[]'});
 			case 'FetchedFiles':
-				if (_p7._0.ctor === 'Err') {
+				if (_p8._0.ctor === 'Err') {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								newsletterFiles: _user$project$FetchData$Failed(_p7._0._0)
+								newsletterFiles: _user$project$FetchData$Failed(_p8._0._0)
 							}),
 						{ctor: '[]'});
 				} else {
@@ -14138,19 +14253,19 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								newsletterFiles: _user$project$FetchData$Fetched(_p7._0._0)
+								newsletterFiles: _user$project$FetchData$Fetched(_p8._0._0)
 							}),
 						{ctor: '[]'});
 				}
 			case 'FetchedNewsletter':
-				if (_p7._1.ctor === 'Err') {
-					var _p10 = _p7._1._0;
+				if (_p8._1.ctor === 'Err') {
+					var _p11 = _p8._1._0;
 					var newsletters = A3(
 						_elm_lang$core$Dict$insert,
-						_p7._0,
-						_user$project$FetchData$Failed(_p10),
+						_p8._0,
+						_user$project$FetchData$Failed(_p11),
 						model.newsletters);
-					var _p9 = A2(_elm_lang$core$Debug$log, 'error', _p10);
+					var _p10 = A2(_elm_lang$core$Debug$log, 'error', _p11);
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
 						_elm_lang$core$Native_Utils.update(
@@ -14160,8 +14275,8 @@ var _user$project$Main$update = F2(
 				} else {
 					var newsletters = A3(
 						_elm_lang$core$Dict$insert,
-						_p7._0,
-						_user$project$FetchData$Fetched(_p7._1._0),
+						_p8._0,
+						_user$project$FetchData$Fetched(_p8._1._0),
 						model.newsletters);
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
@@ -14179,7 +14294,7 @@ var _user$project$Main$update = F2(
 						_0: _elm_lang$navigation$Navigation$newUrl(_user$project$Links$home),
 						_1: {ctor: '[]'}
 					});
-			default:
+			case 'NewsletterClicked':
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					model,
@@ -14188,34 +14303,39 @@ var _user$project$Main$update = F2(
 						_0: _elm_lang$navigation$Navigation$newUrl(_user$project$Links$newsletters),
 						_1: {ctor: '[]'}
 					});
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					{ctor: '[]'});
 		}
 	});
 var _user$project$Main$body = function (model) {
-	var _p11 = model.currentPage;
-	switch (_p11.ctor) {
+	var _p12 = model.currentPage;
+	switch (_p12.ctor) {
 		case 'HomePage':
-			return A2(
-				_elm_lang$html$Html$map,
-				function (_p12) {
-					return _user$project$Main$PageMsg(
-						_user$project$Main$HomePageMsg(_p12));
-				},
-				A3(_user$project$HomePage$view, model.now, model.width, _p11._0));
-		case 'NewslettersPage':
 			return A2(
 				_elm_lang$html$Html$map,
 				function (_p13) {
 					return _user$project$Main$PageMsg(
-						_user$project$Main$NewslettersMsg(_p13));
+						_user$project$Main$HomePageMsg(_p13));
 				},
-				A2(_user$project$NewslettersPage$view, model.newsletterFiles, _p11._0));
-		case 'NewsletterPage':
-			var _p15 = _p11._0;
+				A3(_user$project$HomePage$view, model.now, model.width, _p12._0));
+		case 'NewslettersPage':
 			return A2(
 				_elm_lang$html$Html$map,
 				function (_p14) {
 					return _user$project$Main$PageMsg(
-						_user$project$Main$NewsletterMsg(_p14));
+						_user$project$Main$NewslettersMsg(_p14));
+				},
+				A2(_user$project$NewslettersPage$view, model.newsletterFiles, _p12._0));
+		case 'NewsletterPage':
+			var _p16 = _p12._0;
+			return A2(
+				_elm_lang$html$Html$map,
+				function (_p15) {
+					return _user$project$Main$PageMsg(
+						_user$project$Main$NewsletterMsg(_p15));
 				},
 				A2(
 					_user$project$NewsletterPage$view,
@@ -14228,9 +14348,9 @@ var _user$project$Main$body = function (model) {
 						newsletter: A2(
 							_elm_lang$core$Maybe$withDefault,
 							_user$project$FetchData$NotStarted,
-							A2(_elm_lang$core$Dict$get, _p15.filename, model.newsletters))
+							A2(_elm_lang$core$Dict$get, _p16.filename, model.newsletters))
 					},
-					_p15));
+					_p16));
 		default:
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14289,9 +14409,9 @@ var _user$project$Main$subscriptions = function (model) {
 			ctor: '::',
 			_0: A2(
 				_elm_lang$core$Platform_Sub$map,
-				function (_p16) {
+				function (_p17) {
 					return _user$project$Main$PageMsg(
-						_user$project$Main$HomePageMsg(_p16));
+						_user$project$Main$HomePageMsg(_p17));
 				},
 				_user$project$HomePage$subscriptions),
 			_1: {
