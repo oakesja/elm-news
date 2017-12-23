@@ -1,8 +1,9 @@
 module Components.Header exposing (Config, view)
 
 import Html exposing (Html, header, div, text, a, img, h1)
-import Html.Attributes exposing (class, classList, title, href, attribute, alt, src)
+import Html.Attributes exposing (class, classList, title, href, attribute, alt, src, tabindex, id)
 import Html.Events exposing (onClick)
+import HtmlEvents exposing (onEnter)
 import Components.Logo as Logo
 import Components.GithubLink as GithubLink
 import Analytics exposing (Event)
@@ -31,7 +32,15 @@ view config =
                     , ( "header__logo_min", minimized )
                     ]
                 ]
-                [ Logo.view config.onIconClick ]
+                [ div
+                    [ attribute "role" "button"
+                    , tabindex 0
+                    , onEnter config.onIconClick
+                    , id "logo"
+                    ]
+                    [ Logo.view config.onIconClick ]
+                , div [] []
+                ]
             , h1
                 [ classList
                     [ ( "header__title", True )
@@ -76,5 +85,10 @@ newsletters msg =
         , title "An archive of previous weekly newsletters"
         , onClick msg
         ]
-        [ div [] [ text "Newsletters" ]
+        [ div
+            [ attribute "role" "button"
+            , tabindex 0
+            , onEnter msg
+            ]
+            [ text "Newsletters" ]
         ]
