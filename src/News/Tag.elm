@@ -1,7 +1,7 @@
 module News.Tag exposing (TagInfo, view)
 
 import Html exposing (Html, div, text, a)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, href, tabindex)
 import Html.Events exposing (onClick)
 import Dict
 import News.Reddit as Reddit
@@ -38,6 +38,7 @@ linkAttrs name tag onLinkClick =
         Just u ->
             [ class "tag__link"
             , href u
+            , tabindex -1
             , Analytics.tagLink name u
                 |> onLinkClick
                 |> onClick

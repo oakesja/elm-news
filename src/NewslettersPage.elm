@@ -1,8 +1,9 @@
 module NewslettersPage exposing (Model, Msg, init, view, update)
 
 import Html exposing (Html, div, text, h1, span, a)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, href, tabindex, attribute)
 import Html.Events exposing (onClick)
+import HtmlEvents exposing (onEnter)
 import Newsletter.NewsletterFile as NewsletterFile exposing (NewsletterFile)
 import Links
 import Date.Format
@@ -91,6 +92,9 @@ newsletterView index file =
             , span
                 [ class "internal__link"
                 , onClick (GoToNewletter file.name)
+                , tabindex 0
+                , attribute "row" "button"
+                , onEnter (GoToNewletter file.name)
                 ]
                 [ file.date
                     |> Date.Format.format "%b %d, %Y"

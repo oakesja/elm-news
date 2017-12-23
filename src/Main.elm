@@ -22,6 +22,7 @@ import Http
 import Dict exposing (Dict)
 import Links
 import Return exposing (Return)
+import Dom
 
 
 type alias Model =
@@ -63,6 +64,7 @@ type Msg
     | FetchedNewsletter String (Result Http.Error Newsletter)
     | IconClicked
     | NewsletterClicked
+    | NoOp
 
 
 type PageMsg
@@ -123,6 +125,9 @@ update msg model =
         NewsletterClicked ->
             model ! [ Navigation.newUrl Links.newsletters ]
 
+        NoOp ->
+            model ! []
+
 
 updateCurrentPage : PageMsg -> PageModel -> ( PageModel, Cmd PageMsg )
 updateCurrentPage msg model =
@@ -162,12 +167,14 @@ loadPage location model =
             Page.Home ->
                 HomePage.init
                     |> mapToCurrentPage HomePageMsg HomePage
+                    |> Return.command resetFocus
                     |> Return.command pageView
 
             Page.Newsletters ->
                 NewslettersPage.init
                     |> mapToCurrentPage NewslettersMsg NewslettersPage
                     |> Return.effect_ fetchNewsletterFiles
+                    |> Return.command resetFocus
                     |> Return.command pageView
 
             Page.Newsletter name ->
@@ -175,10 +182,17 @@ loadPage location model =
                     |> mapToCurrentPage NewsletterMsg NewsletterPage
                     |> Return.andThen (fetchNewsletter name)
                     |> Return.effect_ fetchNewsletterFiles
+                    |> Return.command resetFocus
                     |> Return.command pageView
 
             Page.NotFound ->
                 model ! [ pageView ]
+
+
+resetFocus : Cmd Msg
+resetFocus =
+    Dom.focus "logo"
+        |> Task.attempt (\_ -> NoOp)
 
 
 fetchNewsletterFiles : Model -> Cmd Msg

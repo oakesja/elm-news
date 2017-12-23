@@ -1,7 +1,8 @@
 module NewsletterPage exposing (Model, Msg, init, view, update)
 
 import Html exposing (Html, div, text, h1)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, attribute, tabindex)
+import HtmlEvents exposing (onEnter)
 import Newsletter.Newsletter as Newsletter exposing (Newsletter, Article)
 import Newsletter.NewsletterFile exposing (NewsletterFile)
 import News.News as News exposing (DisplayStory)
@@ -129,7 +130,12 @@ navIcon :
 navIcon findArticle icon files filename baseClass =
     case findArticle filename files of
         Just file ->
-            icon baseClass 48 (GoToArticle file.name)
+            div
+                [ tabindex 0
+                , attribute "role" "button"
+                , onEnter (GoToArticle file.name)
+                ]
+                [ icon baseClass 48 (GoToArticle file.name) ]
 
         Nothing ->
             icon "newsletter__nav_disabled" 48 NoOp
