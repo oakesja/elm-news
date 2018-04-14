@@ -95,7 +95,10 @@ a {
   text-align: center;
   font-weight: bold;
 }
-
+#logo {
+  outline: inherit;
+  outline-width: 0;
+}
 .logo {
   cursor: pointer;
 }
