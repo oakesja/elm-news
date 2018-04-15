@@ -9,11 +9,11 @@ import Analytics exposing (Event)
 view : Maybe Int -> (Event -> msg) -> Html msg
 view currentYear onLinkClick =
     footer [ class "footer grey" ]
-        [ GithubLink.view "footer__github" onLinkClick
-        , div [ class "footer__description" ]
+        [ div [ class "footer__description" ]
             [ div [] [ text "Code for this site is open source and written in Elm" ]
             , div [] [ text <| "© " ++ (copyrightYear currentYear) ++ " Jacob Oakes" ]
             ]
+        , GithubLink.view "footer__github" onLinkClick
         ]
 
 

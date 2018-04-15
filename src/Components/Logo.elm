@@ -23,9 +23,7 @@ view clickMsg =
                 []
                 [ text "elm" ]
             , text_
-                [ x "-10"
-                , y "40"
-                ]
+                [ y "40" ]
                 [ text "news" ]
             ]
         ]

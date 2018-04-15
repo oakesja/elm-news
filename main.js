@@ -10880,6 +10880,22 @@ var _evancz$url_parser$UrlParser$intParam = function (name) {
 	return A2(_evancz$url_parser$UrlParser$customParam, name, _evancz$url_parser$UrlParser$intParamHelp);
 };
 
+var _mgold$elm_date_format$Date_Local$brazilian = {
+	date: {
+		months: {jan: 'Janeiro', feb: 'Fevereiro', mar: 'Março', apr: 'Abril', may: 'Maio', jun: 'Junho', jul: 'Julho', aug: 'Agosto', sep: 'Setembro', oct: 'Outubro', nov: 'Novembro', dec: 'Dezembro'},
+		monthsAbbrev: {jan: 'Jan', feb: 'Fev', mar: 'Mar', apr: 'Abr', may: 'Mai', jun: 'Jun', jul: 'Jul', aug: 'Ago', sep: 'Set', oct: 'Out', nov: 'Nov', dec: 'Dez'},
+		wdays: {mon: 'Segunda-feira', tue: 'Terça-feira', wed: 'Quarta-feira', thu: 'Quinta-feira', fri: 'Sexta-feira', sat: 'Sábado', sun: 'Domingo'},
+		wdaysAbbrev: {mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom'},
+		defaultFormat: _elm_lang$core$Maybe$Just('%e de %B de %Y')
+	},
+	time: {
+		am: 'am',
+		pm: 'pm',
+		defaultFormat: _elm_lang$core$Maybe$Just('%k:%M')
+	},
+	timeZones: _elm_lang$core$Maybe$Nothing,
+	defaultFormat: _elm_lang$core$Maybe$Nothing
+};
 var _mgold$elm_date_format$Date_Local$french = {
 	date: {
 		months: {jan: 'Janvier', feb: 'Février', mar: 'Mars', apr: 'Avril', may: 'Mai', jun: 'Juin', jul: 'Juillet', aug: 'Août', sep: 'Septembre', oct: 'Octobre', nov: 'Novembre', dec: 'Décembre'},
@@ -11823,9 +11839,9 @@ var _user$project$Links$newsletter = function (name) {
 	return A2(_elm_lang$core$Basics_ops['++'], '/newsletters/', name);
 };
 var _user$project$Links$newsletterSignup = 'https://docs.google.com/forms/d/1jZmbctSv_HnPlrcVN_fvtemTaWz7MAq8019gJsnSPOE/viewform';
-var _user$project$Links$githubIcon = '/assets/images/GitHub-Mark-Light-64px.png';
+var _user$project$Links$githubIcon = '/assets/images/GitHub-Mark-Light-32px.png';
 var _user$project$Links$github = 'https://github.com/oakesja/elm-news';
-var _user$project$Links$twitterIcon = '/assets/images/twitter.png';
+var _user$project$Links$twitterIcon = '/assets/images/twitter-64px.png';
 var _user$project$Links$twitter = 'https://twitter.com/elmlangnews';
 
 var _user$project$Components_GithubLink$view = F2(
@@ -11896,46 +11912,46 @@ var _user$project$Components_Footer$view = F2(
 			},
 			{
 				ctor: '::',
-				_0: A2(_user$project$Components_GithubLink$view, 'footer__github', onLinkClick),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('footer__description'),
-							_1: {ctor: '[]'}
-						},
-						{
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('footer__description'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Code for this site is open source and written in Elm'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('Code for this site is open source and written in Elm'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(
+									_0: _elm_lang$html$Html$text(
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											'© ',
 											A2(
 												_elm_lang$core$Basics_ops['++'],
-												'© ',
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													_user$project$Components_Footer$copyrightYear(currentYear),
-													' Jacob Oakes'))),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
-							}
-						}),
+												_user$project$Components_Footer$copyrightYear(currentYear),
+												' Jacob Oakes'))),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(_user$project$Components_GithubLink$view, 'footer__github', onLinkClick),
 					_1: {ctor: '[]'}
 				}
 			});
@@ -12078,12 +12094,8 @@ var _user$project$Components_Logo$view = function (clickMsg) {
 								_elm_lang$svg$Svg$text_,
 								{
 									ctor: '::',
-									_0: _elm_lang$svg$Svg_Attributes$x('-10'),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$y('40'),
-										_1: {ctor: '[]'}
-									}
+									_0: _elm_lang$svg$Svg_Attributes$y('40'),
+									_1: {ctor: '[]'}
 								},
 								{
 									ctor: '::',
