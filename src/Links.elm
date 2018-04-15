@@ -6,7 +6,7 @@ twitter =
 
 
 twitterIcon =
-    "/assets/images/twitter.png"
+    "/assets/images/twitter-64px.png"
 
 
 github =
@@ -14,7 +14,7 @@ github =
 
 
 githubIcon =
-    "/assets/images/GitHub-Mark-Light-64px.png"
+    "/assets/images/GitHub-Mark-Light-32px.png"
 
 
 newsletterSignup =
