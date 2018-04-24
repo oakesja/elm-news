@@ -14,7 +14,7 @@ github =
 
 
 githubIcon =
-    "/assets/images/GitHub-Mark-Light-32px.png"
+    "/assets/images/GitHub-Mark-Light-64px.png"
 
 
 newsletterSignup =
