@@ -237,6 +237,10 @@ a {
   color: #FFFFFF;
 }
 
+.footer__github {
+  height: 32px;
+}
+
 .error {
   position: fixed;
   right: 12px;
