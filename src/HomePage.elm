@@ -1,27 +1,27 @@
 port module HomePage
     exposing
         ( Model
-        , init
         , Msg
+        , init
+        , subscriptions
         , update
         , view
-        , subscriptions
         )
 
-import Html exposing (Html, a, text, div, h1, span)
-import Html.Attributes exposing (class)
-import Date exposing (Date)
-import Task exposing (Task, andThen)
-import ErrorManager
-import News.Story exposing (Story, StoryResp, StoryError)
-import News.News as News exposing (DisplayStory)
-import News.Feed as Feed
-import News.Reddit as Reddit
-import News.HackerNews as HackerNews
 import Analytics
-import Http
 import Components.Spinner
+import Date exposing (Date)
+import ErrorManager
+import Html exposing (Html, a, div, h1, span, text)
+import Html.Attributes exposing (class)
+import Http
 import List
+import News.Feed as Feed
+import News.HackerNews as HackerNews
+import News.News as News exposing (DisplayStory)
+import News.Reddit as Reddit
+import News.Story exposing (Story, StoryError, StoryResp)
+import Task exposing (Task, andThen)
 
 
 type alias Model =
@@ -39,8 +39,7 @@ init =
     , news = News.init
     , remainingPlacesToFetchFrom = [ Feed.elmDev, Feed.elmDiscuss, Feed.elmDiscourse, Reddit.tag, HackerNews.tag ]
     }
-        ! [ fetchGoogleGroupMsgs Feed.elmDev
-          , fetchGoogleGroupMsgs Feed.elmDiscuss
+        ! [ fetchGoogleGroupMsgs Feed.elmDiscuss
           , fetchGoogleGroupMsgs Feed.elmDiscourse
           , fetch Reddit.tag Reddit.fetch
           , fetch HackerNews.tag HackerNews.fetch
@@ -76,7 +75,7 @@ update msg model =
                     updateRemainingToFetch tag
                         { model | allStories = model.allStories ++ stories }
             in
-                updatedModel ! []
+            updatedModel ! []
 
         FetchedNews tag (Err rawError) ->
             let
@@ -91,8 +90,8 @@ update msg model =
                 updatedModel =
                     updateRemainingToFetch tag updatedWithError
             in
-                updatedModel
-                    ! [ errorCmd ]
+            updatedModel
+                ! [ errorCmd ]
 
         NewsMsg newsMsg ->
             let
@@ -103,7 +102,7 @@ update msg model =
                         newsMsg
                         model.news
             in
-                { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
+            { model | news = newNews } ! [ Cmd.map NewsMsg cmd ]
 
 
 updateRemainingToFetch : String -> Model -> Model
@@ -121,9 +120,9 @@ updateErrorManager msg model =
         ( newErrorMang, fx ) =
             ErrorManager.update msg model.errorManager
     in
-        ( { model | errorManager = newErrorMang }
-        , Cmd.map ErrorManagerMessage fx
-        )
+    ( { model | errorManager = newErrorMang }
+    , Cmd.map ErrorManagerMessage fx
+    )
 
 
 view : Maybe Date -> Int -> Model -> Html Msg
@@ -141,18 +140,18 @@ view now screenWidth model =
                     (List.map toDisplayStory model.allStories)
                     |> Html.map NewsMsg
     in
-        div [ class "home__body" ]
-            [ news
-            , ErrorManager.view model.errorManager
-                |> Html.map ErrorManagerMessage
-            ]
+    div [ class "home__body" ]
+        [ news
+        , ErrorManager.view model.errorManager
+            |> Html.map ErrorManagerMessage
+        ]
 
 
 toDisplayStory : Story -> DisplayStory
 toDisplayStory story =
     { from = News.Author story.author
     , title = story.title
-    , date = Just (story.date)
+    , date = Just story.date
     , url = story.url
     , tag = story.tag
     }
