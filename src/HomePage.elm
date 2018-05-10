@@ -39,8 +39,7 @@ init =
     , news = News.init
     , remainingPlacesToFetchFrom = [ Feed.elmDev, Feed.elmDiscuss, Feed.elmDiscourse, Reddit.tag, HackerNews.tag ]
     }
-        ! [ fetchGoogleGroupMsgs Feed.elmDev
-          , fetchGoogleGroupMsgs Feed.elmDiscuss
+        ! [ fetchGoogleGroupMsgs Feed.elmDiscuss
           , fetchGoogleGroupMsgs Feed.elmDiscourse
           , fetch Reddit.tag Reddit.fetch
           , fetch HackerNews.tag HackerNews.fetch
