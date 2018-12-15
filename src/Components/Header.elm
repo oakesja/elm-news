@@ -54,41 +54,6 @@ view config =
                     , ( "header__controls_min", minimized )
                     ]
                 ]
-                [ newsletters config.onNewsletterClick
-                , twitterLink config.onLinkClick
-                , GithubLink.view "header__icon header__control" config.onLinkClick
+                [ GithubLink.view "header__icon header__control" config.onLinkClick
                 ]
             ]
-
-
-twitterLink : (Event -> msg) -> Html msg
-twitterLink onLinkClick =
-    a
-        [ href Links.twitter ]
-        [ img
-            [ class "header__icon header__control"
-            , src Links.twitterIcon
-            , alt "Follow @elmlangnews"
-            , title "Follow @elmlangnews on Twitter"
-            , Analytics.twitterLink
-                |> onLinkClick
-                |> onClick
-            ]
-            []
-        ]
-
-
-newsletters : msg -> Html msg
-newsletters msg =
-    div
-        [ class "header__newsletters header__control"
-        , title "An archive of previous weekly newsletters"
-        , onClick msg
-        ]
-        [ div
-            [ attribute "role" "button"
-            , tabindex 0
-            , onEnter msg
-            ]
-            [ text "Newsletters" ]
-        ]
