@@ -1,0 +1,5 @@
+{
+    "commands": [
+        "src/**/*.elm : ./build.sh"
+    ]
+}

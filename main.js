@@ -12450,7 +12450,7 @@ var _user$project$ErrorManager$errorView = F2(
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text('&nbsp'),
+				_0: _elm_lang$html$Html$text(''),
 				_1: {ctor: '[]'}
 			}) : A2(
 			_elm_lang$html$Html$map,
