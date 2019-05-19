@@ -88,8 +88,7 @@ errorView index ( acked, error ) =
             (index * 80) + 12
     in
         if acked then
-            -- This is a hack for chrome since it will not refresh when the error toast is removed
-            div [] [ text "&nbsp" ]
+            div [] [ text "" ]
         else
             Html.map
                 (\_ -> AcknowledgeError error)
