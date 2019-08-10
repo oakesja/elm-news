@@ -37,10 +37,9 @@ init =
     { errorManager = ErrorManager.init
     , allStories = []
     , news = News.init
-    , remainingPlacesToFetchFrom = [ Feed.elmDev, Feed.elmDiscuss, Feed.elmDiscourse, Reddit.tag, HackerNews.tag ]
+    , remainingPlacesToFetchFrom = [ Feed.elmDiscourse, Reddit.tag, HackerNews.tag ]
     }
-        ! [ fetchGoogleGroupMsgs Feed.elmDiscuss
-          , fetchGoogleGroupMsgs Feed.elmDiscourse
+        ! [  fetchGoogleGroupMsgs Feed.elmDiscourse
           , fetch Reddit.tag Reddit.fetch
           , fetch HackerNews.tag HackerNews.fetch
           ]
