@@ -128,14 +128,7 @@
     });
     app.ports.fetchGoogleGroupMsgs.subscribe(function(tag) {
         // 100 messages is the max that you can get from the rss feed
-        var url;
-        switch (tag) {
-            case "Discourse":
-                url = 'https://discourse.elm-lang.org/latest.rss';
-                break;
-            default:
-                url = "https://groups.google.com/forum/feed/" + tag + "/topics/rss_v2_0.xml?num=100";
-        } 
+        var url = 'https://discourse.elm-lang.org/latest.rss';
         feednami.load(url, function(result) {
             if (result.error) {
                 var error = {

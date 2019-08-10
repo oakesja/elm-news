@@ -56,29 +56,11 @@ lookupTagInfo name =
 
         lookup =
             Dict.empty
-                |> Dict.insert Feed.elmDiscuss elmDiscussTag
-                |> Dict.insert Feed.elmDev elmDevTag
                 |> Dict.insert (String.toLower Reddit.tag) redditTag
                 |> Dict.insert (String.toLower HackerNews.tag) hackerNewsTag
                 |> Dict.insert (String.toLower Feed.elmDiscourse) discourseTag
     in
         Maybe.withDefault default (Dict.get name lookup)
-
-
-elmDiscussTag : TagInfo
-elmDiscussTag =
-    { tagColor = "elm_light_blue"
-    , url = Just "https://groups.google.com/forum/#!forum/elm-discuss"
-    , displayName = Feed.elmDiscuss
-    }
-
-
-elmDevTag : TagInfo
-elmDevTag =
-    { tagColor = "elm_dark_blue"
-    , url = Just "https://groups.google.com/forum/#!forum/elm-dev"
-    , displayName = Feed.elmDev
-    }
 
 
 redditTag : TagInfo

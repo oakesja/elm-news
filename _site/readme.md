@@ -1,6 +1,6 @@
 # elm news
 
-All your elm news from elm discourse, elm-discuss, elm-dev, hacker news, and reddit in one place.
+All your elm news from elm discourse, hacker news, and reddit in one place.
 
 ## Issues
 

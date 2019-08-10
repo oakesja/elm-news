@@ -12522,8 +12522,6 @@ var _user$project$FetchData$Fetching = {ctor: 'Fetching'};
 var _user$project$FetchData$NotStarted = {ctor: 'NotStarted'};
 
 var _user$project$News_Feed$elmDiscourse = 'Discourse';
-var _user$project$News_Feed$elmDev = 'elm-dev';
-var _user$project$News_Feed$elmDiscuss = 'elm-discuss';
 
 var _user$project$News_Story$Story = F5(
 	function (a, b, c, d, e) {
@@ -12639,16 +12637,6 @@ var _user$project$News_Tag$redditTag = {
 	url: _elm_lang$core$Maybe$Just('https://www.reddit.com/r/elm/new'),
 	displayName: _user$project$News_Reddit$tag
 };
-var _user$project$News_Tag$elmDevTag = {
-	tagColor: 'elm_dark_blue',
-	url: _elm_lang$core$Maybe$Just('https://groups.google.com/forum/#!forum/elm-dev'),
-	displayName: _user$project$News_Feed$elmDev
-};
-var _user$project$News_Tag$elmDiscussTag = {
-	tagColor: 'elm_light_blue',
-	url: _elm_lang$core$Maybe$Just('https://groups.google.com/forum/#!forum/elm-discuss'),
-	displayName: _user$project$News_Feed$elmDiscuss
-};
 var _user$project$News_Tag$linkAttrs = F3(
 	function (name, tag, onLinkClick) {
 		var _p0 = tag.url;
@@ -12698,11 +12686,7 @@ var _user$project$News_Tag$lookupTagInfo = function (name) {
 				_elm_lang$core$Dict$insert,
 				_elm_lang$core$String$toLower(_user$project$News_Reddit$tag),
 				_user$project$News_Tag$redditTag,
-				A3(
-					_elm_lang$core$Dict$insert,
-					_user$project$News_Feed$elmDev,
-					_user$project$News_Tag$elmDevTag,
-					A3(_elm_lang$core$Dict$insert, _user$project$News_Feed$elmDiscuss, _user$project$News_Tag$elmDiscussTag, _elm_lang$core$Dict$empty)))));
+				_elm_lang$core$Dict$empty)));
 	var $default = A3(_user$project$News_Tag$TagInfo, 'elm_grey', _elm_lang$core$Maybe$Nothing, name);
 	return A2(
 		_elm_lang$core$Maybe$withDefault,
@@ -12894,15 +12878,18 @@ var _user$project$News_News$linkView = function (story) {
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$class('card__description__title'),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html_Attributes$property,
+									'innerHTML',
+									_elm_lang$core$Json_Encode$string(story.title)),
+								_1: {ctor: '[]'}
+							}
 						}
 					}
 				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(story.title),
-					_1: {ctor: '[]'}
-				}),
+				{ctor: '[]'}),
 			_1: {
 				ctor: '::',
 				_0: A2(
@@ -13171,40 +13158,28 @@ var _user$project$HomePage$init = A2(
 		news: _user$project$News_News$init,
 		remainingPlacesToFetchFrom: {
 			ctor: '::',
-			_0: _user$project$News_Feed$elmDev,
+			_0: _user$project$News_Feed$elmDiscourse,
 			_1: {
 				ctor: '::',
-				_0: _user$project$News_Feed$elmDiscuss,
+				_0: _user$project$News_Reddit$tag,
 				_1: {
 					ctor: '::',
-					_0: _user$project$News_Feed$elmDiscourse,
-					_1: {
-						ctor: '::',
-						_0: _user$project$News_Reddit$tag,
-						_1: {
-							ctor: '::',
-							_0: _user$project$News_HackerNews$tag,
-							_1: {ctor: '[]'}
-						}
-					}
+					_0: _user$project$News_HackerNews$tag,
+					_1: {ctor: '[]'}
 				}
 			}
 		}
 	},
 	{
 		ctor: '::',
-		_0: _user$project$HomePage$fetchGoogleGroupMsgs(_user$project$News_Feed$elmDiscuss),
+		_0: _user$project$HomePage$fetchGoogleGroupMsgs(_user$project$News_Feed$elmDiscourse),
 		_1: {
 			ctor: '::',
-			_0: _user$project$HomePage$fetchGoogleGroupMsgs(_user$project$News_Feed$elmDiscourse),
+			_0: A2(_user$project$HomePage$fetch, _user$project$News_Reddit$tag, _user$project$News_Reddit$fetch),
 			_1: {
 				ctor: '::',
-				_0: A2(_user$project$HomePage$fetch, _user$project$News_Reddit$tag, _user$project$News_Reddit$fetch),
-				_1: {
-					ctor: '::',
-					_0: A2(_user$project$HomePage$fetch, _user$project$News_HackerNews$tag, _user$project$News_HackerNews$fetch),
-					_1: {ctor: '[]'}
-				}
+				_0: A2(_user$project$HomePage$fetch, _user$project$News_HackerNews$tag, _user$project$News_HackerNews$fetch),
+				_1: {ctor: '[]'}
 			}
 		}
 	});
