@@ -14602,7 +14602,7 @@ var _user$project$News_HackerNews$tag = 'Hacker News';
 var _user$project$News_HackerNews$storyToMessage = function (story) {
 	return {
 		author: story.author,
-		title: story.title,
+		title: A2(_elm_lang$core$Maybe$withDefault, '', story.title),
 		date: story.date,
 		url: A2(_elm_lang$core$Maybe$withDefault, '', story.url),
 		tag: _user$project$News_HackerNews$tag
@@ -14624,7 +14624,8 @@ var _user$project$News_HackerNews$hackerNewsDecoder = A2(
 			_elm_lang$core$Json_Decode$map5,
 			_user$project$News_HackerNews$HackerNewsStory,
 			A2(_elm_lang$core$Json_Decode$field, 'author', _elm_lang$core$Json_Decode$string),
-			A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string),
+			_elm_lang$core$Json_Decode$maybe(
+				A2(_elm_lang$core$Json_Decode$field, 'title', _elm_lang$core$Json_Decode$string)),
 			A2(_elm_lang$core$Json_Decode$field, 'created_at_i', _user$project$News_HackerNews$timeDecoder),
 			_elm_lang$core$Json_Decode$maybe(
 				A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string)),
@@ -14635,7 +14636,7 @@ var _user$project$News_HackerNews$decoder = A2(
 		return A2(
 			_elm_lang$core$List$filter,
 			function (s) {
-				return !_elm_lang$core$Native_Utils.eq(s.url, '');
+				return (!_elm_lang$core$Native_Utils.eq(s.url, '')) && (!_elm_lang$core$Native_Utils.eq(s.title, ''));
 			},
 			A2(_elm_lang$core$List$map, _user$project$News_HackerNews$storyToMessage, stories));
 	},

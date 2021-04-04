@@ -21,7 +21,7 @@ fetch =
 
 type alias HackerNewsStory =
     { author : String
-    , title : String
+    , title : Maybe String
     , date : Float
     , url : Maybe String
     , tag : String
@@ -33,7 +33,7 @@ decoder =
     map
         (\stories ->
             List.map storyToMessage stories
-                |> List.filter (\s -> s.url /= "")
+                |> List.filter (\s -> s.url /= "" && s.title /= "")
         )
         hackerNewsDecoder
 
@@ -44,7 +44,7 @@ hackerNewsDecoder =
         list <|
             map5 HackerNewsStory
                 (field "author" string)
-                (field "title" string)
+                (maybe (field "title" string))
                 (field "created_at_i" timeDecoder)
                 (maybe (field "url" string))
                 (succeed tag)
@@ -58,7 +58,7 @@ timeDecoder =
 storyToMessage : HackerNewsStory -> Story
 storyToMessage story =
     { author = story.author
-    , title = story.title
+    , title = Maybe.withDefault "" story.title
     , date = story.date
     , url = Maybe.withDefault "" story.url
     , tag = tag
